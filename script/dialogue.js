@@ -221,6 +221,7 @@ class DialogueManager {
               this.textCursor = end + 1
             }
             span.textContent = nextLetter
+            span.classList.add('appear')
             this.$modernText.appendChild(span)
           }
           if (this.textCursor >= text.length) {
@@ -284,14 +285,14 @@ class DialogueManager {
 
   // 更新角色表情
   #updateCharacterEmotion(character, emotion) {
-    let assetUrl = `character/${character.key}/${emotion}`
-    if (Asset.has(assetUrl)) assetUrl = Asset.get(assetUrl)
+    let image = `character/${character.key}/${emotion}`
+    if (Asset.has(image)) image = Asset.get(image)
     else {
-      console.warn('角色资源不存在:', assetUrl)
-      assetUrl = Asset.get('character/gunmu')
+      console.warn('角色资源不存在:', image)
+      image = Asset.get('character/gunmu')
     }
 
-    character.$el.src = assetUrl
+    character.$el.src = image
   }
 
   // 更新全部角色位置、高亮
