@@ -3,7 +3,7 @@
 :root {
   --game-aspect-ratio: 4 / 3;
   --game-aspect-ratio: 16 / 9;
-  --game-padding: 40px;
+  --game-padding: 5vh;
 }
 
 * {

@@ -8,16 +8,12 @@ Keyboard.onKeydown(['Enter', 'Space'], () => {
   Dialogue.next()
 })
 
-let last = performance.now()
 Keyboard.onKeydown(['LCtrl', 'RCtrl'], () => {
-  const k = 0.8
+  const k = 0.6
   const triggerSkip = t => {
-    console.log(performance.now() - last)
-    last = performance.now()
-
     if (Keyboard.anyPressed(['LCtrl', 'RCtrl'])) {
       Dialogue.next(true)
-      t = k * t + (1 - k) * 50
+      t = k * t + (1 - k) * 30
       setTimeout(() => triggerSkip(t), t)
     }
   }

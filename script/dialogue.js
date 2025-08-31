@@ -6,6 +6,8 @@ import Asset from './asset.js'
  * @author windlandneko
  */
 class DialogueManager {
+  static AUTO_NEXT_DELAY = 10 * 1000
+
   dialogueData = []
   eventIndex = 0
 
@@ -17,31 +19,24 @@ class DialogueManager {
   isPlaying = false
   isWaiting = false
 
-  constructor() {
-    // 对话框
-    this.$dialogue = document.querySelector('.dialogue-container')
-    this.$speaker = this.$dialogue.querySelector('.speaker-name')
-    this.$text = this.$dialogue.querySelector('.dialogue-text')
-
-    // 角色立绘
-    this.$character = document.querySelector('.character-container')
-  }
+  $dialogue = document.querySelector('.dialogue-container')
+  $modernTitle = document.querySelector('.dialogue-container .title')
+  $modernSubtitle = document.querySelector('.dialogue-container .subtitle')
+  $modernText = document.querySelector('.dialogue-container .text')
+  $touhou = document.querySelector('.dialogue-container .touhou-style-text')
 
   /**
    * 开始播放对话
    */
   start(dialogue) {
     this.dialogueData = Asset.get(dialogue)
+    this.stop()
+    this.$dialogue.classList.add(
+      'visible',
+      this.dialogueData.text_style ?? 'modern'
+    )
 
-    this.eventIndex = 0
-    this.characters.clear()
-    this.leftCharacter = []
-    this.rightCharacter = []
     this.isPlaying = true
-    this.isWaiting = false
-    this.$dialogue.classList.add('visible')
-    this.$character.classList.add('visible')
-
     this.processEvent()
   }
 
@@ -54,26 +49,34 @@ class DialogueManager {
     this.rightCharacter = []
     this.isPlaying = false
     this.isWaiting = false
-    this.$dialogue.classList.remove('visible')
+    this.textDisplaying = false
+    this.$dialogue.classList.remove('visible', 'modern', 'touhou')
     this.characters.forEach(character => this.#onRemove(character))
 
     clearTimeout(this.waitHandler)
+    clearTimeout(this.autoNextHandler)
   }
 
   /**
    * 继续下一个事件
    */
-  next(force = false) {
+  next(skip = false) {
     if (!this.isPlaying) return
-    if (!force && this.isWaiting) return
+    if (!skip && this.isWaiting) return
+    if (this.textDisplaying) {
+      this.textCursor = Infinity
+      this.textDisplaying = false
+      return
+    }
+
     this.eventIndex++
-    this.processEvent()
+    this.processEvent(skip)
   }
 
   /**
    * 处理当前事件
    */
-  processEvent() {
+  processEvent(skip) {
     if (this.eventIndex >= this.dialogueData.events.length) {
       this.stop()
       return
@@ -91,7 +94,7 @@ class DialogueManager {
         this.#onAddCharacter(event)
         break
       case 'dialogue':
-        this.#onDialogue(event)
+        this.#onDialogue(event, skip)
         break
       case 'remove':
         this.#onRemove(event)
@@ -119,9 +122,9 @@ class DialogueManager {
 
     const $el = document.createElement('img')
     $el.classList.add('character', position)
-    this.$character.appendChild($el)
+    this.$dialogue.appendChild($el)
 
-    const character = { ...event, element: $el }
+    const character = { ...event, $el }
     this.characters.set(id, character)
     this.#updateCharacterEmotion(character, emotion)
 
@@ -140,29 +143,62 @@ class DialogueManager {
    * 显示对话
    * @param {Object} event - 对话事件
    */
-  #onDialogue(event) {
+  #onDialogue(event, skip) {
     const { id, emotion, text } = event
-    const character = this.characters.get(id)
+    const character = { ...this.characters.get(id), ...event }
 
-    if (character) {
-      console.log('移到最前', text, character)
-      // 移到最前
-      if (character.position === 'left') {
-        this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
-        this.leftCharacter.push(character)
-      } else {
-        this.rightCharacter = this.rightCharacter.filter(c => c.id !== id)
-        this.rightCharacter.push(character)
-      }
+    this.characters.set(id, character)
 
-      this.#updatePosition()
-    }
-    if (character?.title) this.$speaker.textContent = character.title
-    if (emotion) this.#updateCharacterEmotion(character, emotion)
-    if (text) {
-      this.$text.textContent = text
+    this.currentSpeaker = character
+
+    // 移到最前
+    if (character.position === 'left') {
+      this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
+      this.leftCharacter.push(character)
     } else {
-      // 如果没有文本内容，则是非交互节点
+      this.rightCharacter = this.rightCharacter.filter(c => c.id !== id)
+      this.rightCharacter.push(character)
+    }
+
+    this.#updatePosition()
+    this.$modernTitle.textContent = character?.title ?? ''
+    this.$modernSubtitle.textContent = character?.subtitle ?? ''
+    if (emotion) this.#updateCharacterEmotion(character, emotion)
+
+    if (text === null) {
+      this.$touhou.classList.remove('visible')
+    }
+
+    if (text) {
+      if (this.dialogueData.text_style === 'modern' && !skip) {
+        this.textCursor = 0
+        this.textDisplayHandler = setInterval(() => {
+          if (this.textCursor === Infinity) {
+            this.$modernText.textContent = text
+          } else {
+            const span = document.createElement('span')
+            span.textContent = text.charAt(this.textCursor++)
+            this.$modernText.appendChild(span)
+          }
+          if (this.textCursor >= text.length) {
+            this.textDisplaying = false
+            clearInterval(this.textDisplayHandler)
+            clearTimeout(this.autoNextHandler)
+            this.autoNextHandler = setTimeout(
+              () => this.next(),
+              DialogueManager.AUTO_NEXT_DELAY
+            )
+          }
+        }, 30)
+        this.textDisplaying = true
+
+        this.$modernText.textContent = ''
+      } else if (skip) {
+        this.$modernText.textContent = text
+      } else {
+        this.#updateBubble(text)
+      }
+    } else {
       this.next()
     }
   }
@@ -176,15 +212,13 @@ class DialogueManager {
     const character = this.characters.get(id)
     if (!character) return
 
-    character.element.classList.add('fade-out')
+    character.$el.classList.add('hide')
     setTimeout(() => {
-      if (character.element.parentNode === this.$character) {
-        this.$character.removeChild(character.element)
-      }
+      character.$el.remove()
       this.characters.delete(id)
 
       this.#updatePosition()
-    }, 300)
+    }, 400)
 
     if (character.position === 'left') {
       this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
@@ -203,11 +237,11 @@ class DialogueManager {
     const { duration } = event
     this.isWaiting = true
 
+    clearTimeout(this.waitHandler)
     this.waitHandler = setTimeout(() => {
       this.isWaiting = false
+      this.next()
     }, duration)
-
-    this.next(true)
   }
 
   // 更新角色表情
@@ -219,31 +253,50 @@ class DialogueManager {
       assetUrl = Asset.get('character/gunmu')
     }
 
-    character.emotion = emotion // todo: don't need this line
-    character.element.src = assetUrl
+    character.$el.src = assetUrl
   }
 
   // 更新全部角色位置、高亮
   #updatePosition() {
     this.leftCharacter.forEach((character, index, { length }) => {
       const k = (index + 1) / length
-      character.element.style.transform = `translateY(${40 * (1 - k)}px)`
-      character.element.style.left = `calc(var(--character-width) * ${k} - var(--character-offset))`
-      character.element.style.right = 'auto'
-      character.element.style.zIndex = 10 + index
-      if (index === length - 1) character.element.classList.add('highlighted')
-      else character.element.classList.remove('highlighted')
+      character.$el.style.transform = `translateY(${10 * (1 - k)}%)`
+      character.$el.style.left = `calc(var(--character-width) * ${k} - var(--character-offset))`
+      character.$el.style.right = 'auto'
+      character.$el.style.zIndex = 10 + index
+      if (index === length - 1) character.$el.classList.add('highlighted')
+      else character.$el.classList.remove('highlighted')
     })
 
     this.rightCharacter.forEach((character, index, { length }) => {
       const k = (index + 1) / length
-      character.element.style.transform = `translateY(${40 * (1 - k)}px) scaleX(-1)`
-      character.element.style.right = `calc(var(--character-width) * ${k} - var(--character-offset))`
-      character.element.style.left = 'auto'
-      character.element.style.zIndex = 10 + index
-      if (index === length - 1) character.element.classList.add('highlighted')
-      else character.element.classList.remove('highlighted')
+      character.$el.style.transform = `translateY(${10 * (1 - k)}%) scaleX(-1)`
+      character.$el.style.right = `calc(var(--character-width) * ${k} - var(--character-offset))`
+      character.$el.style.left = 'auto'
+      character.$el.style.zIndex = 10 + index
+      if (index === length - 1) character.$el.classList.add('highlighted')
+      else character.$el.classList.remove('highlighted')
     })
+  }
+
+  /**
+   * 创建对话气泡
+   * @param {string} text - 对话文本
+   * @param {Object} character - 说话的角色
+   */
+  #updateBubble(text) {
+    this.$touhou.classList.remove('visible', 'left', 'right')
+    this.$touhou.classList.add(this.currentSpeaker.position)
+
+    this.$touhou.querySelectorAll('span').forEach(span => span.remove())
+    text.split('\n').forEach(line => {
+      const span = document.createElement('span')
+      span.textContent = line
+      this.$touhou.appendChild(span)
+    })
+
+    // retrigger animation
+    setTimeout(() => this.$touhou.classList.add('visible'), 0)
   }
 }
 

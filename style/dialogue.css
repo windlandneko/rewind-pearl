@@ -3,40 +3,11 @@
   --character-offset: 22%;
 }
 
-.dialogue-container {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 20px;
-  min-height: 150px;
-  z-index: 100;
-
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.dialogue-container.visible,
-.character-container.visible {
+.dialogue-container.visible {
   opacity: 1;
 }
 
-.speaker-name {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  color: #ffcc00;
-}
-
-.dialogue-text {
-  font-size: 16px;
-  line-height: 1.5;
-  white-space: pre-line;
-}
-
-.character-container {
+.dialogue-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -49,6 +20,13 @@
   transition: opacity 0.3s ease;
 }
 
+.dialogue-container.touhou .touhou-style-text {
+  display: grid;
+}
+.dialogue-container.modern .modern-style-text {
+  display: block;
+}
+
 .character {
   position: absolute;
   bottom: 0;
@@ -56,17 +34,125 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  transition: opacity 0.2s ease, transform 0.3s ease, filter 0.3s ease,
-    left 0.3s ease, right 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease,
+    left 0.4s ease, right 0.4s ease;
 
   filter: brightness(0.6) drop-shadow(-4px -2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.character.visible {
+  opacity: 1;
 }
 
 .character.highlighted {
   filter: brightness(1) drop-shadow(-4px -2px 8px rgba(0, 0, 0, 0.4));
 }
 
-.character.fade-out {
+.character.hide {
   opacity: 0;
   transform: translateX(-15%) !important;
+}
+.character.hide.right {
+  transform: scaleX(-1) translateX(-15%) !important;
+}
+
+.touhou-style-text {
+  position: absolute;
+  background: #ffeca7;
+  border: 2.5px solid #000;
+  border-radius: 22px;
+  padding: 6px 12px;
+
+  font-size: 1.4rem;
+  line-height: 1.8rem;
+  font-weight: 600;
+
+  z-index: 99;
+
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+  top: 64%;
+  max-width: 50%;
+
+  opacity: 0;
+  transform: scaleX(0.5);
+
+  display: none;
+}
+
+.touhou-style-text.left {
+  transform-origin: left center;
+  left: 18%;
+}
+.touhou-style-text.right {
+  transform-origin: right center;
+  right: 18%;
+}
+
+.touhou-style-text.visible {
+  transform: scaleX(1);
+  transition: opacity 60ms ease, transform 80ms linear;
+  opacity: 1;
+}
+
+.touhou-style-text svg {
+  position: absolute;
+  top: -21px;
+}
+.touhou-style-text.left svg {
+  transform: scaleX(-1);
+  left: -2px;
+}
+.touhou-style-text.right svg {
+  right: -2px;
+}
+
+.modern-style-text {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 1.5rem 2rem;
+  min-height: 30%;
+  z-index: 100;
+  display: none;
+}
+
+.modern-style-text .title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #ffcc00;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.modern-style-text .subtitle {
+  font-size: 0.8rem;
+  line-height: 0.4rem;
+  color: rgba(180, 180, 180, 0.9);
+  width: 100%;
+  text-align-last: justify;
+  white-space: nowrap;
+}
+
+.modern-style-text .text {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.modern-style-text .text span {
+  animation: text-appear 0.3s ease forwards;
+}
+
+@keyframes text-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

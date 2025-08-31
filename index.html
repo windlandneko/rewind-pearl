@@ -13,11 +13,28 @@
     <main>
       <canvas id="game-canvas"></canvas>
 
-      <div class="character-container"></div>
-
       <div class="dialogue-container">
-        <div class="speaker-name"></div>
-        <div class="dialogue-text"></div>
+        <div class="modern-style-text">
+          <div style="width: min-content">
+            <div class="subtitle"></div>
+            <div class="title"></div>
+          </div>
+          <div class="text"></div>
+        </div>
+        <div class="touhou-style-text">
+          <svg width="40" height="40" viewBox="-10 -50 90 100">
+            <path
+              d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11 Z"
+              fill="#ffeca7"
+            />
+            <path
+              d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11"
+              fill="none"
+              stroke="#000"
+              stroke-width="5.3"
+            />
+          </svg>
+        </div>
       </div>
     </main>
   </body>

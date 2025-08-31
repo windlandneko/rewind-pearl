@@ -2,16 +2,20 @@
   "audio/test": "audio/獣の知性 - [TH19] 東方獣王園.mp3",
 
   "character/gunmu": "character/gunmu/normal.png",
+
   "character/dingzhen:angry": "character/dingzhen/angry.png",
   "character/dingzhen:normal": "character/dingzhen/normal.png",
   "character/dingzhen:smile": "character/dingzhen/smile.png",
   "character/dingzhen:surprise": "character/dingzhen/surprise.png",
   "character/dingzhen:sweat": "character/dingzhen/sweat.png",
+  "character/dingzhen:sad": "character/dingzhen/sad.png",
+
   "character/reimu:angry": "character/reimu/angry.png",
   "character/reimu:normal": "character/reimu/normal.png",
   "character/reimu:smile": "character/reimu/smile.png",
   "character/reimu:surprise": "character/reimu/surprise.png",
   "character/reimu:sweat": "character/reimu/sweat.png",
+
   "character/wangyuan:angry": "character/wangyuan/angry.png",
   "character/wangyuan:normal": "character/wangyuan/normal.png",
   "character/wangyuan:smile": "character/wangyuan/smile.png",
