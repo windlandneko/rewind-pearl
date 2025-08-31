@@ -1,0 +1,49 @@
+/* 英文等宽字体 */
+
+@font-face {
+  font-family: 'FiraCode';
+  src: url('../assets/font/FiraCode-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 像素字体 */
+
+@font-face {
+  font-family: 'KenPixel';
+  src: url('../assets/font/kenpixel.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* 中文等宽字体 */
+
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('../assets/font/HarmonyOS_Sans_SC_Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HarmonyOS Sans SC';
+  src: url('../assets/font/HarmonyOS_Sans_SC_Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* 思源宋体 */
+
+@font-face {
+  font-family: 'SourceHanSerifCN';
+  src: url('../assets/font/SourceHanSerifCN-Regular-1.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SourceHanSerifCN';
+  src: url('../assets/font/SourceHanSerifCN-Bold-2.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+}

@@ -233,7 +233,7 @@ class DialogueManager {
               DialogueManager.AUTO_NEXT_DELAY
             )
           }
-        }, 30)
+        }, 500 / text.length)
         this.textDisplaying = true
 
         this.$modernText.textContent = ''
