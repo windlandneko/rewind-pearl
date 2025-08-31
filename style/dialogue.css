@@ -21,7 +21,7 @@
 }
 
 .dialogue-container.touhou .touhou-style-text {
-  display: grid;
+  display: block;
 }
 .dialogue-container.modern .modern-style-text {
   display: block;
@@ -118,6 +118,9 @@
   min-height: 30%;
   z-index: 100;
   display: none;
+
+  font-size: 1.3rem;
+  line-height: 1.5;
 }
 
 .modern-style-text .title {
@@ -142,13 +145,11 @@
   white-space: nowrap;
 }
 
-.modern-style-text .text {
-  font-size: 1.3rem;
-  line-height: 1.5;
+.text {
   white-space: pre-line;
 }
 
-.modern-style-text .text span.appear {
+.text span.appear {
   animation: text-appear 0.3s ease forwards;
 }
 

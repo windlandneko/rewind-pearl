@@ -41,8 +41,6 @@ class DialogueManager {
         }
       }
 
-      console.log('test')
-
       setTimeout(() => triggerSkip(200), 200)
     })
   }
@@ -51,8 +49,8 @@ class DialogueManager {
    * 开始播放对话
    */
   async play(dialogue) {
-    this.dialogueData = Asset.get(dialogue)
     this.stop()
+    this.dialogueData = Asset.get(dialogue)
     this.$dialogue.classList.add(
       'visible',
       this.dialogueData.text_style ?? 'modern'
@@ -84,7 +82,7 @@ class DialogueManager {
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
 
-    setTimeout(this.onEnd, 500)
+    setTimeout(this?.onEnd, 500)
   }
 
   /**
@@ -205,35 +203,7 @@ class DialogueManager {
         this.textDisplayHandler = setInterval(() => {
           if (this.textCursor === Infinity) {
             this.$modernText.textContent = ''
-            let span = document.createElement('span')
-            for (let i = 0; i < text.length; i++) {
-              let char = text[i]
-
-              if (char === '\\') {
-                char = text[++i]
-              } else if (char === '$') {
-                this.$modernText.appendChild(span)
-                span = document.createElement('span')
-
-                const divider = text.indexOf(':', i + 1)
-                const end = text.indexOf('$', divider + 1)
-
-                if (end === -1) {
-                  span.textContent = '[[ERROR]]'
-                } else {
-                  span.textContent = text.slice(divider + 1, end)
-                  span.className = text.slice(i + 1, divider)
-                }
-                i = end
-
-                this.$modernText.appendChild(span)
-                span = document.createElement('span')
-                continue
-              }
-
-              span.textContent += char
-            }
-            this.$modernText.appendChild(span)
+            this.#parseText(this.$modernText, text)
           } else {
             const span = document.createElement('span')
             let nextLetter = text.charAt(this.textCursor++)
@@ -245,11 +215,12 @@ class DialogueManager {
 
               if (end === -1) {
                 nextLetter = '[[ERROR]]'
+                this.textCursor = text.length
               } else {
                 nextLetter = text.slice(divider + 1, end)
                 span.className = text.slice(this.textCursor, divider)
+                this.textCursor = end + 1
               }
-              this.textCursor = end + 1
             }
             span.textContent = nextLetter
             span.classList.add('appear')
@@ -259,12 +230,13 @@ class DialogueManager {
             this.textDisplaying = false
             clearInterval(this.textDisplayHandler)
             clearTimeout(this.autoNextHandler)
-            this.autoNextHandler = setTimeout(
-              () => this.next(),
-              DialogueManager.AUTO_NEXT_DELAY
-            )
+            if (this.dialogueData.auto_next_delay > 0)
+              this.autoNextHandler = setTimeout(
+                () => this.next(),
+                this.dialogueData.auto_next_delay + Math.max(0, (text.length - 20) * 60)
+              )
           }
-        }, 500 / text.length)
+        }, 500 / text.length + 20)
         this.textDisplaying = true
 
         this.$modernText.textContent = ''
@@ -359,14 +331,44 @@ class DialogueManager {
     this.$touhou.classList.add(this.currentSpeaker.position)
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
-    text.split('\n').forEach(line => {
-      const span = document.createElement('span')
-      span.textContent = line
-      this.$touhou.appendChild(span)
-    })
+
+    this.$touhou.textContent = ''
+    this.#parseText(this.$touhou, text)
 
     // retrigger animation
     setTimeout(() => this.$touhou.classList.add('visible'), 0)
+  }
+
+  #parseText($el, text) {
+    let span = document.createElement('span')
+    for (let i = 0; i < text.length; i++) {
+      let char = text[i]
+
+      if (char === '\\') {
+        char = text[++i]
+      } else if (char === '$') {
+        $el.appendChild(span)
+        span = document.createElement('span')
+
+        const divider = text.indexOf(':', i + 1)
+        const end = text.indexOf('$', divider + 1)
+
+        if (end === -1) {
+          span.textContent = '[[ERROR]]'
+        } else {
+          span.textContent = text.slice(divider + 1, end)
+          span.className = text.slice(i + 1, divider)
+        }
+        i = end
+
+        $el.appendChild(span)
+        span = document.createElement('span')
+        continue
+      }
+
+      span.textContent += char
+    }
+    $el.appendChild(span)
   }
 }
 

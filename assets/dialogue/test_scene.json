@@ -1,5 +1,6 @@
 {
   "text_style": "modern",
+  "auto_next_delay": 2000,
   "events": [
     {
       "action": "add",
