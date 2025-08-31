@@ -1,0 +1,36 @@
+@import url('dialogue.css');
+
+:root {
+  --game-aspect-ratio: 4 / 3;
+  --game-aspect-ratio: 16 / 9;
+  --game-padding: 40px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  background-color: #000;
+}
+
+main {
+  position: relative;
+  aspect-ratio: var(--game-aspect-ratio);
+
+  width: calc(
+    min(100vw, calc(100vh * var(--game-aspect-ratio))) - 2 * var(--game-padding)
+  );
+
+  background: url('../assets/image/title_bg.png') no-repeat center / cover, #000;
+
+  overflow: hidden;
+}
