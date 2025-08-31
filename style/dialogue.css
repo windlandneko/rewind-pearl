@@ -14,7 +14,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 1;
+  user-select: none;
 
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -134,7 +134,11 @@
   line-height: 0.4rem;
   color: rgba(180, 180, 180, 0.9);
   width: 100%;
+
+  text-align: justify;
+  -ms-text-align-last: justify;
   text-align-last: justify;
+
   white-space: nowrap;
 }
 
@@ -154,5 +158,36 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+.text span.bold {
+  font-weight: bold;
+}
+.text span.italic {
+  font-style: italic;
+}
+
+.text span.wow {
+  display: inline-block;
+  margin: 0 0.6em;
+  animation: effect-wow 2s ease-in-out infinite;
+  color: #ff6b35;
+  font-weight: bold;
+}
+
+@keyframes effect-wow {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.4) rotate(2deg);
+  }
+  50% {
+    transform: scale(1) rotate(0deg);
+  }
+  75% {
+    transform: scale(1.4) rotate(-2deg);
   }
 }

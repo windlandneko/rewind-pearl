@@ -1,8 +1,8 @@
 {
-  "text_style": "touhou",
+  "text_style": "modern",
   "events": [
     {
-      "type": "add",
+      "action": "add",
       "id": "wy",
       "title": "王源",
       "subtitle": "葬送的芙蓉王",
@@ -11,7 +11,7 @@
       "position": "left"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "lm",
       "title": "博丽灵梦",
       "subtitle": "不可思议的巫女",
@@ -20,7 +20,7 @@
       "position": "left"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "dz",
       "title": "丁真",
       "subtitle": "知识学爆",
@@ -29,199 +29,175 @@
       "position": "right"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "temp5",
       "key": "wangyuan",
       "emotion": "sweat",
       "position": "right"
     },
+
     {
-      "type": "dialogue",
       "id": "wy",
-      "text": "Hi 我是颠佬"
+      "text": "$bold italic:Hi$ 我是$wow:颠佬$"
     },
+
     {
-      "type": "dialogue",
       "id": "dz",
       "emotion": "surprise"
     },
     {
-      "type": "dialogue",
       "id": "wy",
       "emotion": "surprise"
     },
     {
-      "type": "dialogue",
       "id": "lm",
       "emotion": "surprise",
       "text": "？我是不是进错片场了"
     },
+
     {
-      "type": "dialogue",
       "id": "lm",
       "emotion": "surprise",
+      "title": "颜艺灵梦",
       "text": "emotion: surprise"
     },
     {
-      "type": "dialogue",
       "id": "lm",
       "emotion": "angry",
       "text": "emotion: angry"
     },
     {
-      "type": "dialogue",
       "id": "lm",
       "emotion": "smile",
       "text": "emotion: smile"
     },
     {
-      "type": "dialogue",
       "id": "lm",
       "emotion": "sweat",
       "text": "emotion: sweat"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "lm"
     },
     {
-      "type": "dialogue",
       "id": "wy",
       "title": "颠佬王源",
-      "emotion": "smile",
-      "text": null
+      "emotion": "sweat",
+      "text": null,
+      "wait": 200
     },
+
     {
-      "type": "wait",
-      "duration": 200
-    },
-    {
-      "type": "dialogue",
       "id": "wy",
       "title": "生气王源",
-      "emotion": "angry"
+      "emotion": "angry",
+      "wait": 200
     },
     {
-      "type": "wait",
-      "duration": 200
-    },
-    {
-      "type": "dialogue",
       "id": "wy",
       "title": "惊讶王源",
-      "emotion": "surprise"
+      "emotion": "surprise",
+      "wait": 200
     },
     {
-      "type": "wait",
-      "duration": 200
-    },
-    {
-      "type": "dialogue",
       "id": "wy",
       "title": "流汗王源",
-      "emotion": "sweat"
+      "emotion": "sweat",
+      "wait": 200
     },
     {
-      "type": "wait",
-      "duration": 200
-    },
-    {
-      "type": "dialogue",
       "id": "wy",
       "title": "颠佬王源",
-      "emotion": "smile"
+      "emotion": "smile",
+      "wait": 500
     },
     {
-      "type": "wait",
-      "duration": 500
-    },
-    {
-      "type": "dialogue",
       "id": "wy",
       "emotion": "smile",
-      "text": "想不想知道我的\n秘密武器？"
+      "text": "想不想知道我的$wow:秘密武器$？"
     },
     {
-      "type": "dialogue",
       "id": "dz",
       "emotion": "angry",
       "text": "不想。"
     },
+
     {
-      "type": "add",
+      "action": "add",
       "id": "temp1",
       "key": "wangyuan",
       "position": "left"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "temp2",
       "key": "wangyuan",
       "emotion": "normal",
       "position": "right"
     },
     {
-      "type": "dialogue",
       "id": "temp1",
       "text": "你说的对，但是《烟神》是由丁真珍珠自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「理塘」的幻想世界，在这里被神选中的人将被授予「电子烟」，引导尼古丁之力。你将扮演一位名为「芙蓉王」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的动物朋友，和它们一起击败强敌，找回不存在的亲人的同时，逐步发掘「理塘」的真相。"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "temp1"
     },
     {
-      "type": "dialogue",
       "id": "temp2",
       "text": "你说得对，但是《星际战甲》是由DE自主研发的一款全新科幻类冒险游戏。游戏发生在一个被称作「始源星系」的幻想世界，在这里，被lotus选中的人将被授予「warframe」，导引虚空之力。你将扮演一位名为「指挥官」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，阻止克隆尼，科普斯，灵煞，异变体的侵袭——同时，逐步发掘「虚空与墙中人」的真相。"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "temp2"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "temp3",
       "key": "wangyuan",
       "emotion": "angry",
       "position": "left"
     },
     {
-      "type": "dialogue",
       "id": "temp3",
       "text": "你说得对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作“提瓦特”的幻想世界，在这里，被神选中的人将被授予“神之眼”，导引元素之力。你将扮演一位名为“旅行者”的神秘角色，在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，找回失散的亲人——同时，逐步发掘“原神”的真相。"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "temp3"
     },
     {
-      "type": "add",
+      "action": "add",
       "id": "temp4",
       "key": "wangyuan",
       "emotion": "smile",
       "position": "right"
     },
     {
-      "type": "dialogue",
       "id": "temp4",
       "text": "你说的对，但是《命运二》是由棒鸡自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作「太阳系」的幻想世界，在这里，被旅行者选中的人将被授予「机灵」，导引光能之力。你将扮演一位名为「守护者」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，阻止暗影的侵袭——同时，逐步发掘「光能与暗影」的真相。"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "temp4"
     },
     {
-      "type": "dialogue",
       "id": "wy",
       "emotion": "smile",
       "text": "充电五分钟\n看片两小时\n免费看片就是我的秘密武器！！！\n再见！"
     },
+
     {
-      "type": "remove",
+      "action": "remove",
       "id": "wy"
     },
     {
-      "type": "dialogue",
       "id": "dz",
       "emotion": "sad",
       "text": "你干嘛嘿嘿诶呦"

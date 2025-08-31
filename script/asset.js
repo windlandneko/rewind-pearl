@@ -30,7 +30,7 @@ class AssetManager {
    * 加载 manifest 中的所有资源文件
    * @param {Object} manifest - 包含资源信息的JSON对象
    */
-  async loadFromManifest(manifest, prefix = '') {
+  async loadFromManifest(manifest) {
     if (typeof manifest === 'string') {
       manifest = await this.#loadJSON(manifest)
     }
@@ -39,16 +39,25 @@ class AssetManager {
       throw new Error('Invalid manifest provided')
     }
 
-    for (const [key, value] of Object.entries(manifest)) {
-      if (typeof value !== 'string') {
-        throw new Error(`Invalid URL for asset "${key}": ${value}`)
+    const loadRecursively = (obj, basePath = '') => {
+      for (const [key, value] of Object.entries(obj)) {
+        const currentPath = basePath ? `${basePath}/${key}` : key
+
+        if (typeof value === 'string') {
+          this.#loadingPromises.push(
+            this.load(value).then(asset => {
+              this.#assets.set(currentPath, asset)
+            })
+          )
+        } else if (typeof value === 'object') {
+          loadRecursively(value, currentPath)
+        } else {
+          throw new Error(`Invalid value for asset "${currentPath}": ${value}`)
+        }
       }
-      this.#loadingPromises.push(
-        this.load(value).then(asset => {
-          this.#assets.set(key, asset)
-        })
-      )
     }
+
+    loadRecursively(manifest)
 
     return Promise.all(this.#loadingPromises)
   }

@@ -89,18 +89,16 @@ class DialogueManager {
       return
     }
 
-    switch (event.type) {
+    switch (event.action) {
       case 'add':
         this.#onAddCharacter(event)
         break
+      case undefined:
       case 'dialogue':
         this.#onDialogue(event, skip)
         break
       case 'remove':
         this.#onRemove(event)
-        break
-      case 'wait':
-        this.#onWait(event)
         break
       default:
         console.warn('未知的事件:', event)
@@ -144,7 +142,7 @@ class DialogueManager {
    * @param {Object} event - 对话事件
    */
   #onDialogue(event, skip) {
-    const { id, emotion, text } = event
+    const { id, emotion, text, wait } = event
     const character = { ...this.characters.get(id), ...event }
 
     this.characters.set(id, character)
@@ -167,6 +165,7 @@ class DialogueManager {
 
     if (text === null) {
       this.$touhou.classList.remove('visible')
+      this.$modernText.textContent = ''
     }
 
     if (text) {
@@ -177,7 +176,23 @@ class DialogueManager {
             this.$modernText.textContent = text
           } else {
             const span = document.createElement('span')
-            span.textContent = text.charAt(this.textCursor++)
+            let nextLetter = text.charAt(this.textCursor++)
+            if (nextLetter === '\\') {
+              nextLetter = text.charAt(this.textCursor++)
+            } else if (nextLetter === '$') {
+              let divider = text.indexOf(':', this.textCursor)
+              let end = text.indexOf('$', divider)
+              if (end === -1) {
+                nextLetter = '[[ERROR]]'
+              } else {
+                console.log(this.textCursor, divider, end)
+                console.log(text.slice(this.textCursor, divider), nextLetter)
+                nextLetter = text.slice(divider + 1, end)
+                span.className = text.slice(this.textCursor, divider)
+              }
+              this.textCursor = end + 1
+            }
+            span.textContent = nextLetter
             this.$modernText.appendChild(span)
           }
           if (this.textCursor >= text.length) {
@@ -198,8 +213,18 @@ class DialogueManager {
       } else {
         this.#updateBubble(text)
       }
-    } else {
+    } else if (!wait) {
       this.next()
+    }
+
+    if (wait) {
+      this.isWaiting = true
+
+      clearTimeout(this.waitHandler)
+      this.waitHandler = setTimeout(() => {
+        this.isWaiting = false
+        this.next()
+      }, wait)
     }
   }
 
@@ -229,24 +254,9 @@ class DialogueManager {
     this.next()
   }
 
-  /**
-   * 等待事件
-   * @param {Object} event - 等待事件
-   */
-  #onWait(event) {
-    const { duration } = event
-    this.isWaiting = true
-
-    clearTimeout(this.waitHandler)
-    this.waitHandler = setTimeout(() => {
-      this.isWaiting = false
-      this.next()
-    }, duration)
-  }
-
   // 更新角色表情
   #updateCharacterEmotion(character, emotion) {
-    let assetUrl = `character/${character.key}:${emotion}`
+    let assetUrl = `character/${character.key}/${emotion}`
     if (Asset.has(assetUrl)) assetUrl = Asset.get(assetUrl)
     else {
       console.warn('角色资源不存在:', assetUrl)
