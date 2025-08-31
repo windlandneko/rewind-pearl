@@ -17,7 +17,7 @@
   user-select: none;
 
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease;
 }
 
 .dialogue-container.touhou .touhou-style-text {
@@ -121,7 +121,7 @@
 }
 
 .modern-style-text .title {
-  font-size: 1.6rem;
+  font-size: 1.75rem;
   font-weight: bold;
   margin-bottom: 10px;
   color: #ffcc00;
@@ -130,7 +130,7 @@
 }
 
 .modern-style-text .subtitle {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   line-height: 0.4rem;
   color: rgba(180, 180, 180, 0.9);
   width: 100%;
@@ -171,23 +171,17 @@
 .text span.wow {
   display: inline-block;
   margin: 0 0.6em;
-  animation: effect-wow 2s ease-in-out infinite;
+  animation: effect-wow 0.5s ease-out infinite alternate !important;
   color: #ff6b35;
+  text-shadow: 0 0 8px rgba(255, 107, 53, 0.5);
   font-weight: bold;
 }
 
 @keyframes effect-wow {
-  0%,
-  100% {
-    transform: scale(1) rotate(0deg);
+  from {
+    transform: scale(1);
   }
-  25% {
-    transform: scale(1.4) rotate(2deg);
-  }
-  50% {
-    transform: scale(1) rotate(0deg);
-  }
-  75% {
-    transform: scale(1.4) rotate(-2deg);
+  to {
+    transform: scale(1.4);
   }
 }

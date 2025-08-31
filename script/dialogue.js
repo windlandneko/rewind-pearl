@@ -1,4 +1,5 @@
 import Asset from './asset.js'
+import keyboard from './keyboard.js'
 
 /**
  * Dialogue Manager
@@ -25,10 +26,31 @@ class DialogueManager {
   $modernText = document.querySelector('.dialogue-container .text')
   $touhou = document.querySelector('.dialogue-container .touhou-style-text')
 
+  constructor() {
+    keyboard.onKeydown(['Enter', 'Space'], () => {
+      this.next()
+    })
+
+    keyboard.onKeydown(['LCtrl', 'RCtrl'], () => {
+      const k = 0.6
+      const triggerSkip = t => {
+        if (keyboard.anyActive(['LCtrl', 'RCtrl'])) {
+          this.next(true)
+          t = k * t + (1 - k) * 30
+          setTimeout(() => triggerSkip(t), t)
+        }
+      }
+
+      console.log('test')
+
+      setTimeout(() => triggerSkip(200), 200)
+    })
+  }
+
   /**
    * 开始播放对话
    */
-  start(dialogue) {
+  async play(dialogue) {
     this.dialogueData = Asset.get(dialogue)
     this.stop()
     this.$dialogue.classList.add(
@@ -36,8 +58,14 @@ class DialogueManager {
       this.dialogueData.text_style ?? 'modern'
     )
 
+    const promise = new Promise(res => {
+      this.onEnd = res
+    })
+
     this.isPlaying = true
-    this.processEvent()
+    this.#processEvent()
+
+    return promise
   }
 
   /**
@@ -55,6 +83,8 @@ class DialogueManager {
 
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
+
+    setTimeout(this.onEnd, 500)
   }
 
   /**
@@ -70,13 +100,13 @@ class DialogueManager {
     }
 
     this.eventIndex++
-    this.processEvent(skip)
+    this.#processEvent(skip)
   }
 
   /**
    * 处理当前事件
    */
-  processEvent(skip) {
+  #processEvent(skip) {
     if (this.eventIndex >= this.dialogueData.events.length) {
       this.stop()
       return

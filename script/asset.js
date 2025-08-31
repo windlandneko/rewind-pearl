@@ -42,6 +42,7 @@ class AssetManager {
 
     const tasks = []
 
+    // 使用箭头函数以绑定 this
     const loadRecursively = (obj, basePath = '') => {
       for (const [key, value] of Object.entries(obj)) {
         const path = basePath ? `${basePath}/${key}` : key
