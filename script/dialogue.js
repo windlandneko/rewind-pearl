@@ -201,6 +201,7 @@ class DialogueManager {
     if (text) {
       if (this.dialogueData.text_style === 'modern' && !skip) {
         this.textCursor = 0
+        clearInterval(this.textDisplayHandler)
         this.textDisplayHandler = setInterval(() => {
           if (this.textCursor === Infinity) {
             this.$modernText.textContent = ''
