@@ -60,9 +60,10 @@ class LoadingManager {
    * @param {number} [delay=500] - 延迟时间（毫秒）
    */
   async hide() {
-    await wait(500)
+    await wait(300)
     this.$container.classList.add('hidden')
-    await wait(2000)
+    await wait(1000)
+    this.$container.remove()
   }
 }
 
