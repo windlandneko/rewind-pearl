@@ -331,8 +331,6 @@ class DialogueManager {
     this.$touhou.classList.add(this.currentSpeaker.position)
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
-
-    this.$touhou.textContent = ''
     this.#parseText(this.$touhou, text)
 
     // retrigger animation

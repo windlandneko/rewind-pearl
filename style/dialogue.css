@@ -21,7 +21,7 @@
 }
 
 .dialogue-container.touhou .touhou-style-text {
-  display: block;
+  display: table;
 }
 .dialogue-container.modern .modern-style-text {
   display: block;
