@@ -233,7 +233,7 @@ class DialogueManager {
             if (this.dialogueData.auto_next_delay > 0)
               this.autoNextHandler = setTimeout(
                 () => this.next(),
-                this.dialogueData.auto_next_delay + Math.max(0, (text.length - 20) * 60)
+                this.dialogueData.auto_next_delay
               )
           }
         }, 500 / text.length + 20)
