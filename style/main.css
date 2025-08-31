@@ -33,4 +33,155 @@ main {
   background: url('../assets/image/title_bg.png') no-repeat center / cover, #000;
 
   overflow: hidden;
+
+  display: grid;
+  place-items: center;
+}
+
+/* 加载界面样式 */
+.loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+  color: white;
+
+  transition: opacity 1.5s ease-out;
+}
+.loading-container.hidden {
+  opacity: 0;
+}
+
+.loading-title {
+  font-size: 2.6rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  text-align: center;
+  user-select: none;
+
+  animation: glow 1s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.loading-progress-container {
+  margin-top: 1.5rem;
+  width: 90%;
+  max-width: 400px;
+  padding: 0 2rem;
+}
+
+.loading-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4a90e2, #7bb3f0);
+  width: 0%;
+  transition: width 0.2s ease;
+  border-radius: 3px;
+  box-shadow: 0 0 10px rgba(74, 144, 226, 0.5);
+}
+
+.loading-status {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #ccc;
+  min-height: 1.2em;
+  user-select: none;
+}
+
+.loading-action {
+  margin-top: 1rem;
+  user-select: none;
+}
+.loading-action.hidden {
+  visibility: hidden;
+}
+
+.loading-action > button {
+  background: transparent;
+  color: #ccc;
+  padding: 0.5rem 1rem;
+  margin: 0 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#loading-retry {
+  border: 2px solid #4caf50;
+  color: #4caf50;
+}
+#loading-skip {
+  border: 1px solid #ccc;
+  color: #ccc;
+  font-weight: 300;
+}
+
+.loading-error {
+  font-family: monospace;
+  font-size: 1rem;
+  text-align: left;
+
+  background-color: rgba(237, 35, 35, 0.1);
+  border: 1px solid #ed2323;
+
+  position: absolute;
+  bottom: 5%;
+  height: 20%;
+  width: 60%;
+  overflow: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  margin: 0.5rem 0;
+  padding: 0.3rem 0.5rem;
+  color: #ed2323;
+  transition: opacity 0.3s ease-out;
+}
+.loading-error.hidden {
+  opacity: 0;
+}
+
+.loading-error::before {
+  content: '错误信息';
+  font-weight: bold;
+
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #ed2323;
+  color: #000;
+
+  padding: 0.1em 0.5em;
 }

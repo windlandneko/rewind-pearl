@@ -1,24 +1,44 @@
-import Keyboard from './keyboard.js'
-import Dialogue from './dialogue.js'
-import Asset from './asset.js'
+import KeyboardManager from './keyboard.js'
+import DialogueManager from './dialogue.js'
+import AssetManager from './asset.js'
+import LoadingManager from './loader.js'
+import { $ } from './utils.js'
 
-await Asset.loadFromManifest('assets/manifest.json')
-
-Keyboard.onKeydown(['Enter', 'Space'], () => {
-  Dialogue.next()
-})
-
-Keyboard.onKeydown(['LCtrl', 'RCtrl'], () => {
-  const k = 0.6
-  const triggerSkip = t => {
-    if (Keyboard.anyPressed(['LCtrl', 'RCtrl'])) {
-      Dialogue.next(true)
-      t = k * t + (1 - k) * 30
-      setTimeout(() => triggerSkip(t), t)
+const init = async (skipAssetLoading = false) => {
+  try {
+    LoadingManager.init()
+    if (!skipAssetLoading) {
+      await AssetManager.loadFromManifest('assets/manifest.json', data =>
+        LoadingManager.updateProgress(data)
+      )
     }
+    await LoadingManager.hide()
+  } catch (error) {
+    LoadingManager.$action.classList.remove('hidden')
+    throw error
   }
 
-  setTimeout(() => triggerSkip(200), 200)
-})
+  KeyboardManager.onKeydown(['Enter', 'Space'], () => {
+    DialogueManager.next()
+  })
 
-Dialogue.start('dialogue/test_scene')
+  KeyboardManager.onKeydown(['LCtrl', 'RCtrl'], () => {
+    const k = 0.6
+    const triggerSkip = t => {
+      if (KeyboardManager.anyActive(['LCtrl', 'RCtrl'])) {
+        DialogueManager.next(true)
+        t = k * t + (1 - k) * 30
+        setTimeout(() => triggerSkip(t), t)
+      }
+    }
+
+    setTimeout(() => triggerSkip(200), 200)
+  })
+
+  DialogueManager.start('dialogue/test_scene')
+}
+
+$('#loading-retry').addEventListener('click', () => init())
+$('#loading-skip').addEventListener('click', () => init(true))
+
+init()

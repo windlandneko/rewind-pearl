@@ -38,7 +38,7 @@
 
     {
       "id": "wy",
-      "text": "$bold italic:Hi$ 我是$wow:颠佬$"
+      "text": "Hi 我是$wow:颠佬$"
     },
 
     {

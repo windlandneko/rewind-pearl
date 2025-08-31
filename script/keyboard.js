@@ -1,4 +1,4 @@
-import EventListener from './utils/eventListener.js'
+import { EventListener } from './utils.js'
 
 /**
  * A class to manage keyboard input.
@@ -194,7 +194,7 @@ class KeyboardManager {
    * Check if the specified key is currently pressed.
    * @param {string} key
    */
-  isPressed(key) {
+  isActive(key) {
     return this.#record.get(key) || false
   }
 
@@ -202,16 +202,16 @@ class KeyboardManager {
    * Check if all the specified keys are currently pressed.
    * @param {string[]} keys
    */
-  allPressed(keys) {
-    return keys.reduce((ans, key) => ans & this.isPressed(key), true)
+  allActive(keys) {
+    return keys.reduce((ans, key) => ans & this.isActive(key), true)
   }
 
   /**
    * Check if any of the specified keys are currently pressed.
    * @param {string[]} keys
    */
-  anyPressed(keys) {
-    return keys.reduce((ans, key) => ans | this.isPressed(key), false)
+  anyActive(keys) {
+    return keys.reduce((ans, key) => ans | this.isActive(key), false)
   }
 }
 

@@ -1,9 +1,14 @@
+export const $ = selector => document.querySelector(selector)
+export const $$ = selector => document.querySelectorAll(selector)
+
+export const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+
 /**
  * A simple event listener class.
  *
  * @author windlandneko
  */
-export default class EventListener {
+export class EventListener {
   /** @type {Map<string, Function[]>} */
   #listeners
 

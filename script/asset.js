@@ -5,8 +5,6 @@
  */
 class AssetManager {
   #assets = new Map()
-  /** @type {Promise[]} */
-  #loadingPromises = []
 
   /**
    * 获取已加载的资源
@@ -28,9 +26,10 @@ class AssetManager {
 
   /**
    * 加载 manifest 中的所有资源文件
-   * @param {Object} manifest - 包含资源信息的JSON对象
+   * @param {Object|string} manifest - 包含资源信息的JSON对象或文件路径
+   * @param {Function} [onProgress] - 进度回调函数，接收参数 (current, total, currentFile)
    */
-  async loadFromManifest(manifest) {
+  async loadFromManifest(manifest, onProgress) {
     if (typeof manifest === 'string') {
       manifest = await this.#loadJSON(manifest)
     }
@@ -39,27 +38,60 @@ class AssetManager {
       throw new Error('Invalid manifest provided')
     }
 
+    this.onProgress = onProgress
+
+    const tasks = []
+
     const loadRecursively = (obj, basePath = '') => {
       for (const [key, value] of Object.entries(obj)) {
-        const currentPath = basePath ? `${basePath}/${key}` : key
+        const path = basePath ? `${basePath}/${key}` : key
 
         if (typeof value === 'string') {
-          this.#loadingPromises.push(
-            this.load(value).then(asset => {
-              this.#assets.set(currentPath, asset)
-            })
-          )
+          if (!this.has(path)) {
+            tasks.push({ path, url: value })
+          }
         } else if (typeof value === 'object') {
-          loadRecursively(value, currentPath)
+          loadRecursively(value, path)
         } else {
-          throw new Error(`Invalid value for asset "${currentPath}": ${value}`)
+          throw new Error(`Invalid value for asset "${path}": ${value}`)
         }
       }
     }
 
     loadRecursively(manifest)
 
-    return Promise.all(this.#loadingPromises)
+    let count = 0,
+      errorCount = 0
+    const total = tasks.length
+
+    return Promise.all(
+      tasks.map(item =>
+        this.load(item.url)
+          .then(asset => {
+            this.#assets.set(item.path, asset)
+            this.onProgress?.({
+              type: 'completed',
+              count: ++count,
+              errorCount,
+              total,
+              current: item.path,
+            })
+            return asset
+          })
+          .catch(error => {
+            count++
+            this.onProgress?.({
+              type: 'failed',
+              count: ++count,
+              errorCount: ++errorCount,
+              total,
+              current: item.path,
+              error,
+            })
+            throw error
+          })
+      )
+    )
   }
 
   /**
@@ -119,6 +151,10 @@ class AssetManager {
     return new Promise((res, rej) => {
       const img = new Image()
       img.onload = () => res(url)
+      img.onprogress = ({ loaded, total }) => {
+        if (!total) return
+        this.onProgress?.({ type: 'progress', count: loaded, total })
+      }
       img.onerror = () =>
         rej(new Error(`[AssetManager] Failed to load image: ${url}`))
       img.src = url
@@ -134,6 +170,10 @@ class AssetManager {
     return new Promise((res, rej) => {
       const audio = new Audio()
       audio.oncanplaythrough = () => res(url)
+      audio.onprogress = ({ loaded, total }) => {
+        if (!total) return
+        this.onProgress?.({ type: 'progress', count: loaded, total })
+      }
       audio.onerror = () =>
         rej(new Error(`[AssetManager] Failed to load audio: ${url}`))
       audio.src = url
