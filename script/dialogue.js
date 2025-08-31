@@ -173,7 +173,36 @@ class DialogueManager {
         this.textCursor = 0
         this.textDisplayHandler = setInterval(() => {
           if (this.textCursor === Infinity) {
-            this.$modernText.textContent = text
+            this.$modernText.textContent = ''
+            let span = document.createElement('span')
+            for (let i = 0; i < text.length; i++) {
+              let char = text[i]
+
+              if (char === '\\') {
+                char = text[++i]
+              } else if (char === '$') {
+                this.$modernText.appendChild(span)
+                span = document.createElement('span')
+
+                const divider = text.indexOf(':', i + 1)
+                const end = text.indexOf('$', divider + 1)
+
+                if (end === -1) {
+                  span.textContent = '[[ERROR]]'
+                } else {
+                  span.textContent = text.slice(divider + 1, end)
+                  span.className = text.slice(i + 1, divider)
+                }
+                i = end
+
+                this.$modernText.appendChild(span)
+                span = document.createElement('span')
+                continue
+              }
+
+              span.textContent += char
+            }
+            this.$modernText.appendChild(span)
           } else {
             const span = document.createElement('span')
             let nextLetter = text.charAt(this.textCursor++)
@@ -182,11 +211,10 @@ class DialogueManager {
             } else if (nextLetter === '$') {
               let divider = text.indexOf(':', this.textCursor)
               let end = text.indexOf('$', divider)
+
               if (end === -1) {
                 nextLetter = '[[ERROR]]'
               } else {
-                console.log(this.textCursor, divider, end)
-                console.log(text.slice(this.textCursor, divider), nextLetter)
                 nextLetter = text.slice(divider + 1, end)
                 span.className = text.slice(this.textCursor, divider)
               }
