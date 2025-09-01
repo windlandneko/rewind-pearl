@@ -24,23 +24,32 @@ class DialogueManager {
   $modernText = document.querySelector('.dialogue-container .text')
   $touhou = document.querySelector('.dialogue-container .touhou-style-text')
 
-  constructor() {
-    KeyboardManager.onKeydown(['Enter', 'Space'], () => {
-      this.next()
-    })
+  #keyboardListeners = []
 
-    KeyboardManager.onKeydown(['LCtrl', 'RCtrl'], key => {
-      const k = 0.6
-      const triggerSkip = t => {
-        if (KeyboardManager.isActive(key)) {
-          this.next(true)
-          t = k * t + (1 - k) * 30
-          setTimeout(() => triggerSkip(t), t)
+  #registerKeyboardListeners() {
+    this.#clearKeyboardListeners()
+    this.#keyboardListeners.push(
+      KeyboardManager.onKeydown(['Enter', 'Space'], () => {
+        this.next()
+      }),
+      KeyboardManager.onKeydown(['LCtrl', 'RCtrl'], key => {
+        const k = 0.6
+        const triggerSkip = t => {
+          if (KeyboardManager.isActive(key)) {
+            this.next(true)
+            t = k * t + (1 - k) * 30
+            setTimeout(() => triggerSkip(t), t)
+          }
         }
-      }
 
-      setTimeout(() => triggerSkip(200), 200)
-    })
+        setTimeout(() => triggerSkip(200), 200)
+      })
+    )
+  }
+
+  #clearKeyboardListeners() {
+    this.#keyboardListeners.forEach(removeListener => removeListener())
+    this.#keyboardListeners = []
   }
 
   /**
@@ -49,15 +58,23 @@ class DialogueManager {
   async play(dialogue) {
     if (this.isPlaying) {
       console.warn('[DialogueManager] Already playing!')
-      return
+      return Promise.resolve()
+    }
+
+    if (!AssetManager.has('dialogue/' + dialogue)) {
+      console.warn('[DialogueManager] Dialogue not found:', dialogue)
+      return Promise.resolve()
     }
 
     this.stop()
     this.dialogueData = AssetManager.get('dialogue/' + dialogue)
     this.$dialogue.classList.add(
       'visible',
-      this.dialogueData.text_style ?? 'modern'
+      this.dialogueData?.text_style ?? 'modern'
     )
+
+    // 注册键盘监听器
+    this.#registerKeyboardListeners()
 
     const promise = new Promise(res => {
       this.onEnd = res
@@ -79,13 +96,14 @@ class DialogueManager {
     this.isPlaying = false
     this.isWaiting = false
     this.textDisplaying = false
-    this.$dialogue.classList.remove('visible', 'modern', 'touhou')
+    this.$dialogue.className = ''
     this.characters.forEach(character => this.#onRemove(character))
 
+    this.#clearKeyboardListeners()
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
 
-    setTimeout(this?.onEnd, 500)
+    this.onEnd?.()
   }
 
   /**
@@ -174,7 +192,12 @@ class DialogueManager {
    */
   #onDialogue(event, skip) {
     const { id, emotion, text, wait } = event
-    const character = { ...this.characters.get(id), ...event }
+    const baseCharacter = this.characters.get(id)
+    if (!baseCharacter && id) {
+      console.warn('角色ID无效或不存在:', id)
+      return
+    }
+    const character = { ...baseCharacter, ...event }
 
     this.characters.set(id, character)
 
@@ -203,6 +226,7 @@ class DialogueManager {
       if (this.dialogueData.text_style === 'modern' && !skip) {
         this.textCursor = 0
         clearInterval(this.textDisplayHandler)
+        this.$modernText.textContent = ''
         this.textDisplayHandler = setInterval(() => {
           if (this.textCursor === Infinity) {
             this.$modernText.textContent = ''
@@ -241,8 +265,6 @@ class DialogueManager {
           }
         }, 500 / text.length + 15)
         this.textDisplaying = true
-
-        this.$modernText.textContent = ''
       } else if (skip) {
         this.$modernText.textContent = text
       } else {
@@ -291,9 +313,11 @@ class DialogueManager {
 
   // 更新角色表情
   #updateCharacterEmotion(character, emotion) {
-    let image = `character/${character.key}/${emotion}`
-    if (AssetManager.has(image)) image = AssetManager.get(image)
-    else {
+    const key = character.key ?? 'gunmu'
+    let image = `character/${key}/${emotion}`
+    if (AssetManager.has(image)) {
+      image = AssetManager.get(image)
+    } else {
       console.warn('角色资源不存在:', image)
       image = AssetManager.get('character/gunmu')
     }
@@ -330,8 +354,7 @@ class DialogueManager {
    * @param {Object} character - 说话的角色
    */
   #updateBubble(text) {
-    this.$touhou.classList.remove('visible', 'left', 'right')
-    this.$touhou.classList.add(this.currentSpeaker.position)
+    this.$touhou.className = this.currentSpeaker.position
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
     this.#parseText(this.$touhou, text)

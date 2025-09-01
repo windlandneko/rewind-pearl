@@ -1,0 +1,270 @@
+import Vec2 from './Vector.js'
+
+/**
+ * 2D游戏摄像机类
+ * 实现基于屏幕边距的智能跟随逻辑
+ */
+export class Camera {
+  constructor() {
+    // 摄像机位置（世界坐标）
+    this.position = new Vec2(0, 0)
+
+    // 摄像机视窗尺寸
+    this.viewportWidth = 800
+    this.viewportHeight = 600
+
+    // 摄像机跟随参数
+    this.padding = {
+      left: 200, // 左边距
+      right: 200, // 右边距
+      top: 150, // 上边距
+      bottom: 150, // 下边距
+    }
+
+    // 跟随目标
+    this.target = null
+
+    // 平滑跟随参数
+    this.lerpFactor = 0.1
+    this.enableSmoothing = true
+
+    // 世界边界限制
+    this.worldBounds = null
+  }
+
+  /**
+   * 设置跟随目标
+   * @param {Object} target - 要跟随的对象，需要有r.x和r.y属性
+   */
+  setTarget(target) {
+    this.target = target
+  }
+
+  /**
+   * 设置摄像机视窗尺寸
+   * @param {number} width - 视窗宽度
+   * @param {number} height - 视窗高度
+   */
+  setViewportSize(width, height) {
+    this.viewportWidth = width
+    this.viewportHeight = height
+  }
+
+  /**
+   * 设置跟随边距
+   * @param {number} left - 左边距
+   * @param {number} right - 右边距
+   * @param {number} top - 上边距
+   * @param {number} bottom - 下边距
+   */
+  setPadding(left, right, top, bottom) {
+    this.padding.left = left
+    this.padding.right = right
+    this.padding.top = top
+    this.padding.bottom = bottom
+  }
+
+  /**
+   * 设置世界边界
+   * @param {number} minX - 世界最小X坐标
+   * @param {number} minY - 世界最小Y坐标
+   * @param {number} maxX - 世界最大X坐标
+   * @param {number} maxY - 世界最大Y坐标
+   */
+  setWorldBounds(minX, minY, maxX, maxY) {
+    this.worldBounds = { minX, minY, maxX, maxY }
+  }
+
+  /**
+   * 清除世界边界限制
+   */
+  clearWorldBounds() {
+    this.worldBounds = null
+  }
+
+  /**
+   * 设置平滑跟随参数
+   * @param {boolean} enabled - 是否启用平滑跟随
+   * @param {number} lerpFactor - 插值因子 (0-1)
+   */
+  setSmoothFollow(enabled, lerpFactor = 0.1) {
+    this.enableSmoothing = enabled
+    this.lerpFactor = Math.max(0, Math.min(1, lerpFactor))
+  }
+
+  /**
+   * 更新摄像机位置
+   * @param {number} dt - 帧时间间隔
+   */
+  update(dt) {
+    if (!this.target) return
+
+    // 计算目标在屏幕中的位置
+    const targetScreenX = this.target.r.x - this.position.x
+    const targetScreenY = this.target.r.y - this.position.y
+
+    // 计算需要移动的摄像机偏移量
+    let deltaX = 0
+    let deltaY = 0
+
+    // 检查水平方向
+    if (targetScreenX < this.padding.left) {
+      // 目标在左边距外，摄像机需要向左移动
+      deltaX = targetScreenX - this.padding.left
+    } else if (targetScreenX > this.viewportWidth - this.padding.right) {
+      // 目标在右边距外，摄像机需要向右移动
+      deltaX = targetScreenX - (this.viewportWidth - this.padding.right)
+    }
+
+    // 检查垂直方向
+    if (targetScreenY < this.padding.top) {
+      // 目标在上边距外，摄像机需要向上移动
+      deltaY = targetScreenY - this.padding.top
+    } else if (targetScreenY > this.viewportHeight - this.padding.bottom) {
+      // 目标在下边距外，摄像机需要向下移动
+      deltaY = targetScreenY - (this.viewportHeight - this.padding.bottom)
+    }
+
+    // 计算新的摄像机位置
+    let newX = this.position.x + deltaX
+    let newY = this.position.y + deltaY
+
+    // 应用世界边界限制
+    if (this.worldBounds) {
+      newX = Math.max(
+        this.worldBounds.minX,
+        Math.min(newX, this.worldBounds.maxX - this.viewportWidth)
+      )
+      newY = Math.max(
+        this.worldBounds.minY,
+        Math.min(newY, this.worldBounds.maxY - this.viewportHeight)
+      )
+    }
+
+    // 应用平滑跟随或直接设置位置
+    if (this.enableSmoothing && (deltaX !== 0 || deltaY !== 0)) {
+      this.position.x += (newX - this.position.x) * this.lerpFactor
+      this.position.y += (newY - this.position.y) * this.lerpFactor
+    } else if (deltaX !== 0 || deltaY !== 0) {
+      this.position.x = newX
+      this.position.y = newY
+    }
+  }
+
+  /**
+   * 立即移动摄像机到指定位置
+   * @param {number} x - X坐标
+   * @param {number} y - Y坐标
+   */
+  setPosition(x, y) {
+    this.position.x = x
+    this.position.y = y
+
+    // 应用世界边界限制
+    if (this.worldBounds) {
+      this.position.x = Math.max(
+        this.worldBounds.minX,
+        Math.min(this.position.x, this.worldBounds.maxX - this.viewportWidth)
+      )
+      this.position.y = Math.max(
+        this.worldBounds.minY,
+        Math.min(this.position.y, this.worldBounds.maxY - this.viewportHeight)
+      )
+    }
+  }
+
+  /**
+   * 立即将摄像机居中到目标位置
+   */
+  centerOnTarget() {
+    if (!this.target) return
+
+    const centerX = this.target.r.x - this.viewportWidth / 2
+    const centerY = this.target.r.y - this.viewportHeight / 2
+    this.setPosition(centerX, centerY)
+  }
+
+  /**
+   * 获取摄像机视窗信息
+   * @returns {{x: number, y: number, width: number, height: number}}
+   */
+  getViewport() {
+    return {
+      x: this.position.x,
+      y: this.position.y,
+      width: this.viewportWidth,
+      height: this.viewportHeight,
+    }
+  }
+
+  /**
+   * 检查对象是否在摄像机视野内
+   * @param {Object} object - 要检查的对象
+   * @param {number} margin - 额外的边距
+   * @returns {boolean}
+   */
+  isInView(object, margin = 0) {
+    const viewport = this.getViewport()
+
+    return (
+      object.r.x + object.width >= viewport.x - margin &&
+      object.r.x <= viewport.x + viewport.width + margin &&
+      object.r.y + object.height >= viewport.y - margin &&
+      object.r.y <= viewport.y + viewport.height + margin
+    )
+  }
+
+  /**
+   * 将世界坐标转换为屏幕坐标
+   * @param {number} worldX - 世界X坐标
+   * @param {number} worldY - 世界Y坐标
+   * @returns {{x: number, y: number}}
+   */
+  worldToScreen(worldX, worldY) {
+    return {
+      x: worldX - this.position.x,
+      y: worldY - this.position.y,
+    }
+  }
+
+  /**
+   * 将屏幕坐标转换为世界坐标
+   * @param {number} screenX - 屏幕X坐标
+   * @param {number} screenY - 屏幕Y坐标
+   * @returns {{x: number, y: number}}
+   */
+  screenToWorld(screenX, screenY) {
+    return {
+      x: screenX + this.position.x,
+      y: screenY + this.position.y,
+    }
+  }
+
+  /**
+   * 获取调试信息
+   * @returns {Object}
+   */
+  getDebugInfo() {
+    const viewport = this.getViewport()
+    const targetInfo = this.target
+      ? {
+          x: this.target.r.x,
+          y: this.target.r.y,
+          screenX: this.target.r.x - this.position.x,
+          screenY: this.target.r.y - this.position.y,
+        }
+      : null
+
+    return {
+      position: { x: this.position.x, y: this.position.y },
+      viewport,
+      target: targetInfo,
+      padding: { ...this.padding },
+      smoothing: {
+        enabled: this.enableSmoothing,
+        lerpFactor: this.lerpFactor,
+      },
+      worldBounds: this.worldBounds ? { ...this.worldBounds } : null,
+    }
+  }
+}
