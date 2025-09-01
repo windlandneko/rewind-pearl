@@ -2,7 +2,7 @@ import DialogueManager from './DialogueManager.js'
 import AssetManager from './AssetManager.js'
 import LoadingManager from './LoadingManager.js'
 import Game2D from './game2d/Game2D.js'
-import { $ } from './utils.js'
+import { $, wait } from './utils.js'
 
 async function init(skipAssetLoading = false) {
   try {
@@ -19,6 +19,7 @@ async function init(skipAssetLoading = false) {
   }
 
   await DialogueManager.play('test_scene')
+  await wait(1000)
   Game2D.loadLevel()
   Game2D.startLevel()
 }

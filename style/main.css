@@ -34,8 +34,6 @@ main {
     min(100vw, calc(100vh * var(--game-aspect-ratio))) - 2 * var(--game-padding)
   );
 
-  /* background: url('../assets/image/title_bg.png') no-repeat center / cover, #000; */
-
   overflow: hidden;
 
   display: grid;
@@ -56,4 +54,10 @@ main {
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
+
+  transition: opacity 1s;
+}
+#game-canvas.hidden {
+  opacity: 0;
+  pointer-events: none;
 }

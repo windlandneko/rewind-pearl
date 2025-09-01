@@ -62,7 +62,7 @@ class Game {
     resizeCanvas()
     addEventListener('resize', resizeCanvas)
 
-    this.canvas.style.display = 'none'
+    this.canvas.classList.add('hidden')
   }
 
   #registerKeyboardListeners() {
@@ -87,7 +87,7 @@ class Game {
     console.log(`[Game] 开始关卡 ${levelId}`)
 
     // 显示游戏画布
-    this.canvas.style.display = 'block'
+    this.canvas.classList.remove('hidden')
 
     this.setCameraHeight(600)
 
@@ -212,7 +212,7 @@ class Game {
       this.render()
     }
 
-    requestAnimationFrame(() => this.gameLoop())
+    this.animationFrameHandler = requestAnimationFrame(() => this.gameLoop())
   }
 
   /**
@@ -377,6 +377,7 @@ class Game {
       if (this.player.checkCollision(entity) && entity.dialogueId) {
         this.#clearKeyboardListeners()
         this.isRunning = false
+        cancelAnimationFrame(this.animationFrameHandler)
         await DialogueManager.play(entity.dialogueId)
         this.startLevel()
         break

@@ -12,8 +12,8 @@ export class Player extends AABBObject {
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
-  health = 3
-  score = 0
+  health = 114514
+  score = 1919810
   damageTimer = 0
 
   // 狼跳机制
