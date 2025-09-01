@@ -1,0 +1,27 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "reimu",
+      "title": "博丽灵梦",
+      "subtitle": "不可思议的巫女",
+      "key": "reimu",
+      "emotion": "smile",
+      "position": "left"
+    },
+    {
+      "id": "reimu",
+      "text": "第一个区域清理完毕！"
+    },
+    {
+      "id": "reimu",
+      "text": "继续前进吧。"
+    },
+    {
+      "action": "remove",
+      "id": "reimu"
+    }
+  ]
+}

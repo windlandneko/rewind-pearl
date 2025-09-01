@@ -30,7 +30,10 @@
   },
 
   "dialogue": {
-    "test_scene": "dialogue/test_scene.json"
+    "test_scene": "dialogue/test_scene.json",
+    "level1_start": "dialogue/level1_start.json",
+    "level1_end": "dialogue/level1_end.json",
+    "level1_npc": "dialogue/level1_npc.json"
   },
 
   "image": {

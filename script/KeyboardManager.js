@@ -171,9 +171,9 @@ class KeyboardManager {
    */
   onKeydown(key, callback) {
     if (typeof key === 'string')
-      return this.listener.on(`keydown:${key}`, callback)
+      return this.listener.on(`keydown:${key}`, () => callback(key))
 
-    const offCallbacks = key.forEach(k => this.onKeydown(k, callback))
+    const offCallbacks = key.map(k => this.onKeydown(k, callback))
     return () => offCallbacks.forEach(fn => fn())
   }
 
@@ -184,9 +184,9 @@ class KeyboardManager {
    */
   onKeyup(key, callback) {
     if (typeof key === 'string')
-      return this.listener.on(`keyup:${key}`, callback)
+      return this.listener.on(`keyup:${key}`, () => callback(key))
 
-    const offCallbacks = key.forEach(k => this.onKeyup(k, callback))
+    const offCallbacks = key.map(k => this.onKeyup(k, callback))
     return () => offCallbacks.forEach(fn => fn())
   }
 

@@ -1,0 +1,27 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "reimu",
+      "title": "博丽灵梦",
+      "subtitle": "不可思议的巫女",
+      "key": "reimu",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "reimu",
+      "text": "又有新的异变发生了..."
+    },
+    {
+      "id": "reimu",
+      "text": "看来我得去调查一下。"
+    },
+    {
+      "action": "remove",
+      "id": "reimu"
+    }
+  ]
+}

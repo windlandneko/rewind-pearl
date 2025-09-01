@@ -1,5 +1,5 @@
-import Asset from './asset.js'
-import keyboard from './keyboard.js'
+import AssetManager from './AssetManager.js'
+import KeyboardManager from './KeyboardManager.js'
 
 /**
  * Dialogue Manager
@@ -7,8 +7,6 @@ import keyboard from './keyboard.js'
  * @author windlandneko
  */
 class DialogueManager {
-  static AUTO_NEXT_DELAY = 10 * 1000
-
   dialogueData = []
   eventIndex = 0
 
@@ -27,14 +25,14 @@ class DialogueManager {
   $touhou = document.querySelector('.dialogue-container .touhou-style-text')
 
   constructor() {
-    keyboard.onKeydown(['Enter', 'Space'], () => {
+    KeyboardManager.onKeydown(['Enter', 'Space'], () => {
       this.next()
     })
 
-    keyboard.onKeydown(['LCtrl', 'RCtrl'], () => {
+    KeyboardManager.onKeydown(['LCtrl', 'RCtrl'], key => {
       const k = 0.6
       const triggerSkip = t => {
-        if (keyboard.anyActive(['LCtrl', 'RCtrl'])) {
+        if (KeyboardManager.isActive(key)) {
           this.next(true)
           t = k * t + (1 - k) * 30
           setTimeout(() => triggerSkip(t), t)
@@ -49,8 +47,13 @@ class DialogueManager {
    * 开始播放对话
    */
   async play(dialogue) {
+    if (this.isPlaying) {
+      console.warn('[DialogueManager] Already playing!')
+      return
+    }
+
     this.stop()
-    this.dialogueData = Asset.get(dialogue)
+    this.dialogueData = AssetManager.get('dialogue/' + dialogue)
     this.$dialogue.classList.add(
       'visible',
       this.dialogueData.text_style ?? 'modern'
@@ -236,7 +239,7 @@ class DialogueManager {
                 this.dialogueData.auto_next_delay
               )
           }
-        }, 500 / text.length + 20)
+        }, 500 / text.length + 15)
         this.textDisplaying = true
 
         this.$modernText.textContent = ''
@@ -275,7 +278,7 @@ class DialogueManager {
       this.characters.delete(id)
 
       this.#updatePosition()
-    }, 400)
+    }, 500)
 
     if (character.position === 'left') {
       this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
@@ -289,10 +292,10 @@ class DialogueManager {
   // 更新角色表情
   #updateCharacterEmotion(character, emotion) {
     let image = `character/${character.key}/${emotion}`
-    if (Asset.has(image)) image = Asset.get(image)
+    if (AssetManager.has(image)) image = AssetManager.get(image)
     else {
       console.warn('角色资源不存在:', image)
-      image = Asset.get('character/gunmu')
+      image = AssetManager.get('character/gunmu')
     }
 
     character.$el.src = image
