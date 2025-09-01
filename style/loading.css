@@ -17,7 +17,7 @@
   text-align: center;
   color: white;
 
-  transition: opacity 1s ease-out;
+  transition: opacity 1s ease;
 }
 .loading-container.hidden {
   opacity: 0;
@@ -38,10 +38,10 @@
 
 @keyframes glow {
   from {
-    opacity: 0.6;
+    opacity: 1;
   }
   to {
-    opacity: 1;
+    opacity: 0.8;
   }
 }
 
