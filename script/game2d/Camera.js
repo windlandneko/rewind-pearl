@@ -33,12 +33,12 @@ export class Camera {
   }
 
   /**
-   * 设置跟随目标
-   * @param {Object} target - 要跟随的对象，需要有r.x和r.y属性
-   */
-  setTarget(target) {
-    this.target = target
-  }
+     * 设置跟随目标
+     * @param {Object} target - 要跟随的对象，必须包含 r.x、r.y、width、height 属性
+     */
+    setTarget(target) {
+      this.target = target
+    }
 
   /**
    * 设置摄像机视窗尺寸

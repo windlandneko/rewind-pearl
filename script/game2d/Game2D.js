@@ -71,6 +71,9 @@ class Game {
       Keyboard.onKeydown(['Esc'], () => this.pause()),
       Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
         this.player.tryJump()
+      }),
+      Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
+        this.player.stopJump()
       })
     )
   }
@@ -115,6 +118,9 @@ class Game {
     // 创建玩家
     this.player = new Player(50, 400)
 
+    // 设置摄像机
+    this.setupCamera()
+
     // 创建测试狼跳机制的平台系统
     this.platforms = [
       new Platform(0, 500, 1000, 50),
@@ -132,9 +138,6 @@ class Game {
       new Platform(1320, 220, 60, 20),
       new Platform(1440, 160, 100, 20),
     ]
-
-    // 设置摄像机
-    this.setupCamera()
 
     // 创建多样化的敌人
     this.enemies = [
@@ -205,10 +208,15 @@ class Game {
     this.prevTick = currentTime
 
     if (this.dt < 0.1) {
-      for (let i = 0.02; i < this.dt; i += 0.02) {
-        this.update(0.02)
-      }
-      this.update(this.dt % 0.02)
+      // for (let i = 0.02; i < this.dt; i += 0.02) {
+      //   this.update(0.02)
+      // }
+      // this.update(this.dt % 0.02)
+      // if (this.frameCount % 8 === 0) this.update(1 / 30)
+      // if (this.frameCount % 4 === 0) this.update(1 / 60)
+      // if (this.frameCount % 2 === 0) this.update(1 / 120)
+      if (this.frameCount % 1 === 0) this.update(1 / 240)
+      console.log(this.dt)
       this.render()
     }
 
@@ -225,12 +233,11 @@ class Game {
 
     // 处理水平移动
     if (keyLeft && !keyRight) {
-      this.player.moveLeft()
+      this.player.moveLeft(dt)
     } else if (keyRight && !keyLeft) {
-      this.player.moveRight()
+      this.player.moveRight(dt)
     } else {
-      // 没有按移动键时停止移动
-      this.player.stopMoving()
+      this.player.stopMoving(dt)
     }
 
     // 更新玩家物理
@@ -412,7 +419,7 @@ class Game {
     // 设置平滑跟随
     this.camera.setSmoothFollow(true, 0.08)
 
-    // 设置世界边界（假设世界大小）
+    // 设置世界边界
     this.camera.setWorldBounds(0, 0, 1600, 800)
 
     // 立即居中到玩家

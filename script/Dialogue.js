@@ -96,7 +96,7 @@ class Dialogue {
     this.isPlaying = false
     this.isWaiting = false
     this.textDisplaying = false
-    this.$dialogue.className = 'dialogue-container'
+    this.$dialogue.classList.remove('visible')
     this.characters.forEach(character => this.#onRemove(character))
 
     this.#clearKeyboardListeners()

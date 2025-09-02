@@ -6,10 +6,13 @@ export class Player extends AABBObject {
 
   gravity = 1500 // 重力加速度
   moveSpeed = 200 // 移动速度 (像素/秒)
-  jumpSpeed = 560 // 地面跳跃速度 (像素/秒)
+  jumpSpeed = 335 // 地面跳跃速度 (像素/秒)
+  jumpKeyPressed = false
+  jumpTimer = 0
+  maxJumpTime = 0.2
+  variableJumpGravityMultiplier = 0.5
+
   airJumpSpeed = 400 // N段跳速度，一般稍小于地面跳跃
-  airResistance = 0.0001 // 空气阻力系数 (减小阻力)
-  groundFriction = 2000 // 地面摩擦力系数 (像素/秒²)
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
@@ -22,7 +25,7 @@ export class Player extends AABBObject {
   coyoteTimer = 0 // 计时器
   jumpBuffer = 0.1 // 跳跃缓冲：提前按跳跃键的缓冲时间(秒)
   jumpBufferTimer = 0 // 计时器
-  airJumps = 10 // N段跳次数
+  airJumps = 0 // N段跳次数
   airJumpsCount = 0 // 计数器
 
   previousOnGround = false
@@ -41,27 +44,13 @@ export class Player extends AABBObject {
 
     const acceleration = new Vec2()
 
+    let gravityMultiplier = 1.0
+    if (this.jumpKeyPressed && Math.abs(this.v.y) <= 80) {
+      gravityMultiplier = this.variableJumpGravityMultiplier
+    }
+
     // 重力
-    acceleration.y += this.gravity
-
-    // 空气阻力
-    if (this.v.len() > 0) {
-      const dragMagnitude = this.airResistance * this.v.len() ** 2
-      const airDrag = this.v.norm().mul(-dragMagnitude)
-      acceleration.addTo(airDrag)
-    }
-
-    // 地面摩擦力
-    if (this.onGround && Math.abs(this.v.x) > 0) {
-      const frictionForce = Math.sign(this.v.x) * -this.groundFriction
-      acceleration.x += frictionForce
-
-      // 防止摩擦力使速度反向
-      if (Math.sign(this.v.x + acceleration.x * dt) !== Math.sign(this.v.x)) {
-        this.v.x = 0
-        acceleration.x = 0
-      }
-    }
+    acceleration.y += this.gravity * gravityMultiplier
 
     // 更新速度
     this.v.addTo(acceleration.mul(dt))
@@ -73,38 +62,54 @@ export class Player extends AABBObject {
     this.damageTimer = Math.max(0, this.damageTimer - dt)
   }
 
-  moveLeft() {
+  moveLeft(dt) {
     const targetVelocity = -this.moveSpeed
     if (this.onGround) {
-      this.v.x = Math.max(this.v.x - this.moveSpeed * 0.08, targetVelocity)
+      this.v.x = Math.max(this.v.x - this.moveSpeed * 20 * dt, targetVelocity)
     } else {
       // 在空中时移动较慢
-      this.v.x = Math.max(this.v.x - this.moveSpeed * 0.04, targetVelocity * 1.5)
+      this.v.x = Math.max(
+        this.v.x - this.moveSpeed * 10 * dt,
+        targetVelocity * 1.2
+      )
     }
   }
 
-  moveRight() {
+  moveRight(dt) {
     const targetVelocity = this.moveSpeed
     if (this.onGround) {
-      this.v.x = Math.min(this.v.x + this.moveSpeed * 0.08, targetVelocity)
+      this.v.x = Math.min(this.v.x + this.moveSpeed * 20 * dt, targetVelocity)
     } else {
       // 在空中时移动较慢
-      this.v.x = Math.min(this.v.x + this.moveSpeed * 0.04, targetVelocity * 1.5)
+      this.v.x = Math.min(
+        this.v.x + this.moveSpeed * 10 * dt,
+        targetVelocity * 1.2
+      )
     }
   }
 
-  stopMoving() {
-    // 在地面时不需要做任何事，摩擦力会处理减速
-    // 在空中时稍微减少水平速度
-    if (!this.onGround) {
-      this.v.x *= 0.98
+  stopMoving(dt) {
+    if (this.onGround) {
+      this.v.x *= Math.pow(0.1, 10 * dt)
     }
   }
 
   /**
-   * 更新土狼时间
+   * 更新跳跃相关逻辑
    */
   updateJump(dt) {
+    // 更新跳跃计时器
+    if (this.jumpKeyPressed) {
+      this.jumpTimer += dt
+      this.v.y = Math.min(this.v.y, -this.currentJumpSpeed)
+
+      // 超过最大跳跃时间后停止变高跳跃
+      if (this.jumpTimer >= this.maxJumpTime) {
+        this.jumpKeyPressed = false
+      }
+    }
+
+    // 土狼时间逻辑
     if (this.onGround) {
       this.coyoteTimer = this.coyote
       if (!this.previousOnGround) {
@@ -120,6 +125,7 @@ export class Player extends AABBObject {
 
     this.previousOnGround = this.onGround
 
+    // 跳跃缓冲逻辑
     if (this.jumpBufferTimer > 0) {
       this.jumpBufferTimer -= dt
 
@@ -160,8 +166,15 @@ export class Player extends AABBObject {
     return false
   }
 
+  stopJump() {
+    this.jumpKeyPressed = false
+  }
+
   #jump(speed) {
-    this.v.y = -speed
+    this.currentJumpSpeed = speed
+    this.v.y = Math.min(this.v.y, -speed)
+    this.jumpKeyPressed = true
+    this.jumpTimer = 0
   }
 
   handlePlatformCollision(platform) {
