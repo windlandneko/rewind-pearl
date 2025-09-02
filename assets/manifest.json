@@ -37,7 +37,11 @@
     "level1_npc": "dialogue/level1_npc.json"
   },
 
-  "image": {
-    "test_bg": "image/title_bg.png"
+  "level": {
+    "test_level": "level/test_level.json"
+  },
+
+  "background": {
+    "test_bg": "background/title_bg.png"
   }
 }

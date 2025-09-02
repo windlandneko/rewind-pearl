@@ -1,5 +1,5 @@
 import Keyboard from '../Keyboard.js'
-import { EventListener, wait } from '../utils.js'
+import { EventListener, throttle, wait } from '../utils.js'
 import {
   Player,
   Platform,
@@ -9,6 +9,7 @@ import {
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
 import Dialogue from '../Dialogue.js'
+import Asset from '../Asset.js'
 
 class Game {
   /** @type {HTMLCanvasElement} */
@@ -25,13 +26,7 @@ class Game {
   // 游戏状态
   isRunning = false
   camera = new Camera()
-
-  displayWidth = 0
-  displayHeight = 0
-
-  // 摄像机高度 - 游戏内多少像素对应实际渲染canvas的高度
-  cameraHeight = 600 // 默认600游戏像素对应canvas高度
-  cameraScale = 1 // 渲染缩放比例，会根据canvas大小自动计算
+  cameraScale
 
   #keyboardListeners = []
 
@@ -49,7 +44,7 @@ class Game {
       this.canvas.width = this.displayWidth = width * DPR
       this.canvas.height = this.displayHeight = height * DPR
 
-      this.cameraScale = this.displayHeight / this.cameraHeight
+      this.cameraScale = this.displayHeight / this.levelHeight
 
       this.ctx.imageSmoothingEnabled = false
       this.ctx.webkitImageSmoothingEnabled = false
@@ -60,7 +55,7 @@ class Game {
     }
 
     resizeCanvas()
-    addEventListener('resize', resizeCanvas)
+    addEventListener('resize', throttle(resizeCanvas, 16))
 
     this.canvas.classList.add('hidden')
   }
@@ -86,141 +81,73 @@ class Game {
   /**
    * 开始关卡
    */
-  startLevel(levelId) {
+  start(levelId) {
     console.log(`[Game] 开始关卡 ${levelId}`)
-
-    // 显示游戏画布
-    this.canvas.classList.remove('hidden')
-
-    this.setCameraHeight(600)
 
     this.#registerKeyboardListeners()
 
-    // 开始游戏循环
-    this.frameCount = 0
-    this.prevTick = performance.now()
-    this.dt = 0
+    this.canvas.classList.remove('hidden')
 
     this.isRunning = true
-    this.gameLoop()
+    this.updateLoop()
+    this.renderLoop()
+  }
+
+  stop() {
+    this.#clearKeyboardListeners()
+    this.isRunning = false
+    clearInterval(this.updateIntervalHandler)
+    cancelAnimationFrame(this.animationFrameHandler)
   }
 
   /**
    * 加载关卡数据
    */
   loadLevel(levelId) {
-    // 清空之前的游戏对象
     this.enemies = []
     this.platforms = []
     this.interactables = []
     this.collectibles = []
 
+    if (!Asset.has(`level/${levelId}`)) {
+      console.error(`[Game] 关卡 ${levelId} 不存在！`)
+      return
+    }
+
+    this.levelData = Asset.get(`level/${levelId}`)
+
+    this.tileHeight = this.levelData.height
+    this.tileWidth = this.levelData.width
+    this.levelHeight = this.levelData.height * 8
+    this.levelWidth = this.levelData.width * 8
+
     // 创建玩家
-    this.player = new Player(50, 400)
+    this.player = new Player(
+      this.levelData.spawnpoint.x,
+      this.levelData.spawnpoint.y
+    )
+
+    this.platforms = [
+      new Platform(0, this.levelHeight - 8, this.levelWidth, 8),
+      new Platform(0, 0, this.levelWidth, 8),
+      new Platform(0, 0, 8, this.levelHeight),
+      new Platform(this.levelWidth - 8, 0, 8, this.levelHeight),
+
+      new Platform(80, 152, 200, 16.2)
+    ]
 
     // 设置摄像机
     this.setupCamera()
-
-    // 创建测试狼跳机制的平台系统
-    this.platforms = [
-      new Platform(0, 500, 1000, 50),
-
-      new Platform(150, 450, 100, 20),
-      new Platform(300, 420, 80, 20),
-      new Platform(430, 390, 70, 20),
-      new Platform(550, 360, 90, 20),
-
-      new Platform(700, 300, 100, 20),
-      new Platform(850, 450, 100, 20),
-      new Platform(1000, 350, 100, 20),
-
-      new Platform(1200, 280, 60, 20),
-      new Platform(1320, 220, 60, 20),
-      new Platform(1440, 160, 100, 20),
-    ]
-
-    // 创建多样化的敌人
-    this.enemies = [
-      // 地面巡逻敌人
-      new Enemy(250, 450),
-      new Enemy(450, 450),
-      new Enemy(700, 450),
-      new Enemy(950, 450),
-
-      // 平台上的敌人
-      new Enemy(420, 150),
-      new Enemy(640, 100),
-      new Enemy(220, 200),
-
-      // 终点区域守卫
-      new Enemy(1250, 400),
-      new Enemy(1350, 300),
-    ]
-
-    // 创建多个可交互对象
-    this.interactables = [
-      new Interactable(180, 400, 'level1_npc', '按E键对话'),
-      new Interactable(630, 100, 'level1_hint', '获得提示'),
-      new Interactable(880, 150, 'level1_secret', '神秘信息'),
-      new Interactable(1350, 200, 'level1_boss', 'Boss对话'),
-    ]
-
-    // 创建丰富的收集品分布
-    this.collectibles = [
-      // 低层收集品
-      new Collectible(170, 400),
-      new Collectible(370, 350),
-      new Collectible(520, 300),
-      new Collectible(680, 250),
-
-      // 中层收集品
-      new Collectible(120, 250),
-      new Collectible(770, 350),
-      new Collectible(870, 300),
-
-      // 高层收集品（奖励冒险精神）
-      new Collectible(240, 200),
-      new Collectible(420, 150),
-      new Collectible(620, 100),
-      new Collectible(940, 150),
-
-      // 隐藏收集品（需要精确操作）
-      new Collectible(110, 250),
-      new Collectible(760, 350),
-
-      // 终点区域收集品
-      new Collectible(1230, 400),
-      new Collectible(1330, 300),
-      new Collectible(1430, 200),
-    ]
   }
 
-  /**
-   * 游戏主循环
-   */
-  gameLoop() {
-    if (!this.isRunning) return
-
-    this.frameCount++
-
-    const currentTime = performance.now()
-    this.dt = (currentTime - this.prevTick) / 1000
-    this.prevTick = currentTime
-
-    if (this.dt < 0.1) {
-      // for (let i = 0.02; i < this.dt; i += 0.02) {
-      //   this.update(0.02)
-      // }
-      // this.update(this.dt % 0.02)
-      // if (this.frameCount % 8 === 0) this.update(1 / 30)
-      // if (this.frameCount % 4 === 0) this.update(1 / 60)
-      // if (this.frameCount % 2 === 0) this.update(1 / 120)
-      if (this.frameCount % 1 === 0) this.update(1 / 240)
-      console.log(this.dt)
-      this.render()
-    }
-
-    this.animationFrameHandler = requestAnimationFrame(() => this.gameLoop())
+  updateLoop() {
+    this.updateIntervalHandler = setInterval(() => {
+      this.update(0.01)
+    }, 10)
+  }
+  renderLoop() {
+    this.render()
+    this.animationFrameHandler = requestAnimationFrame(() => this.renderLoop())
   }
 
   /**
@@ -243,8 +170,28 @@ class Game {
     // 更新玩家物理
     this.player.update(dt)
 
-    // 世界边界检测（假设世界大小为1600x800）
-    this.player.handleWorldBounds(1600, 800)
+    // 左边界
+    if (this.player.r.x < 0) {
+      this.player.r.x = 0
+      this.player.v.x = 0
+    }
+    // 右边界
+    if (this.player.r.x + this.player.width > this.levelWidth) {
+      this.player.r.x = this.levelWidth - this.player.width
+      this.player.v.x = 0
+    }
+    // 上边界
+    if (this.player.r.y < 0) {
+      this.player.r.y = 0
+      this.player.v.y = 0
+    }
+    // 下边界
+    if (this.player.r.y > this.levelHeight) {
+      this.player.r.x = this.levelData.spawnpoint.x
+      this.player.r.y = this.levelData.spawnpoint.y
+      // todo
+      stateMachine.emit('map:enter/bottom')
+    }
 
     this.platforms.forEach(entity => entity.update(dt))
     this.collectibles.forEach(entity => entity.update(dt))
@@ -256,9 +203,6 @@ class Game {
 
     // 摄像机更新
     this.camera.update(dt)
-
-    // 关卡完成条件检查
-    this.checkLevelComplete()
   }
 
   /**
@@ -272,7 +216,6 @@ class Game {
     this.ctx.scale(this.cameraScale, this.cameraScale)
 
     // 摄像机变换
-    this.ctx.save()
     this.ctx.translate(
       -Math.round(this.camera.position.x),
       -Math.round(this.camera.position.y)
@@ -281,53 +224,21 @@ class Game {
     // 绘制背景网格
     this.#renderBackgroundGrid()
 
-    this.platforms.forEach(entity => entity.render(this.ctx))
-    this.collectibles.forEach(entity => entity.render(this.ctx))
-    this.enemies.forEach(entity => entity.render(this.ctx))
-    this.interactables.forEach(entity => entity.render(this.ctx))
+    this.platforms.forEach(entity => entity.render(this.ctx, this.cameraScale))
+    this.collectibles.forEach(entity =>
+      entity.render(this.ctx, this.cameraScale)
+    )
+    this.enemies.forEach(entity => entity.render(this.ctx, this.cameraScale))
+    this.interactables.forEach(entity =>
+      entity.render(this.ctx, this.cameraScale)
+    )
 
     // 玩家
-    this.player.render(this.ctx)
-
-    // 取消摄像机变换
-    this.ctx.restore()
-
-    this.renderUI()
+    this.player.render(this.ctx, this.cameraScale)
 
     this.ctx.restore()
-  }
 
-  /**
-   * 渲染背景网格
-   */
-  #renderBackgroundGrid() {
-    const viewport = this.camera.getViewport()
-    const gridSize = 100
-
-    this.ctx.strokeStyle = '#444'
-    this.ctx.lineWidth = 1
-
-    // 计算网格绘制范围（只绘制可见区域）
-    const startX = Math.floor(viewport.x / gridSize) * gridSize
-    const endX = Math.ceil((viewport.x + viewport.width) / gridSize) * gridSize
-    const startY = Math.floor(viewport.y / gridSize) * gridSize
-    const endY = Math.ceil((viewport.y + viewport.height) / gridSize) * gridSize
-
-    // 绘制垂直线
-    for (let x = startX; x <= endX; x += gridSize) {
-      this.ctx.beginPath()
-      this.ctx.moveTo(x, startY)
-      this.ctx.lineTo(x, endY)
-      this.ctx.stroke()
-    }
-
-    // 绘制水平线
-    for (let y = startY; y <= endY; y += gridSize) {
-      this.ctx.beginPath()
-      this.ctx.moveTo(startX, y)
-      this.ctx.lineTo(endX, y)
-      this.ctx.stroke()
-    }
+    this.#renderDebugUI()
   }
 
   /**
@@ -387,11 +298,9 @@ class Game {
   async checkInteraction() {
     for (const entity of this.interactables) {
       if (this.player.checkCollision(entity) && entity.dialogueId) {
-        this.#clearKeyboardListeners()
-        this.isRunning = false
-        cancelAnimationFrame(this.animationFrameHandler)
+        this.stop()
         await Dialogue.play(entity.dialogueId)
-        this.startLevel()
+        this.start()
         break
       }
     }
@@ -405,75 +314,79 @@ class Game {
 
     // 计算摄像机视窗尺寸
     const cameraWidth =
-      this.cameraHeight * (this.displayWidth / this.displayHeight)
+      this.levelHeight * (this.displayWidth / this.displayHeight)
 
     // 设置摄像机参数
-    this.camera.setViewportSize(cameraWidth, this.cameraHeight)
-    this.camera.setTarget(this.player)
+    this.camera.setViewportSize(cameraWidth, this.levelHeight)
+    this.camera.target = this.player
 
     // 设置跟随边距（屏幕的1/4作为padding）
     const paddingX = cameraWidth * 0.25
-    const paddingY = this.cameraHeight * 0.25
+    const paddingY = this.levelHeight * 0.25
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
 
     // 设置平滑跟随
-    this.camera.setSmoothFollow(true, 0.08)
+    this.camera.smoothFactor = 0.08
 
     // 设置世界边界
-    this.camera.setWorldBounds(0, 0, 1600, 800)
+    this.camera.setWorldBounds(0, 0, this.levelWidth, this.levelHeight)
 
     // 立即居中到玩家
     this.camera.centerOnTarget()
+
+    this.cameraScale = this.displayHeight / this.levelHeight
   }
 
   /**
-   * 设置摄像机高度
-   * @param {number} height - 游戏内像素高度
+   * 渲染背景网格
    */
-  setCameraHeight(height) {
-    this.cameraHeight = height
-    this.cameraScale = this.displayHeight / this.cameraHeight
+  #renderBackgroundGrid() {
+    const viewport = this.camera.viewport
+    const gridSize = 8
 
-    // 更新Camera实例的视窗尺寸
-    if (this.camera) {
-      const cameraWidth =
-        this.cameraHeight * (this.displayWidth / this.displayHeight)
-      this.camera.setViewportSize(cameraWidth, this.cameraHeight)
+    this.ctx.strokeStyle = '#444'
+    this.ctx.lineWidth = 1 / this.cameraScale
+
+    // 计算网格绘制范围（只绘制可见区域）
+    const startX = Math.floor(viewport.x / gridSize) * gridSize
+    const endX = Math.ceil((viewport.x + viewport.width) / gridSize) * gridSize
+    const startY = Math.floor(viewport.y / gridSize) * gridSize
+    const endY = Math.ceil((viewport.y + viewport.height) / gridSize) * gridSize
+
+    // 绘制垂直线
+    for (let x = startX; x <= endX; x += gridSize) {
+      this.ctx.beginPath()
+      this.ctx.moveTo(x, startY)
+      this.ctx.lineTo(x, endY)
+      this.ctx.stroke()
     }
-  }
 
-  /**
-   * 检查关卡完成
-   */
-  checkLevelComplete() {
-    // 示例：收集完所有收集品且到达终点
-    if (this.collectibles.length === 0 && this.player.x > 1400) {
-      this.completeLevel()
-    }
-
-    // 检查玩家死亡
-    if (this.player.health <= 0) {
-      this.gameOver()
+    // 绘制水平线
+    for (let y = startY; y <= endY; y += gridSize) {
+      this.ctx.beginPath()
+      this.ctx.moveTo(startX, y)
+      this.ctx.lineTo(endX, y)
+      this.ctx.stroke()
     }
   }
 
   /**
    * 渲染UI
    */
-  renderUI() {
+  #renderDebugUI() {
     // 渲染生命值、分数等UI元素
     this.ctx.fillStyle = '#fff'
-    this.ctx.font = '20px SourceHanSerifCN, serif, sans-serif'
-    this.ctx.fillText(`HP: ${this.player.health}`, 20, 30)
-    this.ctx.fillText(`Score: ${this.player.score}`, 20, 60)
-    this.ctx.font = '20px SourceHanSerifCN, serif, sans-serif'
+    this.ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
+    this.ctx.fillText(`HP: ${this.player.health}`, 20, 10)
+    this.ctx.fillText(`Score: ${this.player.score}`, 20, 50)
+    this.ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
     // 狼跳机制说明
     this.ctx.fillStyle = 'white'
-    this.ctx.font = '14px SourceHanSerifCN, serif, sans-serif'
+    this.ctx.font = '28px SourceHanSerifCN, serif, sans-serif'
     this.ctx.fillText('狼跳机制:', 20, 100)
-    this.ctx.fillText('• 土狼时间: 离开平台后0.15秒内仍可跳跃', 20, 120)
-    this.ctx.fillText('• 二段跳: 空中可再跳1次', 20, 140)
-    this.ctx.fillText('• 跳跃缓冲: 提前按跳跃键会在落地时自动跳跃', 20, 160)
+    this.ctx.fillText('• 土狼时间: 离开平台后0.15秒内仍可跳跃', 20, 140)
+    this.ctx.fillText('• 二段跳: 空中可再跳1次', 20, 180)
+    this.ctx.fillText('• 跳跃缓冲: 提前按跳跃键会在落地时自动跳跃', 20, 220)
 
     // 当前状态指示
     if (this.player.coyoteTimer > 0 && !this.player.onGround) {
@@ -497,55 +410,47 @@ class Game {
 
     // 调试信息：摄像机状态
     this.ctx.fillStyle = '#888'
-    this.ctx.font = '9px FiraCode, monospace'
+    this.ctx.font = '18px FiraCode, monospace'
     this.ctx.fillText(
-      `Camera Height: ${this.cameraHeight}px`,
+      `Camera Height: ${this.displayHeight}px`,
       0,
-      this.cameraHeight - 10
+      this.displayHeight - 20
     )
     this.ctx.fillText(
       `Camera Scale: ${this.cameraScale.toFixed(2)}x`,
       0,
-      this.cameraHeight - 20
+      this.displayHeight - 40
     )
-    const viewport = this.camera.getViewport()
+    const viewport = this.camera.viewport
     this.ctx.fillText(
       `Viewport: ${viewport.width.toFixed(0)}x${viewport.height.toFixed(0)}`,
       0,
-      this.cameraHeight - 30
+      this.displayHeight - 60
     )
 
     // 摄像机调试信息
-    const cameraDebug = this.camera.getDebugInfo()
+    const info = this.camera.getDebugInfo()
     this.ctx.fillText(
-      `Camera Pos: (${cameraDebug.position.x.toFixed(
-        1
-      )}, ${cameraDebug.position.y.toFixed(1)})`,
+      `Camera Pos: (${info.position.x}, ${info.position.y})`,
       0,
-      this.cameraHeight - 40
+      this.displayHeight - 80
     )
-    if (cameraDebug.target) {
-      this.ctx.fillText(
-        `Target Screen: (${cameraDebug.target.screenX.toFixed(
-          1
-        )}, ${cameraDebug.target.screenY.toFixed(1)})`,
-        0,
-        this.cameraHeight - 50
-      )
-    }
 
     // 摄像机跟随边距
     this.ctx.save()
-    this.ctx.scale(1 / this.cameraScale, 1 / this.cameraScale)
     this.ctx.strokeStyle = '#00FF00'
-    this.ctx.lineWidth = 2
+    this.ctx.lineWidth = 1
     this.ctx.strokeRect(
-      cameraDebug.padding.left * this.cameraScale,
-      cameraDebug.padding.top * this.cameraScale,
-      (viewport.width - cameraDebug.padding.left - cameraDebug.padding.right) *
-        this.cameraScale,
-      (viewport.height - cameraDebug.padding.top - cameraDebug.padding.bottom) *
-        this.cameraScale
+      Math.round(info.padding.left * this.cameraScale),
+      Math.round(info.padding.top * this.cameraScale),
+      Math.round(
+        (viewport.width - info.padding.left - info.padding.right) *
+          this.cameraScale
+      ),
+      Math.round(
+        (viewport.height - info.padding.top - info.padding.bottom) *
+          this.cameraScale
+      )
     )
     this.ctx.restore()
   }

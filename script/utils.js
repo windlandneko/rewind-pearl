@@ -3,6 +3,17 @@ export const $$ = selector => document.querySelectorAll(selector)
 
 export const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 
+export const throttle = (func, delay) => {
+  let lastTime = 0
+  return (...args) => {
+    const now = performance.now()
+    if (now - lastTime >= delay) {
+      lastTime = now
+      func(...args)
+    }
+  }
+}
+
 /**
  * A simple event listener class.
  *

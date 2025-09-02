@@ -30,26 +30,26 @@ export class Enemy extends AABBObject {
     }
   }
 
-  render(ctx) {
-    const pixelX = Math.round(this.r.x)
-    const pixelY = Math.round(this.r.y)
+  render(ctx, scale) {
+    const x = Math.round(this.r.x * scale) / scale
+    const y = Math.round(this.r.y * scale) / scale
 
     ctx.fillStyle = 'red'
-    ctx.fillRect(pixelX, pixelY, this.width, this.height)
+    ctx.fillRect(x, y, this.width, this.height)
 
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
     ctx.font = '9px FiraCode, monospace'
-    const debugY = pixelY + 30
+    const debugY = y + 30
     ctx.fillText(
       `pos: (${this.r.x.toFixed(1)}, ${this.r.y.toFixed(1)})`,
-      pixelX,
+      x,
       debugY
     )
     ctx.fillText(
       `vel: (${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)})`,
-      pixelX,
+      x,
       debugY + 10
     )
-    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, pixelX, debugY + 20)
+    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, x, debugY + 20)
   }
 }

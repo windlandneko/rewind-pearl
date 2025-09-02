@@ -31,13 +31,32 @@ class StateMachine {
   }
 
   /**
+   * 触发自定义事件
+   *
+   * @param {string} event 事件名称
+   */
+  emit(event) {
+    this.#listeners.emit(event)
+  }
+
+  /**
    * 等待状态机进入指定状态
    *
    * @param {string} state 需要等待进入的状态名
    * @returns {Promise<void>} 当状态机进入指定状态时 resolve
    */
-  async waitUntil(state) {
+  async waitState(state) {
     return new Promise(res => this.#listeners.once(`enter:${state}`, res))
+  }
+
+  /**
+   * 等待指定事件触发
+   *
+   * @param {string} event 需要等待的事件名
+   * @returns {Promise<void>} 当事件触发时 resolve
+   */
+  async waitEvent(event) {
+    return new Promise(res => this.#listeners.once(event, res))
   }
 
   get state() {

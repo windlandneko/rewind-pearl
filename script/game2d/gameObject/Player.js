@@ -1,18 +1,18 @@
 import { AABBObject } from './AABBObject.js'
 import Vec2 from '../Vector.js'
+import stateMachine from '../../stateMachine.js'
 
 export class Player extends AABBObject {
   color = 'blue'
 
-  gravity = 1500 // 重力加速度
-  moveSpeed = 200 // 移动速度 (像素/秒)
-  jumpSpeed = 335 // 地面跳跃速度 (像素/秒)
+  gravity = 500 // 重力加速度
+  moveSpeed = 72 // 移动速度 (像素/秒)
+  jumpSpeed = 100 // 地面跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
   maxJumpTime = 0.2
   variableJumpGravityMultiplier = 0.5
 
-  airJumpSpeed = 400 // N段跳速度，一般稍小于地面跳跃
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
@@ -20,19 +20,24 @@ export class Player extends AABBObject {
   score = 1919810
   damageTimer = 0
 
-  // 狼跳机制
+  // 狼跳
   coyote = 0.15 // 土狼时间：离开地面后还能跳跃的时间(秒)
   coyoteTimer = 0 // 计时器
+
+  // 跳跃缓冲
   jumpBuffer = 0.1 // 跳跃缓冲：提前按跳跃键的缓冲时间(秒)
   jumpBufferTimer = 0 // 计时器
-  airJumps = 0 // N段跳次数
+
+  // N段跳
+  airJumps = 0 // 最大次数
+  airJumpSpeed = 80 // N段跳速度，一般稍小于地面跳跃
   airJumpsCount = 0 // 计数器
 
   previousOnGround = false
   previousPosition = null
 
   constructor(x, y) {
-    super(x, y, 30, 50)
+    super(x, y, 10, 16)
     this.previousPosition = new Vec2(x, y)
   }
 
@@ -70,7 +75,7 @@ export class Player extends AABBObject {
       // 在空中时移动较慢
       this.v.x = Math.max(
         this.v.x - this.moveSpeed * 10 * dt,
-        targetVelocity * 1.2
+        targetVelocity * 1.3
       )
     }
   }
@@ -83,7 +88,7 @@ export class Player extends AABBObject {
       // 在空中时移动较慢
       this.v.x = Math.min(
         this.v.x + this.moveSpeed * 10 * dt,
-        targetVelocity * 1.2
+        targetVelocity * 1.3
       )
     }
   }
@@ -91,6 +96,8 @@ export class Player extends AABBObject {
   stopMoving(dt) {
     if (this.onGround) {
       this.v.x *= Math.pow(0.1, 10 * dt)
+    } else {
+      this.v.x *= Math.pow(0.1, 0.4 * dt)
     }
   }
 
@@ -109,16 +116,15 @@ export class Player extends AABBObject {
       }
     }
 
-    // 土狼时间逻辑
-    if (this.onGround) {
+    // 落地，重置N段跳
+    if (this.onGround && !this.previousOnGround) {
+      this.airJumpsCount = 0
+    }
+    // 下落而且并非起跳，开始土狼时间计时
+    if (!this.jumpKeyPressed && !this.onGround && this.previousOnGround) {
       this.coyoteTimer = this.coyote
-      if (!this.previousOnGround) {
-        this.airJumpsCount = 0
-      }
-    } else if (this.previousOnGround) {
-      // 刚离开地面，开始土狼时间计时
-      this.coyoteTimer = this.coyote
-    } else {
+    }
+    if (!this.onGround) {
       // 在空中，减少土狼时间
       this.coyoteTimer = Math.max(0, this.coyoteTimer - dt)
     }
@@ -171,7 +177,7 @@ export class Player extends AABBObject {
   }
 
   #jump(speed) {
-    this.currentJumpSpeed = speed
+    this.currentJumpSpeed = speed + Math.abs(this.v.x) * 0.2
     this.v.y = Math.min(this.v.y, -speed)
     this.jumpKeyPressed = true
     this.jumpTimer = 0
@@ -216,11 +222,10 @@ export class Player extends AABBObject {
   }
 
   checkGroundContact(platforms) {
-    // 向下延伸1像素检查是否接触地面
     const groundCheckBox = {
-      r: { x: this.r.x + 2, y: this.r.y + this.height },
-      width: this.width - 4,
-      height: 2,
+      r: { x: this.r.x + 1, y: this.r.y + this.height },
+      width: this.width - 2,
+      height: 1,
     }
 
     for (const platform of platforms) {
@@ -231,7 +236,6 @@ export class Player extends AABBObject {
     return false
   }
 
-  // 通用的盒子碰撞检测
   boxCollision(box1, box2) {
     return (
       box1.r.x < box2.r.x + box2.width &&
@@ -241,10 +245,6 @@ export class Player extends AABBObject {
     )
   }
 
-  onPlatformCollision(platform) {
-    this.handlePlatformCollision(platform)
-  }
-
   takeDamage() {
     if (this.damageTimer <= 0) {
       this.health--
@@ -252,37 +252,9 @@ export class Player extends AABBObject {
     }
   }
 
-  // 处理世界边界碰撞
-  handleWorldBounds(worldWidth, worldHeight) {
-    // 左右边界
-    if (this.r.x < 0) {
-      this.r.x = 0
-      this.v.x = 0
-    } else if (this.r.x + this.width > worldWidth) {
-      this.r.x = worldWidth - this.width
-      this.v.x = 0
-    }
-
-    // 上边界
-    if (this.r.y < 0) {
-      this.r.y = 0
-      this.v.y = 0
-    }
-
-    // 下边界（死亡）
-    if (this.r.y > worldHeight) {
-      this.takeDamage()
-      // 重置到安全位置
-      this.r.x = 100
-      this.r.y = 400
-      this.v.x = 0
-      this.v.y = 0
-    }
-  }
-
-  render(ctx) {
-    const x = Math.round(this.r.x)
-    const y = Math.round(this.r.y)
+  render(ctx, scale) {
+    const x = Math.round(this.r.x * scale) / scale
+    const y = Math.round(this.r.y * scale) / scale
 
     // ctx.fillStyle = '#2196F3'
     // ctx.fillRect(x, y, 1, 1)
@@ -300,13 +272,13 @@ export class Player extends AABBObject {
     ctx.fillRect(x, y, this.width, this.height)
     if (this.onGround) {
       ctx.fillStyle = '#444'
-      ctx.fillRect(x + 2, y + this.height - 6, this.width - 4, 3)
+      ctx.fillRect(x + 1, y + this.height - 2, this.width - 2, 1)
     }
 
     // 显示速度向量（调试用）
     if (this.v.len() > 0) {
       ctx.strokeStyle = 'yellow'
-      ctx.lineWidth = 2
+      ctx.lineWidth = 2 / scale
       ctx.beginPath()
       ctx.moveTo(x + this.width / 2, y + this.height / 2)
       ctx.lineTo(
@@ -318,8 +290,8 @@ export class Player extends AABBObject {
 
     // 调试信息
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-    ctx.font = '9px FiraCode, monospace'
-    const debugY = y - 60
+    ctx.font = `${24 / scale}px FiraCode, monospace`
+    const debugY = y - 100 / scale
     ctx.fillText(
       `pos: (${this.r.x.toFixed(1)}, ${this.r.y.toFixed(1)})`,
       x,
@@ -328,19 +300,19 @@ export class Player extends AABBObject {
     ctx.fillText(
       `vel: (${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)})`,
       x,
-      debugY + 10
+      debugY + 25 / scale
     )
-    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, x, debugY + 20)
+    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, x, debugY + 50 / scale)
     ctx.fillText(
       `jumpBuffer: ${this.jumpBufferTimer.toFixed(2)}s`,
       x,
-      debugY + 30
+      debugY + 75 / scale
     )
 
     // 可视化土狼时间
     if (this.coyoteTimer > 0 && !this.onGround) {
       ctx.fillStyle = 'orange'
-      const coyoteHeight = 3
+      const coyoteHeight = 3 / scale
       const coyoteWidth = (this.coyoteTimer / this.coyote) * this.width
       ctx.fillRect(x, y + this.height + 2, coyoteWidth, coyoteHeight)
     }
@@ -348,7 +320,7 @@ export class Player extends AABBObject {
     // 可视化跳跃缓冲
     if (this.jumpBufferTimer > 0) {
       ctx.fillStyle = 'cyan'
-      const bufferHeight = 3
+      const bufferHeight = 3 / scale
       const bufferWidth = (this.jumpBufferTimer / this.jumpBuffer) * this.width
       ctx.fillRect(x, y + this.height + 6, bufferWidth, bufferHeight)
     }
@@ -356,7 +328,7 @@ export class Player extends AABBObject {
     // 可视化空中跳跃次数
     for (let i = 0; i < this.airJumps; i++) {
       ctx.fillStyle = i < this.airJumpsCount ? 'lightblue' : '#222'
-      ctx.fillRect(x + i * 10, y - 10, 8, 8)
+      ctx.fillRect(x + i * 10, y - 10, 8 / scale, 8 / scale)
     }
   }
 }

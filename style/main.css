@@ -5,7 +5,7 @@
 :root {
   /* todo */
   --game-aspect-ratio: 4 / 3;
-  --game-aspect-ratio: 16 / 9;
+  --game-aspect-ratio: 40 / 24;
   --game-padding: 5vh;
   --game-padding: 0vh;
 }
