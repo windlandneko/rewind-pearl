@@ -8,7 +8,7 @@ import { EventListener } from './utils.js'
  *
  * @author windlandneko, ri-nai
  */
-class KeyboardManager {
+class Keyboard {
   KEYMAP = new Map([
     // Modifier Keys
     ['ShiftLeft', 'LShift'],
@@ -215,4 +215,4 @@ class KeyboardManager {
   }
 }
 
-export default new KeyboardManager()
+export default new Keyboard()

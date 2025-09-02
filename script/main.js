@@ -1,24 +1,25 @@
-import DialogueManager from './DialogueManager.js'
-import AssetManager from './AssetManager.js'
-import LoadingManager from './LoadingManager.js'
+import Dialogue from './Dialogue.js'
+import Asset from './Asset.js'
+import Loading from './Loading.js'
 import Game2D from './game2d/Game2D.js'
 import { $, wait } from './utils.js'
 
 async function init(skipAssetLoading = false) {
   try {
-    LoadingManager.init()
+    Loading.init()
     if (!skipAssetLoading) {
-      await AssetManager.loadFromManifest('assets/manifest.json', data =>
-        LoadingManager.updateProgress(data)
+      await Asset.loadFromManifest('assets/manifest.json', data =>
+        Loading.updateProgress(data)
       )
     }
-    await LoadingManager.hide()
+    await Loading.hide()
   } catch (error) {
-    LoadingManager.$action.classList.remove('hidden')
+    Loading.$action.classList.remove('hidden')
     throw error
   }
 
-  await DialogueManager.play('test_scene')
+  await Dialogue.play('prologue')
+  // await Dialogue.play('test_scene')
   await wait(1000)
   Game2D.loadLevel()
   Game2D.startLevel()

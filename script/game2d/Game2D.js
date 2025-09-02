@@ -1,4 +1,4 @@
-import KeyboardManager from '../KeyboardManager.js'
+import Keyboard from '../Keyboard.js'
 import { EventListener, wait } from '../utils.js'
 import {
   Player,
@@ -8,7 +8,7 @@ import {
   Collectible,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
-import DialogueManager from '../DialogueManager.js'
+import Dialogue from '../Dialogue.js'
 
 class Game {
   /** @type {HTMLCanvasElement} */
@@ -67,9 +67,9 @@ class Game {
 
   #registerKeyboardListeners() {
     this.#keyboardListeners.push(
-      KeyboardManager.onKeydown(['E'], () => this.checkInteraction()),
-      KeyboardManager.onKeydown(['Esc'], () => this.pause()),
-      KeyboardManager.onKeydown(['W', 'Up', 'Space'], () => {
+      Keyboard.onKeydown(['E'], () => this.checkInteraction()),
+      Keyboard.onKeydown(['Esc'], () => this.pause()),
+      Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
         this.player.tryJump()
       })
     )
@@ -220,8 +220,8 @@ class Game {
    */
   update(dt) {
     // 玩家输入处理
-    const keyLeft = KeyboardManager.anyActive(['A', 'ArrowLeft'])
-    const keyRight = KeyboardManager.anyActive(['D', 'ArrowRight'])
+    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
+    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
 
     // 处理水平移动
     if (keyLeft && !keyRight) {
@@ -341,19 +341,24 @@ class Game {
     }
 
     // 玩家与敌人碰撞
-    this.enemies.forEach((entity, index) => {
-      if (this.player.checkCollision(entity)) {
-        if (this.player.v.y > 0 && this.player.r.y < entity.r.y) {
-          // 从上方踩到敌人
-          this.enemies.splice(index, 1)
-          this.player.v.y = -this.player.jumpSpeed * 0.6 // 小跳跃
-          this.player.score += 100
-        } else {
-          // 玩家受伤
-          this.player.takeDamage()
+    if (this.player.damageTimer === 0) {
+      this.enemies.forEach((entity, index) => {
+        if (this.player.checkCollision(entity)) {
+          if (
+            this.player.v.y > 0 &&
+            this.player.r.y + this.player.height < entity.r.y + entity.height
+          ) {
+            // 从上方踩到敌人
+            this.enemies.splice(index, 1)
+            this.player.v.y = -this.player.jumpSpeed * 0.6 // 小跳跃
+            this.player.score += 100
+          } else {
+            // 玩家受伤
+            this.player.takeDamage()
+          }
         }
-      }
-    })
+      })
+    }
 
     // 玩家与收集品碰撞
     this.collectibles.forEach((entity, index) => {
@@ -378,7 +383,7 @@ class Game {
         this.#clearKeyboardListeners()
         this.isRunning = false
         cancelAnimationFrame(this.animationFrameHandler)
-        await DialogueManager.play(entity.dialogueId)
+        await Dialogue.play(entity.dialogueId)
         this.startLevel()
         break
       }

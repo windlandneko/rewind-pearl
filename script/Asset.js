@@ -3,7 +3,7 @@
  *
  * @author windlandneko
  */
-class AssetManager {
+class Asset {
   #assets = new Map()
 
   /**
@@ -157,7 +157,7 @@ class AssetManager {
         this.onProgress?.({ type: 'progress', count: loaded, total })
       }
       img.onerror = () =>
-        rej(new Error(`[AssetManager] Failed to load image: ${url}`))
+        rej(new Error(`[Asset] Failed to load image: ${url}`))
       img.src = url
     })
   }
@@ -176,7 +176,7 @@ class AssetManager {
         this.onProgress?.({ type: 'progress', count: loaded, total })
       }
       audio.onerror = () =>
-        rej(new Error(`[AssetManager] Failed to load audio: ${url}`))
+        rej(new Error(`[Asset] Failed to load audio: ${url}`))
       audio.src = url
     })
   }
@@ -221,4 +221,4 @@ class AssetManager {
   }
 }
 
-export default new AssetManager()
+export default new Asset()

@@ -5,7 +5,7 @@ import { $, wait } from './utils.js'
  *
  * @author windlandneko
  */
-class LoadingManager {
+class Loading {
   $container = $('.loading-container')
   $progress = $('.loading-progress-fill')
   $status = $('.loading-status')
@@ -67,4 +67,4 @@ class LoadingManager {
   }
 }
 
-export default new LoadingManager()
+export default new Loading()

@@ -4,15 +4,16 @@ import Vec2 from '../Vector.js'
 export class Player extends AABBObject {
   color = 'blue'
 
-  speed = 200 // 移动速度 (像素/秒)
+  gravity = 1500 // 重力加速度
+  moveSpeed = 200 // 移动速度 (像素/秒)
   jumpSpeed = 560 // 地面跳跃速度 (像素/秒)
   airJumpSpeed = 400 // N段跳速度，一般稍小于地面跳跃
-  airResistance = 0.0 // 空气阻力系数 (减小阻力)
+  airResistance = 0.0001 // 空气阻力系数 (减小阻力)
   groundFriction = 2000 // 地面摩擦力系数 (像素/秒²)
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
-  health = 114514
+  health = 5
   score = 1919810
   damageTimer = 0
 
@@ -21,7 +22,7 @@ export class Player extends AABBObject {
   coyoteTimer = 0 // 计时器
   jumpBuffer = 0.1 // 跳跃缓冲：提前按跳跃键的缓冲时间(秒)
   jumpBufferTimer = 0 // 计时器
-  airJumps = 0 // N段跳次数
+  airJumps = 10 // N段跳次数
   airJumpsCount = 0 // 计数器
 
   previousOnGround = false
@@ -73,22 +74,22 @@ export class Player extends AABBObject {
   }
 
   moveLeft() {
-    const targetVelocity = -this.speed
+    const targetVelocity = -this.moveSpeed
     if (this.onGround) {
-      this.v.x = Math.max(this.v.x - this.speed * 0.08, targetVelocity)
+      this.v.x = Math.max(this.v.x - this.moveSpeed * 0.08, targetVelocity)
     } else {
       // 在空中时移动较慢
-      this.v.x = Math.max(this.v.x - this.speed * 0.04, targetVelocity * 1.5)
+      this.v.x = Math.max(this.v.x - this.moveSpeed * 0.04, targetVelocity * 1.5)
     }
   }
 
   moveRight() {
-    const targetVelocity = this.speed
+    const targetVelocity = this.moveSpeed
     if (this.onGround) {
-      this.v.x = Math.min(this.v.x + this.speed * 0.08, targetVelocity)
+      this.v.x = Math.min(this.v.x + this.moveSpeed * 0.08, targetVelocity)
     } else {
       // 在空中时移动较慢
-      this.v.x = Math.min(this.v.x + this.speed * 0.04, targetVelocity * 1.5)
+      this.v.x = Math.min(this.v.x + this.moveSpeed * 0.04, targetVelocity * 1.5)
     }
   }
 

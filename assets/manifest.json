@@ -30,6 +30,7 @@
   },
 
   "dialogue": {
+    "prologue": "dialogue/prologue.json",
     "test_scene": "dialogue/test_scene.json",
     "level1_start": "dialogue/level1_start.json",
     "level1_end": "dialogue/level1_end.json",

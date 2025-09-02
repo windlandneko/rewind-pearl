@@ -3,10 +3,6 @@
   --character-offset: 22%;
 }
 
-.dialogue-container.visible {
-  opacity: 1;
-}
-
 .dialogue-container {
   position: absolute;
   top: 0;
@@ -16,10 +12,13 @@
   pointer-events: none;
   user-select: none;
 
-  background: url('../assets/image/title_bg.png') no-repeat center / cover, #000;
+  /* background: url('../assets/image/title_bg.png') no-repeat center / cover, #000; */
 
   opacity: 0;
   transition: opacity 0.5s ease;
+}
+.dialogue-container.visible {
+  opacity: 1;
 }
 
 .dialogue-container.touhou .touhou-style-text {
@@ -36,26 +35,21 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  transition: opacity 0.4s ease, transform 0.4s ease, filter 0.4s ease,
-    left 0.4s ease, right 0.4s ease;
+  transition: all 0.4s ease;
 
   filter: brightness(0.6) drop-shadow(-4px -2px 4px rgba(0, 0, 0, 0.1));
 }
-
-.character.visible {
-  opacity: 1;
+.character.remove.left {
+  transform: translateX(-15%) !important;
+  opacity: 0;
+}
+.character.remove.right {
+  transform: scaleX(-1) translateX(-15%) !important;
+  opacity: 0;
 }
 
 .character.highlighted {
   filter: brightness(1) drop-shadow(-4px -2px 8px rgba(0, 0, 0, 0.4));
-}
-
-.character.hide {
-  opacity: 0;
-  transform: translateX(-15%) !important;
-}
-.character.hide.right {
-  transform: scaleX(-1) translateX(-15%) !important;
 }
 
 .touhou-style-text {

@@ -1,12 +1,12 @@
-import AssetManager from './AssetManager.js'
-import KeyboardManager from './KeyboardManager.js'
+import Asset from './Asset.js'
+import keyboard from './Keyboard.js'
 
 /**
  * Dialogue Manager
  *
  * @author windlandneko
  */
-class DialogueManager {
+class Dialogue {
   dialogueData = []
   eventIndex = 0
 
@@ -29,13 +29,13 @@ class DialogueManager {
   #registerKeyboardListeners() {
     this.#clearKeyboardListeners()
     this.#keyboardListeners.push(
-      KeyboardManager.onKeydown(['Enter', 'Space'], () => {
+      keyboard.onKeydown(['Enter', 'Space'], () => {
         this.next()
       }),
-      KeyboardManager.onKeydown(['LCtrl', 'RCtrl'], key => {
+      keyboard.onKeydown(['LCtrl', 'RCtrl'], key => {
         const k = 0.6
         const triggerSkip = t => {
-          if (KeyboardManager.isActive(key)) {
+          if (keyboard.isActive(key)) {
             this.next(true)
             t = k * t + (1 - k) * 30
             setTimeout(() => triggerSkip(t), t)
@@ -57,17 +57,17 @@ class DialogueManager {
    */
   async play(dialogue) {
     if (this.isPlaying) {
-      console.warn('[DialogueManager] Already playing!')
+      console.warn('[Dialogue] Already playing!')
       return Promise.resolve()
     }
 
-    if (!AssetManager.has('dialogue/' + dialogue)) {
-      console.warn('[DialogueManager] Dialogue not found:', dialogue)
+    if (!Asset.has('dialogue/' + dialogue)) {
+      console.warn('[Dialogue] Dialogue not found:', dialogue)
       return Promise.resolve()
     }
 
     this.stop()
-    this.dialogueData = AssetManager.get('dialogue/' + dialogue)
+    this.dialogueData = Asset.get('dialogue/' + dialogue)
     this.$dialogue.classList.add(
       'visible',
       this.dialogueData?.text_style ?? 'modern'
@@ -171,7 +171,7 @@ class DialogueManager {
     $el.classList.add('character', position)
     this.$dialogue.appendChild($el)
 
-    const character = { ...event, $el }
+    const character = { ...event, $el, appear: true }
     this.characters.set(id, character)
     this.#updateCharacterEmotion(character, emotion)
 
@@ -180,7 +180,6 @@ class DialogueManager {
     } else {
       this.rightCharacter.push(character)
     }
-    this.#updatePosition()
 
     // 非交互节点
     this.next()
@@ -294,7 +293,7 @@ class DialogueManager {
     const character = this.characters.get(id)
     if (!character) return
 
-    character.$el.classList.add('hide')
+    character.$el.classList.add('remove')
     setTimeout(() => {
       character.$el.remove()
       this.characters.delete(id)
@@ -315,11 +314,11 @@ class DialogueManager {
   #updateCharacterEmotion(character, emotion) {
     const key = character.key ?? 'gunmu'
     let image = `character/${key}/${emotion}`
-    if (AssetManager.has(image)) {
-      image = AssetManager.get(image)
+    if (Asset.has(image)) {
+      image = Asset.get(image)
     } else {
       console.warn('角色资源不存在:', image)
-      image = AssetManager.get('character/gunmu')
+      image = Asset.get('character/gunmu')
     }
 
     character.$el.src = image
@@ -329,8 +328,22 @@ class DialogueManager {
   #updatePosition() {
     this.leftCharacter.forEach((character, index, { length }) => {
       const k = (index + 1) / length
+      const offset = `var(--character-width) * ${k} - var(--character-offset)`
+      if (character.appear) {
+        character.$el.animate(
+          {
+            opacity: [0, 1],
+            left: [`calc(${offset} - 5%)`, `calc(${offset})`],
+          },
+          {
+            duration: 400,
+            easing: 'ease',
+          }
+        )
+        character.appear = false
+      }
       character.$el.style.transform = `translateY(${10 * (1 - k)}%)`
-      character.$el.style.left = `calc(var(--character-width) * ${k} - var(--character-offset))`
+      character.$el.style.left = `calc(${offset})`
       character.$el.style.right = 'auto'
       character.$el.style.zIndex = 10 + index
       if (index === length - 1) character.$el.classList.add('highlighted')
@@ -339,8 +352,22 @@ class DialogueManager {
 
     this.rightCharacter.forEach((character, index, { length }) => {
       const k = (index + 1) / length
-      character.$el.style.transform = `translateY(${10 * (1 - k)}%) scaleX(-1)`
-      character.$el.style.right = `calc(var(--character-width) * ${k} - var(--character-offset))`
+      const offset = `var(--character-width) * ${k} - var(--character-offset)`
+      if (character.appear) {
+        character.$el.animate(
+          {
+            opacity: [0, 1],
+            right: [`calc(${offset} - 5%)`, `calc(${offset})`],
+          },
+          {
+            duration: 400,
+            easing: 'ease',
+          }
+        )
+        character.appear = false
+      }
+      character.$el.style.transform = `scaleX(-1) translateY(${10 * (1 - k)}%)`
+      character.$el.style.right = `calc(${offset})`
       character.$el.style.left = 'auto'
       character.$el.style.zIndex = 10 + index
       if (index === length - 1) character.$el.classList.add('highlighted')
@@ -348,13 +375,9 @@ class DialogueManager {
     })
   }
 
-  /**
-   * 创建对话气泡
-   * @param {string} text - 对话文本
-   * @param {Object} character - 说话的角色
-   */
+  // 更新对话气泡
   #updateBubble(text) {
-    this.$touhou.className = this.currentSpeaker.position
+    this.$touhou.className = `touhou-style-text ${this.currentSpeaker.position}`
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
     this.#parseText(this.$touhou, text)
@@ -396,4 +419,4 @@ class DialogueManager {
   }
 }
 
-export default new DialogueManager()
+export default new Dialogue()

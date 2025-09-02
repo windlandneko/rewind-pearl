@@ -1,8 +1,6 @@
 import Vec2 from '../Vector.js'
 
 export class AABBObject {
-  gravity = 1500 // 重力加速度
-
   constructor(x, y, width, height) {
     this.r = new Vec2(x, y)
     this.v = new Vec2(0, 0)

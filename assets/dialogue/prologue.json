@@ -1,0 +1,142 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "passerby_a",
+      "title": "路人甲",
+      "subtitle": "龙套演员",
+      "key": "gunmu",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "action": "add",
+      "id": "passerby_b",
+      "title": "路人乙",
+      "subtitle": "龙套演员",
+      "key": "gunmu",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "passerby_a",
+      "text": "你听说了没，最近有好多起艺人和网红的失踪事件......"
+    },
+    {
+      "id": "passerby_b",
+      "text": "听说了听说了，好像全都是些有黑料的大咖......"
+    },
+    {
+      "id": "passerby_a",
+      "text": "好恐怖哦，人间蒸发了一样\n不会是被雪藏了吧？"
+    },
+    {
+      "id": "passerby_b",
+      "text": "切，有钱不赚，公司才不会这么傻\n说不定是什么诈骗集团，被拐去园区了！"
+    },
+    {
+      "id": "passerby_b",
+      "text": "祈祷别落在自己头上吧。"
+    },
+    {
+      "id": "passerby_a",
+      "text": "你我这种跑龙套的人家才不稀罕......"
+    },
+    {
+      "action": "remove",
+      "id": "passerby_a"
+    },
+    {
+      "action": "remove",
+      "id": "passerby_b"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（此时正在片场休息抽锐克，无意中听见了两个龙套演员的对话。）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "smile",
+      "text": "诈骗团伙？和我的保镖说去吧。"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（内心嗤笑一声，又吸了一大口锐克，餍足地享受着尼古丁的簇拥。）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "都市传说都比诈骗团伙可信。"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（抽完最后一口烟油，他眯了眯眼睛，缓缓将肺中的烟雾全部推出鼻腔，然后站起身来。）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "surprise",
+      "text": "（这时他看到了一个熟悉的人影在注视着自己。）"
+    },
+    {
+      "action": "add",
+      "id": "wangyuan",
+      "title": "王源",
+      "subtitle": "失踪的艺人",
+      "key": "wangyuan",
+      "emotion": "smile",
+      "position": "right"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "靠，不会是偷拍我抽烟的狗仔吧。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "surprise",
+      "text": "不对，那是......那是......失踪的$wow:王源$！"
+    },
+    {
+      "id": "wangyuan",
+      "emotion": "smile",
+      "text": "（冲他粲然一笑，挥了挥手）"
+    },
+    {
+      "action": "fade_to_black"
+    },
+    {
+      "action": "remove",
+      "id": "wangyuan"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "sad",
+      "text": "（随后丁真的眼前便是无尽的黑暗。）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "欸？骗人的吧？\n我不应该是理塘王吗？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "sad",
+      "text": "为什么为什么！我被绑架了！"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    }
+  ]
+}
