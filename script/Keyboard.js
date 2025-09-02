@@ -173,8 +173,8 @@ class Keyboard {
     if (typeof key === 'string')
       return this.listener.on(`keydown:${key}`, () => callback(key))
 
-    const offCallbacks = key.map(k => this.onKeydown(k, callback))
-    return () => offCallbacks.forEach(fn => fn())
+    const removeListeners = key.map(k => this.onKeydown(k, callback))
+    return () => removeListeners.forEach(fn => fn())
   }
 
   /**
@@ -186,8 +186,8 @@ class Keyboard {
     if (typeof key === 'string')
       return this.listener.on(`keyup:${key}`, () => callback(key))
 
-    const offCallbacks = key.map(k => this.onKeyup(k, callback))
-    return () => offCallbacks.forEach(fn => fn())
+    const removeListeners = key.map(k => this.onKeyup(k, callback))
+    return () => removeListeners.forEach(fn => fn())
   }
 
   /**

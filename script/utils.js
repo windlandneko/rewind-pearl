@@ -17,7 +17,8 @@ export class EventListener {
   }
 
   /**
-   * Register a callback for a specific event.
+   * Register a persistent listener.
+   *
    * @param {string} event
    * @param {Function} callback
    * @returns {Function} A function to unregister the callback.
@@ -35,6 +36,27 @@ export class EventListener {
         callbacks.filter(cb => cb !== callback)
       )
     }
+  }
+
+  /**
+   * Register a one-time listener.
+   *
+   * @param {string} event
+   * @param {Function} callback
+   */
+  /**
+   * Register a one-time listener.
+   *
+   * @param {string} event
+   * @param {Function} callback
+   * @returns {Function} A function to unregister the callback.
+   */
+  once(event, callback) {
+    const removeListener = this.on(event, (...args) => {
+      removeListener()
+      callback(...args)
+    })
+    return removeListener
   }
 
   /**
