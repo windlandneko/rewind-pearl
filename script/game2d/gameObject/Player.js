@@ -57,7 +57,8 @@ export class Player extends AABBObject {
       acceleration.x += frictionForce
 
       // 防止摩擦力使速度反向
-      if (Math.sign(this.v.x + acceleration.x * dt) !== Math.sign(this.v.x)) {
+      if (Math.sign(this.v.x + frictionForce * dt) !== Math.sign(this.v.x)) {
+        console.log(this.v.x, frictionForce * dt)
         this.v.x = 0
         acceleration.x = 0
       }

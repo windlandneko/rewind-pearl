@@ -18,9 +18,9 @@ async function init(skipAssetLoading = false) {
     throw error
   }
 
-  await Dialogue.play('prologue')
+  // await Dialogue.play('prologue')
   // await Dialogue.play('test_scene')
-  await wait(1000)
+  // await wait(1000)
   Game2D.loadLevel()
   Game2D.startLevel()
 }
