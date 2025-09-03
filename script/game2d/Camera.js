@@ -87,26 +87,26 @@ export class Camera {
     if (!this.#target) return
 
     // 目标在屏幕中的位置
-    const targetScreenX = this.#target.r.x - this.position.x
-    const targetScreenY = this.#target.r.y - this.position.y
+    const targetX = this.#target.r.x - this.position.x + this.#target.width / 2
+    const targetY = this.#target.r.y - this.position.y + this.#target.height / 2
 
     let deltaX = 0
     let deltaY = 0
 
-    if (targetScreenX < this.#padding.left) {
+    if (targetX < this.#padding.left) {
       // 目标在左边距外，摄像机需要向左移动
-      deltaX = targetScreenX - this.#padding.left
-    } else if (targetScreenX > this.#viewportWidth - this.#padding.right) {
+      deltaX = targetX - this.#padding.left
+    } else if (targetX > this.#viewportWidth - this.#padding.right) {
       // 目标在右边距外，摄像机需要向右移动
-      deltaX = targetScreenX - (this.#viewportWidth - this.#padding.right)
+      deltaX = targetX - (this.#viewportWidth - this.#padding.right)
     }
 
-    if (targetScreenY < this.#padding.top) {
+    if (targetY < this.#padding.top) {
       // 目标在上边距外，摄像机需要向上移动
-      deltaY = targetScreenY - this.#padding.top
-    } else if (targetScreenY > this.#viewportHeight - this.#padding.bottom) {
+      deltaY = targetY - this.#padding.top
+    } else if (targetY > this.#viewportHeight - this.#padding.bottom) {
       // 目标在下边距外，摄像机需要向下移动
-      deltaY = targetScreenY - (this.#viewportHeight - this.#padding.bottom)
+      deltaY = targetY - (this.#viewportHeight - this.#padding.bottom)
     }
 
     // 新的摄像机位置
