@@ -1,3 +1,4 @@
+import Dialogue from '../../Dialogue.js'
 import { AABBObject } from './AABBObject.js'
 
 export class Interactable extends AABBObject {
@@ -8,12 +9,36 @@ export class Interactable extends AABBObject {
 
   constructor(x, y, dialogueId, hint) {
     super(x, y, 40, 40)
+    this.type = 'interactable'
     this.dialogueId = dialogueId
     this.hint = hint
   }
 
   update(dt) {
     this.bobOffset += dt * 2
+  }
+
+  /**
+   * 可交互物体与玩家的交互逻辑
+   * @param {Player} player 玩家对象
+   * @param {Game} game 游戏实例
+   */
+  interactWithPlayer(player, game) {
+    this.isHighlighted = player.checkCollision(this)
+  }
+
+  /**
+   * 处理按键交互
+   * @param {Player} player 玩家对象
+   * @param {import('../Game2D.js').Game} game 游戏实例
+   * @returns {boolean} 是否开始了对话
+   */
+  async handleKeyInteraction(player, game) {
+    if (!player.checkCollision(this) || !this.dialogueId) return false
+    game.stop()
+    await Dialogue.play(entity.dialogueId)
+    game.start()
+    return true
   }
 
   render(ctx) {

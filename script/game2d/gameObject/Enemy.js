@@ -10,6 +10,7 @@ export class Enemy extends AABBObject {
 
   constructor(x, y) {
     super(x, y, 25, 25)
+    this.type = 'enemy'
     this.anchor = new Vec2(x, y)
   }
 
@@ -27,6 +28,27 @@ export class Enemy extends AABBObject {
       this.r.x >= this.anchor.x + this.patrolRange
     ) {
       this.direction *= -1
+    }
+  }
+
+  /**
+   * 敌人与玩家的交互逻辑
+   * @param {Player} player 玩家对象
+   * @param {Game} game 游戏实例
+   */
+  interactWithPlayer(player, game) {
+    if (!player.checkCollision(this) || player.damageTimer > 0) {
+      return
+    }
+
+    // 降落+在敌人上方
+    if (player.v.y > 0 && player.r.y + player.height < this.r.y + this.height) {
+      this.removed = true
+      player.v.y = -player.jumpSpeed * 0.6 // 小跳跃
+      player.score += 100
+    } else {
+      // 玩家受伤
+      player.takeDamage()
     }
   }
 

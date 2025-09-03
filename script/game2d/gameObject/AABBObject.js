@@ -1,6 +1,9 @@
 import Vec2 from '../Vector.js'
 
 export class AABBObject {
+  type = 'default'
+  removed = false
+
   constructor(x, y, width, height) {
     this.r = new Vec2(x, y)
     this.v = new Vec2(0, 0)
@@ -17,8 +20,26 @@ export class AABBObject {
     )
   }
 
-  update() {}
+  /**
+   * 更新状态
+   * @abstract
+   * @param {number} dt - 时间增量
+   */
+  update(dt) {}
 
+  /**
+   * 玩家交互
+   * @abstract
+   * @param {import('./Player.js').Player} player 玩家对象
+   * @param {import('../Game2D.js').Game} game 游戏实例
+   */
+  interactWithPlayer(player, game) {}
+
+  /**
+   * 渲染对象
+   * @abstract
+   * @param {CanvasRenderingContext2D} ctx
+   */
   render(ctx) {
     // missing texture
     const tileSize = 16

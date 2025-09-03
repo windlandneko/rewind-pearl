@@ -7,17 +7,16 @@ export class Player extends AABBObject {
 
   gravity = 500 // 重力加速度
   moveSpeed = 72 // 移动速度 (像素/秒)
-  jumpSpeed = 100 // 地面跳跃速度 (像素/秒)
+  jumpSpeed = 100 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
-  maxJumpTime = 0.2
-  variableJumpGravityMultiplier = 0.5
+  maxJumpTime = 0.2 // 跳跃增益时间（秒）
 
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
   health = 5
-  score = 1919810
+  score = 0
   damageTimer = 0
 
   // 狼跳
@@ -29,9 +28,9 @@ export class Player extends AABBObject {
   jumpBufferTimer = 0 // 计时器
 
   // N段跳
-  airJumps = 0 // 最大次数
-  airJumpSpeed = 80 // N段跳速度，一般稍小于地面跳跃
-  airJumpsCount = 0 // 计数器
+  maxAirJumps = 1 // 最大空中跳跃次数
+  airJumpSpeed = 80 // N段跳速度，一般稍小于跳跃速度
+  airJumpsCount = 0 // 已使用的空中跳跃次数
 
   previousOnGround = false
   previousPosition = null
@@ -39,23 +38,23 @@ export class Player extends AABBObject {
   constructor(x, y) {
     super(x, y, 10, 16)
     this.previousPosition = new Vec2(x, y)
+    this.groundCheckBox = {
+      r: { x: this.r.x + 1, y: this.r.y + this.height },
+      width: this.width - 2,
+      height: 1,
+    }
   }
 
   update(dt) {
     this.previousPosition.x = this.r.x
     this.previousPosition.y = this.r.y
 
-    this.updateJump(dt)
+    this.#updateJump(dt)
 
     const acceleration = new Vec2()
 
-    let gravityMultiplier = 1.0
-    if (this.jumpKeyPressed && Math.abs(this.v.y) <= 80) {
-      gravityMultiplier = this.variableJumpGravityMultiplier
-    }
-
     // 重力
-    acceleration.y += this.gravity * gravityMultiplier
+    acceleration.y += this.gravity
 
     // 更新速度
     this.v.addTo(acceleration.mul(dt))
@@ -67,44 +66,10 @@ export class Player extends AABBObject {
     this.damageTimer = Math.max(0, this.damageTimer - dt)
   }
 
-  moveLeft(dt) {
-    const targetVelocity = -this.moveSpeed
-    if (this.onGround) {
-      this.v.x = Math.max(this.v.x - this.moveSpeed * 20 * dt, targetVelocity)
-    } else {
-      // 在空中时移动较慢
-      this.v.x = Math.max(
-        this.v.x - this.moveSpeed * 10 * dt,
-        targetVelocity * 1.3
-      )
-    }
-  }
-
-  moveRight(dt) {
-    const targetVelocity = this.moveSpeed
-    if (this.onGround) {
-      this.v.x = Math.min(this.v.x + this.moveSpeed * 20 * dt, targetVelocity)
-    } else {
-      // 在空中时移动较慢
-      this.v.x = Math.min(
-        this.v.x + this.moveSpeed * 10 * dt,
-        targetVelocity * 1.3
-      )
-    }
-  }
-
-  stopMoving(dt) {
-    if (this.onGround) {
-      this.v.x *= Math.pow(0.1, 10 * dt)
-    } else {
-      this.v.x *= Math.pow(0.1, 0.4 * dt)
-    }
-  }
-
   /**
    * 更新跳跃相关逻辑
    */
-  updateJump(dt) {
+  #updateJump(dt) {
     // 更新跳跃计时器
     if (this.jumpKeyPressed) {
       this.jumpTimer += dt
@@ -137,32 +102,66 @@ export class Player extends AABBObject {
 
       // 如果在缓冲时间内落地，立即跳跃
       if (this.onGround && this.jumpBufferTimer > 0) {
-        this.#jump(this.jumpSpeed)
+        this.#performJump(this.jumpSpeed)
         this.jumpBufferTimer = 0
       }
+    }
+  }
+
+  #performJump(speed) {
+    this.currentJumpSpeed = speed + Math.abs(this.v.x) * 0.2
+    this.v.y = Math.min(this.v.y, -speed)
+    this.jumpKeyPressed = true
+    this.jumpTimer = 0
+  }
+
+  /**
+   * 处理水平移动
+   * @param {number} direction -1为左，1为右，0为停止
+   * @param {number} dt 时间增量
+   */
+  onHorizontalInput(direction, dt) {
+    const acceleration = this.onGround ? 20 : 10
+    const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.3
+
+    // 祥，移动
+    if (direction > 0) {
+      this.v.x = Math.min(
+        this.v.x + this.moveSpeed * acceleration * dt,
+        targetVelocity
+      )
+    } else if (direction < 0) {
+      this.v.x = Math.max(
+        this.v.x - this.moveSpeed * acceleration * dt,
+        -targetVelocity
+      )
+    } else {
+      // 停止移动
+      const decay = this.onGround ? 10 : 0.4
+      this.v.x *= Math.pow(0.1, decay * dt)
     }
   }
 
   /**
    * 尝试跳跃的输入处理方法
    */
-  tryJump() {
+  onJumpInput() {
     // 1. 地面跳跃
     if (this.onGround) {
-      this.#jump(this.jumpSpeed)
+      this.#performJump(this.jumpSpeed)
       return true
     }
 
     // 2. 土狼时间跳跃
     if (this.coyoteTimer > 0) {
-      this.#jump(this.jumpSpeed)
+      this.#performJump(this.jumpSpeed)
       this.coyoteTimer = 0 // 使用后立即清零
       return true
     }
 
     // 3. 空中二段跳
-    if (this.airJumpsCount < this.airJumps) {
-      this.#jump(this.airJumpSpeed)
+    if (this.airJumpsCount < this.maxAirJumps) {
+      this.#performJump(this.airJumpSpeed)
       this.airJumpsCount++
       return true
     }
@@ -172,52 +171,10 @@ export class Player extends AABBObject {
     return false
   }
 
-  stopJump() {
-    this.jumpKeyPressed = false
-  }
-
-  #jump(speed) {
-    this.currentJumpSpeed = speed + Math.abs(this.v.x) * 0.2
-    this.v.y = Math.min(this.v.y, -speed)
-    this.jumpKeyPressed = true
-    this.jumpTimer = 0
-  }
-
-  handlePlatformCollision(platform) {
-    if (!this.checkCollision(platform)) return
-
-    // 计算重叠区域
-    const overlapLeft = this.r.x + this.width - platform.r.x
-    const overlapRight = platform.r.x + platform.width - this.r.x
-    const overlapTop = this.r.y + this.height - platform.r.y
-    const overlapBottom = platform.r.y + platform.height - this.r.y
-
-    // 找到最小的重叠方向
-    const minOverlap = Math.min(
-      overlapLeft,
-      overlapRight,
-      overlapTop,
-      overlapBottom
-    )
-
-    // 根据重叠方向调整位置和速度
-    if (minOverlap === overlapTop && this.v.y > 0) {
-      // 从上方碰撞（着地）
-      this.r.y = platform.r.y - this.height
-      this.v.y = 0
-      this.onGround = true
-    } else if (minOverlap === overlapBottom && this.v.y < 0) {
-      // 从下方碰撞（撞头）
-      this.r.y = platform.r.y + platform.height
-      this.v.y = 0
-    } else if (minOverlap === overlapLeft && this.v.x > 0) {
-      // 从左侧碰撞
-      this.r.x = platform.r.x - this.width
-      this.v.x = 0
-    } else if (minOverlap === overlapRight && this.v.x < 0) {
-      // 从右侧碰撞
-      this.r.x = platform.r.x + platform.width
-      this.v.x = 0
+  onDamage() {
+    if (this.damageTimer <= 0) {
+      this.health--
+      this.damageTimer = this.invincibleTime
     }
   }
 
@@ -229,39 +186,14 @@ export class Player extends AABBObject {
     }
 
     for (const platform of platforms) {
-      if (this.boxCollision(groundCheckBox, platform)) {
-        return true
-      }
+      if (platform.checkCollision(groundCheckBox)) return true
     }
     return false
-  }
-
-  boxCollision(box1, box2) {
-    return (
-      box1.r.x < box2.r.x + box2.width &&
-      box1.r.x + box1.width > box2.r.x &&
-      box1.r.y < box2.r.y + box2.height &&
-      box1.r.y + box1.height > box2.r.y
-    )
-  }
-
-  takeDamage() {
-    if (this.damageTimer <= 0) {
-      this.health--
-      this.damageTimer = this.invincibleTime
-    }
   }
 
   render(ctx, scale) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
-
-    // ctx.fillStyle = '#2196F3'
-    // ctx.fillRect(x, y, 1, 1)
-    // ctx.fillStyle = '#f3ec21ff'
-    // ctx.fillRect(x, 300 - this.v.x / 10, 1, 1)
-    // ctx.restore()
-    // return
 
     // 受伤时闪烁效果
     if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.2) % 2 === 0) {
@@ -326,7 +258,7 @@ export class Player extends AABBObject {
     }
 
     // 可视化空中跳跃次数
-    for (let i = 0; i < this.airJumps; i++) {
+    for (let i = 0; i < this.maxAirJumps; i++) {
       ctx.fillStyle = i < this.airJumpsCount ? 'lightblue' : '#222'
       ctx.fillRect(x + i * 10, y - 10, 8 / scale, 8 / scale)
     }

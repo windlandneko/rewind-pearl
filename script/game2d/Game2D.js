@@ -6,22 +6,31 @@ import {
   Enemy,
   Interactable,
   Collectible,
+  AABBObject,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
 import Dialogue from '../Dialogue.js'
 import Asset from '../Asset.js'
+import GameConfig from './GameConfig.js'
 
-class Game {
+export class Game {
   /** @type {HTMLCanvasElement} */
   canvas = document.getElementById('game-canvas')
   listener = new EventListener()
 
   // 游戏对象
+  /** @type {Player} */
   player = null
-  platforms = []
-  enemies = []
-  interactables = []
-  collectibles = []
+  /** @type {AABBObject[]} */
+  gameObjects = []
+
+  // 渲染缓存（避免每帧重复过滤）
+  #renderGroups = {
+    platforms: [],
+    collectibles: [],
+    enemies: [],
+    interactables: [],
+  }
 
   // 游戏状态
   isRunning = false
@@ -62,13 +71,17 @@ class Game {
 
   #registerKeyboardListeners() {
     this.#keyboardListeners.push(
-      Keyboard.onKeydown(['E'], () => this.checkInteraction()),
+      Keyboard.onKeydown(['E'], async () => {
+        for (const entity of this.#renderGroups.interactables) {
+          if (await entity.handleKeyInteraction?.(this.player, this)) break
+        }
+      }),
       Keyboard.onKeydown(['Esc'], () => this.pause()),
       Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
-        this.player.tryJump()
+        this.player.onJumpInput()
       }),
       Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
-        this.player.stopJump()
+        this.player.jumpKeyPressed = false
       })
     )
   }
@@ -79,38 +92,13 @@ class Game {
   }
 
   /**
-   * 开始关卡
-   */
-  start(levelId) {
-    console.log(`[Game] 开始关卡 ${levelId}`)
-
-    this.#registerKeyboardListeners()
-
-    this.canvas.classList.remove('hidden')
-
-    this.isRunning = true
-    this.updateLoop()
-    this.renderLoop()
-  }
-
-  stop() {
-    this.#clearKeyboardListeners()
-    this.isRunning = false
-    clearInterval(this.updateIntervalHandler)
-    cancelAnimationFrame(this.animationFrameHandler)
-  }
-
-  /**
    * 加载关卡数据
    */
   loadLevel(levelId) {
-    this.enemies = []
-    this.platforms = []
-    this.interactables = []
-    this.collectibles = []
+    this.gameObjects = []
 
     if (!Asset.has(`level/${levelId}`)) {
-      console.error(`[Game] 关卡 ${levelId} 不存在！`)
+      console.error(`[Game2D] 关卡 ${levelId} 不存在！`)
       return
     }
 
@@ -127,81 +115,109 @@ class Game {
       this.levelData.spawnpoint.y
     )
 
-    this.platforms = [
+    // 添加平台到游戏对象数组
+    this.gameObjects.push(
       new Platform(0, this.levelHeight - 8, this.levelWidth, 8),
       new Platform(0, 0, this.levelWidth, 8),
       new Platform(0, 0, 8, this.levelHeight),
       new Platform(this.levelWidth - 8, 0, 8, this.levelHeight),
-
       new Platform(80, 152, 200, 16.2)
-    ]
+    )
 
     // 设置摄像机
-    this.setupCamera()
+    this.#setupCamera()
   }
 
-  updateLoop() {
+  start() {
+    this.canvas.classList.remove('hidden')
+
+    this.isRunning = true
+    this.#registerKeyboardListeners()
+
+    // Update Loop
     this.updateIntervalHandler = setInterval(() => {
-      this.update(0.01)
-    }, 10)
+      this.update(GameConfig.UPDATE_INTERVAL / 1000)
+    }, GameConfig.UPDATE_INTERVAL)
+
+    // Render Loop
+    const renderLoop = () => {
+      this.render()
+      this.animationFrameHandler = requestAnimationFrame(renderLoop)
+    }
+    renderLoop()
+
+    // 初始化渲染组
+    this.#updateRenderGroups()
   }
-  renderLoop() {
-    this.render()
-    this.animationFrameHandler = requestAnimationFrame(() => this.renderLoop())
+
+  stop() {
+    this.isRunning = false
+    this.#clearKeyboardListeners()
+    clearInterval(this.updateIntervalHandler)
+    cancelAnimationFrame(this.animationFrameHandler)
   }
 
   /**
    * 更新游戏逻辑
    */
   update(dt) {
-    // 玩家输入处理
+    // 移除标记为删除的对象
+    const objectsToRemove = this.gameObjects.filter(obj => obj.removed)
+    if (objectsToRemove.length > 0) {
+      this.gameObjects = this.gameObjects.filter(obj => !obj.removed)
+      this.#updateRenderGroups()
+    }
+
+    // 水平移动输入
     const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
     const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
-
-    // 处理水平移动
     if (keyLeft && !keyRight) {
-      this.player.moveLeft(dt)
+      this.player.onHorizontalInput(-1, dt)
     } else if (keyRight && !keyLeft) {
-      this.player.moveRight(dt)
+      this.player.onHorizontalInput(1, dt)
     } else {
-      this.player.stopMoving(dt)
+      this.player.onHorizontalInput(0, dt)
     }
 
-    // 更新玩家物理
+    // 世界边界
+    if (this.levelData.worldBorder) {
+      // 左
+      if (this.player.r.x < 0) {
+        this.player.r.x = 0
+        this.player.v.x = 0
+      }
+      // 右
+      if (this.player.r.x + this.player.width > this.levelWidth) {
+        this.player.r.x = this.levelWidth - this.player.width
+        this.player.v.x = 0
+      }
+      // 上
+      if (this.player.r.y < 0) {
+        this.player.r.y = 0
+        this.player.v.y = 0
+      }
+      // 下
+      if (this.player.r.y > this.levelHeight) {
+        this.player.r.x = this.levelData.spawnpoint.x
+        this.player.r.y = this.levelData.spawnpoint.y
+        // todo
+        stateMachine.emit('map:enter/bottom')
+      }
+    }
+
+    // 更新游戏对象本身
+    this.gameObjects.forEach(entity => entity.update(dt))
+
+    // 更新游戏对象与玩家的互动（碰撞检测等）
+    this.player.onGround = false
+    this.gameObjects.forEach(obj => {
+      obj.interactWithPlayer(this.player, this)
+    })
+
+    // 更新玩家
     this.player.update(dt)
 
-    // 左边界
-    if (this.player.r.x < 0) {
-      this.player.r.x = 0
-      this.player.v.x = 0
-    }
-    // 右边界
-    if (this.player.r.x + this.player.width > this.levelWidth) {
-      this.player.r.x = this.levelWidth - this.player.width
-      this.player.v.x = 0
-    }
-    // 上边界
-    if (this.player.r.y < 0) {
-      this.player.r.y = 0
-      this.player.v.y = 0
-    }
-    // 下边界
-    if (this.player.r.y > this.levelHeight) {
-      this.player.r.x = this.levelData.spawnpoint.x
-      this.player.r.y = this.levelData.spawnpoint.y
-      // todo
-      stateMachine.emit('map:enter/bottom')
-    }
-
-    this.platforms.forEach(entity => entity.update(dt))
-    this.collectibles.forEach(entity => entity.update(dt))
-    this.enemies.forEach(entity => entity.update(dt))
-    this.interactables.forEach(entity => entity.update(dt))
-
-    // 碰撞检测
-    this.checkCollisions()
-
-    // 摄像机更新
+    // 更新摄像机
     this.camera.update(dt)
   }
 
@@ -214,104 +230,56 @@ class Game {
 
     // 摄像机缩放
     this.ctx.scale(this.cameraScale, this.cameraScale)
-
-    // 摄像机变换
-    this.ctx.translate(
-      -Math.round(this.camera.position.x),
-      -Math.round(this.camera.position.y)
-    )
+    this.ctx.translate(-this.camera.position.x, -this.camera.position.y)
 
     // 绘制背景网格
     this.#renderBackgroundGrid()
 
-    this.platforms.forEach(entity => entity.render(this.ctx, this.cameraScale))
-    this.collectibles.forEach(entity =>
+    // 按优先级渲染游戏对象
+    this.#renderGroups.platforms.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
-    this.enemies.forEach(entity => entity.render(this.ctx, this.cameraScale))
-    this.interactables.forEach(entity =>
+    this.#renderGroups.collectibles.forEach(entity =>
+      entity.render(this.ctx, this.cameraScale)
+    )
+    this.#renderGroups.enemies.forEach(entity =>
+      entity.render(this.ctx, this.cameraScale)
+    )
+    this.#renderGroups.interactables.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
 
-    // 玩家
+    // 渲染玩家
     this.player.render(this.ctx, this.cameraScale)
 
     this.ctx.restore()
 
+    // 调试数据
     this.#renderDebugUI()
   }
 
   /**
-   * 检查碰撞
+   * 更新渲染组缓存
    */
-  checkCollisions() {
-    // 重置地面状态
-    this.player.onGround = false
-
-    // 玩家与平台碰撞
-    this.platforms.forEach(platform => {
-      this.player.handlePlatformCollision(platform)
-    })
-
-    // 检查地面接触（更精确的地面检测）
-    if (!this.player.onGround) {
-      this.player.onGround = this.player.checkGroundContact(this.platforms)
-    }
-
-    // 玩家与敌人碰撞
-    if (this.player.damageTimer === 0) {
-      this.enemies.forEach((entity, index) => {
-        if (this.player.checkCollision(entity)) {
-          if (
-            this.player.v.y > 0 &&
-            this.player.r.y + this.player.height < entity.r.y + entity.height
-          ) {
-            // 从上方踩到敌人
-            this.enemies.splice(index, 1)
-            this.player.v.y = -this.player.jumpSpeed * 0.6 // 小跳跃
-            this.player.score += 100
-          } else {
-            // 玩家受伤
-            this.player.takeDamage()
-          }
-        }
-      })
-    }
-
-    // 玩家与收集品碰撞
-    this.collectibles.forEach((entity, index) => {
-      if (this.player.checkCollision(entity)) {
-        this.collectibles.splice(index, 1)
-        this.player.score += entity.value
-      }
-    })
-
-    // 玩家与可交互物体碰撞
-    this.interactables.forEach(entity => {
-      entity.isHighlighted = this.player.checkCollision(entity)
-    })
-  }
-
-  /**
-   * 检查互动
-   */
-  async checkInteraction() {
-    for (const entity of this.interactables) {
-      if (this.player.checkCollision(entity) && entity.dialogueId) {
-        this.stop()
-        await Dialogue.play(entity.dialogueId)
-        this.start()
-        break
-      }
-    }
+  #updateRenderGroups() {
+    this.#renderGroups.platforms = this.gameObjects.filter(
+      obj => obj.type === 'platform'
+    )
+    this.#renderGroups.collectibles = this.gameObjects.filter(
+      obj => obj.type === 'collectible'
+    )
+    this.#renderGroups.enemies = this.gameObjects.filter(
+      obj => obj.type === 'enemy'
+    )
+    this.#renderGroups.interactables = this.gameObjects.filter(
+      obj => obj.type === 'interactable'
+    )
   }
 
   /**
    * 设置摄像机
    */
-  setupCamera() {
-    if (!this.player) return
-
+  #setupCamera() {
     // 计算摄像机视窗尺寸
     const cameraWidth =
       this.levelHeight * (this.displayWidth / this.displayHeight)
@@ -342,7 +310,7 @@ class Game {
    */
   #renderBackgroundGrid() {
     const viewport = this.camera.viewport
-    const gridSize = 8
+    const gridSize = GameConfig.GRID_SIZE
 
     this.ctx.strokeStyle = '#444'
     this.ctx.lineWidth = 1 / this.cameraScale
@@ -397,12 +365,10 @@ class Game {
       this.ctx.fillStyle = 'cyan'
       this.ctx.fillText('跳跃缓冲', 20, 210)
     }
-    if (this.player.airJumps < this.player.maxAirJumps) {
+    if (this.player.airJumpsCount > 0) {
       this.ctx.fillStyle = 'lightblue'
       this.ctx.fillText(
-        `已使用n段跳: ${this.player.maxAirJumps - this.player.airJumps}/${
-          this.player.maxAirJumps
-        }`,
+        `已使用空中跳跃: ${this.player.airJumpsCount}/${this.player.maxAirJumps}`,
         20,
         230
       )
