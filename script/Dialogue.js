@@ -57,12 +57,12 @@ class Dialogue {
    */
   async play(dialogue) {
     if (this.isPlaying) {
-      console.warn('[Dialogue] Already playing!')
+      console.warn('[Dialogue] (play) 重复触发播放！')
       return Promise.resolve()
     }
 
     if (!Asset.has('dialogue/' + dialogue)) {
-      console.warn('[Dialogue] Dialogue not found:', dialogue)
+      console.warn('[Dialogue] (play) 对话资源不存在:', dialogue)
       return Promise.resolve()
     }
 
@@ -150,7 +150,7 @@ class Dialogue {
         this.#onRemove(event)
         break
       default:
-        console.warn('未知的事件:', event)
+        console.warn('[Dialogue] (processEvent) 未知的事件:', event)
         this.next()
     }
   }
@@ -162,8 +162,12 @@ class Dialogue {
   #onAddCharacter(event) {
     const { id, emotion = 'normal', position } = event
 
-    if (!id || this.characters.has(id)) {
-      console.warn('角色已存在或ID无效:', id)
+    if (!id) {
+      console.warn('[Dialogue] (onAddCharacter) ID无效:', id)
+      return
+    }
+    if (this.characters.has(id)) {
+      console.warn('[Dialogue] (onAddCharacter) 角色已存在:', id)
       return
     }
 
@@ -193,7 +197,7 @@ class Dialogue {
     const { id, emotion, text, wait } = event
     const baseCharacter = this.characters.get(id)
     if (!baseCharacter && id) {
-      console.warn('角色ID无效或不存在:', id)
+      console.warn('[Dialogue] (onDialogue) 角色ID无效或不存在:', id)
       return
     }
     const character = { ...baseCharacter, ...event }
@@ -212,6 +216,10 @@ class Dialogue {
     }
 
     this.#updatePosition()
+    this.$modernTitle.style.setProperty(
+      '--color',
+      character?.title_color || '#ffcc00'
+    )
     this.$modernTitle.textContent = character?.title ?? ''
     this.$modernSubtitle.textContent = character?.subtitle ?? ''
     if (emotion) this.#updateCharacterEmotion(character, emotion)
@@ -293,19 +301,19 @@ class Dialogue {
     const character = this.characters.get(id)
     if (!character) return
 
+    this.characters.delete(id)
     character.$el.classList.add('remove')
-    setTimeout(() => {
-      character.$el.remove()
-      this.characters.delete(id)
-
-      this.#updatePosition()
-    }, 500)
 
     if (character.position === 'left') {
       this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
     } else {
       this.rightCharacter = this.rightCharacter.filter(c => c.id !== id)
     }
+
+    setTimeout(() => {
+      character.$el.remove()
+      this.#updatePosition()
+    }, 500)
 
     this.next()
   }
@@ -317,7 +325,7 @@ class Dialogue {
     if (Asset.has(image)) {
       image = Asset.get(image)
     } else {
-      console.warn('角色资源不存在:', image)
+      console.warn('[Dialogue] (updateCharacterEmotion) 角色资源不存在:', image)
       image = Asset.get('character/gunmu')
     }
 

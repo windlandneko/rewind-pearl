@@ -2,7 +2,7 @@ import { BaseObject } from './BaseObject.js'
 
 export class Collectible extends BaseObject {
   constructor(x, y) {
-    super(x, y, 20, 20)
+    super(x, y, 8, 8)
     this.type = 'collectible'
     this.color = '#FFC107'
     this.bonus = 10

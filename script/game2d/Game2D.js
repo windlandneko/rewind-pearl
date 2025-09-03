@@ -1,5 +1,5 @@
 import Keyboard from '../Keyboard.js'
-import { EventListener, throttle, wait } from '../utils.js'
+import { EventListener, throttle } from '../utils.js'
 import {
   Player,
   Platform,
@@ -9,7 +9,6 @@ import {
   BaseObject,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
-import Dialogue from '../Dialogue.js'
 import Asset from '../Asset.js'
 import GameConfig from './GameConfig.js'
 
@@ -98,7 +97,7 @@ export class Game {
     this.gameObjects = []
 
     if (!Asset.has(`level/${levelId}`)) {
-      console.error(`[Game2D] 关卡 ${levelId} 不存在！`)
+      console.error(`[Game2D] (loadLevel) 关卡 ${levelId} 不存在！`)
       return
     }
 
@@ -117,11 +116,80 @@ export class Game {
 
     // 添加平台到游戏对象数组
     this.gameObjects.push(
-      new Platform(0, this.levelHeight - 8, this.levelWidth, 8),
-      new Platform(0, 0, this.levelWidth, 8),
-      new Platform(0, 0, 8, this.levelHeight),
-      new Platform(this.levelWidth - 8, 0, 8, this.levelHeight),
-      new Platform(80, 152, 200, 16.2)
+      // 边界平台
+      new Platform(0, this.levelHeight - 8, this.levelWidth, 8), // 地面
+      new Platform(0, 0, this.levelWidth, 8), // 天花板
+      new Platform(0, 0, 8, this.levelHeight), // 左墙
+      new Platform(this.levelWidth - 8, 0, 8, this.levelHeight), // 右墙
+
+      // 游戏内容平台 - 创建多层结构
+      new Platform(80, 152, 200, 16), // 起始平台
+      new Platform(150, 120, 80, 16), // 中层平台1
+      new Platform(280, 100, 100, 16), // 中层平台2
+      new Platform(420, 80, 80, 16), // 中层平台3
+      new Platform(200, 60, 120, 16), // 高层平台1
+      new Platform(350, 40, 100, 16), // 高层平台2
+      new Platform(480, 140, 60, 16), // 跳跃挑战平台1
+      new Platform(560, 110, 60, 16), // 跳跃挑战平台2
+      new Platform(this.levelWidth - 200, 100, 150, 16) // 终点平台
+    )
+
+    // 添加收集品 - 分布在各个位置
+    this.gameObjects.push(
+      // 起始区域收集品
+      new Collectible(120, 130),
+      new Collectible(200, 130),
+      new Collectible(250, 130),
+
+      // 中层收集品
+      new Collectible(180, 98),
+      new Collectible(320, 78),
+      new Collectible(450, 58),
+
+      // 高层收集品
+      new Collectible(240, 38),
+      new Collectible(380, 18),
+
+      // 挑战区域收集品
+      new Collectible(510, 118),
+      new Collectible(590, 88),
+
+      // 终点区域收集品
+      new Collectible(this.levelWidth - 150, 78),
+      new Collectible(this.levelWidth - 100, 78),
+
+      // 空中悬浮收集品（需要跳跃技巧）
+      new Collectible(340, 60),
+      new Collectible(480, 20)
+    )
+
+    // 添加敌人 - 在各个平台上巡逻
+    this.gameObjects.push(
+      // 起始区域敌人（简单）
+      new Enemy(150, 127),
+
+      // 中层敌人
+      new Enemy(300, 75),
+      new Enemy(440, 55),
+
+      // 挑战区域敌人
+      new Enemy(500, 115),
+      new Enemy(570, 85),
+
+      // 终点前的守卫敌人
+      new Enemy(this.levelWidth - 180, 75)
+    )
+
+    // 添加可交互对象 - NPC和提示牌
+    this.gameObjects.push(
+      // 起始NPC - 教学提示
+      new Interactable(14, 160, 'level1_start', '按E交互'),
+
+      // 中途NPC - 游戏提示
+      new Interactable(320, 160, 'level1_npc', '妈妈生的'),
+
+      // 终点NPC - 关卡完成
+      new Interactable(this.levelWidth - 60, 75, 'level1_end', '恭喜通关！')
     )
 
     // 设置摄像机
@@ -168,6 +236,9 @@ export class Game {
       this.#updateRenderGroups()
     }
 
+    // 更新玩家
+    this.player.update(dt)
+
     // 水平移动输入
     const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
     const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
@@ -213,9 +284,6 @@ export class Game {
     this.gameObjects.forEach(obj => {
       obj.interactWithPlayer(this.player, this)
     })
-
-    // 更新玩家
-    this.player.update(dt)
 
     // 更新摄像机
     this.camera.update(dt)

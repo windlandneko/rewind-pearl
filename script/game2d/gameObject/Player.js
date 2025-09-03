@@ -1,13 +1,12 @@
 import { BaseObject } from './BaseObject.js'
 import Vec2 from '../Vector.js'
-import stateMachine from '../../stateMachine.js'
 
 export class Player extends BaseObject {
   color = 'blue'
 
   gravity = 500 // 重力加速度
   moveSpeed = 72 // 移动速度 (像素/秒)
-  jumpSpeed = 100 // 跳跃速度 (像素/秒)
+  jumpSpeed = 114.514 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
   maxJumpTime = 0.2 // 跳跃增益时间（秒）
@@ -109,7 +108,7 @@ export class Player extends BaseObject {
   }
 
   #performJump(speed) {
-    this.currentJumpSpeed = speed + Math.abs(this.v.x) * 0.2
+    this.currentJumpSpeed = speed
     this.v.y = Math.min(this.v.y, -speed)
     this.jumpKeyPressed = true
     this.jumpTimer = 0
@@ -121,7 +120,7 @@ export class Player extends BaseObject {
    * @param {number} dt 时间增量
    */
   onHorizontalInput(direction, dt) {
-    const acceleration = this.onGround ? 20 : 10
+    const acceleration = this.onGround ? 20 : 8
     const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.3
 
     // 祥，移动
@@ -137,7 +136,7 @@ export class Player extends BaseObject {
       )
     } else {
       // 停止移动
-      const decay = this.onGround ? 10 : 0.4
+      const decay = this.onGround ? 11 : 0.8
       this.v.x *= Math.pow(0.1, decay * dt)
     }
   }
@@ -244,23 +243,23 @@ export class Player extends BaseObject {
     // 可视化土狼时间
     if (this.coyoteTimer > 0 && !this.onGround) {
       ctx.fillStyle = 'orange'
-      const coyoteHeight = 3 / scale
+      const coyoteHeight = 1
       const coyoteWidth = (this.coyoteTimer / this.coyote) * this.width
-      ctx.fillRect(x, y + this.height + 2, coyoteWidth, coyoteHeight)
+      ctx.fillRect(x, y - 1, coyoteWidth, coyoteHeight)
     }
 
     // 可视化跳跃缓冲
     if (this.jumpBufferTimer > 0) {
       ctx.fillStyle = 'cyan'
-      const bufferHeight = 3 / scale
+      const bufferHeight = 1
       const bufferWidth = (this.jumpBufferTimer / this.jumpBuffer) * this.width
-      ctx.fillRect(x, y + this.height + 6, bufferWidth, bufferHeight)
+      ctx.fillRect(x, y - 2, bufferWidth, bufferHeight)
     }
 
     // 可视化空中跳跃次数
     for (let i = 0; i < this.maxAirJumps; i++) {
       ctx.fillStyle = i < this.airJumpsCount ? 'lightblue' : '#222'
-      ctx.fillRect(x + i * 10, y - 10, 8 / scale, 8 / scale)
+      ctx.fillRect(x + i * 10 + 1, y + 1, 1, 1)
     }
   }
 }

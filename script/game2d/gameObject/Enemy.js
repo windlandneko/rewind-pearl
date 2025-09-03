@@ -3,13 +3,13 @@ import { BaseObject } from './BaseObject.js'
 
 export class Enemy extends BaseObject {
   color = '#FF5722'
-  speed = 50
+  speed = 20
   direction = 1
   patrolRange = 100
   bobOffset = Math.random() * 100
 
   constructor(x, y) {
-    super(x, y, 25, 25)
+    super(x, y, 8, 8)
     this.type = 'enemy'
     this.anchor = new Vec2(x, y)
   }
@@ -20,7 +20,7 @@ export class Enemy extends BaseObject {
     // 简单的左右移动AI
     this.v.x = this.speed * this.direction
     this.r.x += this.v.x * dt
-    this.r.y = this.anchor.y + Math.sin(this.bobOffset) * 5
+    this.r.y = this.anchor.y + Math.sin(this.bobOffset) * 2
 
     // 巡逻范围检测，转向
     if (
@@ -48,7 +48,7 @@ export class Enemy extends BaseObject {
       player.score += 100
     } else {
       // 玩家受伤
-      player.takeDamage()
+      player.onDamage()
     }
   }
 
@@ -58,20 +58,5 @@ export class Enemy extends BaseObject {
 
     ctx.fillStyle = 'red'
     ctx.fillRect(x, y, this.width, this.height)
-
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-    ctx.font = '9px FiraCode, monospace'
-    const debugY = y + 30
-    ctx.fillText(
-      `pos: (${this.r.x.toFixed(1)}, ${this.r.y.toFixed(1)})`,
-      x,
-      debugY
-    )
-    ctx.fillText(
-      `vel: (${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)})`,
-      x,
-      debugY + 10
-    )
-    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, x, debugY + 20)
   }
 }

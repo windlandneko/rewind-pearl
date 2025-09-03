@@ -5,6 +5,7 @@
     {
       "action": "add",
       "id": "reimu",
+      "title_color": "#f9001a",
       "title": "博丽灵梦",
       "subtitle": "不可思议的巫女",
       "key": "reimu",
@@ -17,6 +18,8 @@
     },
     {
       "id": "reimu",
+      "title_color": "#f2de32",
+      "emotion": "sweat",
       "text": "看来我得去调查一下。"
     },
     {

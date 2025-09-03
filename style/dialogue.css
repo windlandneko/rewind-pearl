@@ -120,16 +120,21 @@
 }
 
 .modern-style-text .title {
-  font-size: 1.75rem;
+  --color: #ffcc00;
+
+  font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 10px;
-  color: #ffcc00;
+  color: var(--color);
   text-align: center;
   white-space: nowrap;
+
+  text-shadow: 0 0 24px color-mix(in srgb, var(--color) 80%, transparent);
+  transition: text-shadow 0.3s ease, color 0.3s ease;
 }
 
 .modern-style-text .subtitle {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 0.4rem;
   color: rgba(180, 180, 180, 0.9);
   width: 100%;

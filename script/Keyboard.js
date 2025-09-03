@@ -131,7 +131,7 @@ class Keyboard {
       const key = this.KEYMAP.get(event.code)
 
       if (!this.#record.has(key)) {
-        console.warn(`[Keyboard] Key not registered: ${key}`)
+        console.warn(`[Keyboard] 用户触发了一个未知的按键: ${key}`)
         return
       }
 
@@ -148,7 +148,7 @@ class Keyboard {
       const key = this.KEYMAP.get(event.code)
 
       if (!this.#record.has(key)) {
-        console.warn(`[Keyboard] Key not registered: ${key}`)
+        console.warn(`[Keyboard] 用户触发了一个未知的按键: ${key}`)
         return
       }
 

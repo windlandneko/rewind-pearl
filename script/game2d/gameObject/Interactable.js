@@ -8,7 +8,7 @@ export class Interactable extends BaseObject {
   isHighlighted = false
 
   constructor(x, y, dialogueId, hint) {
-    super(x, y, 40, 40)
+    super(x, y, 12, 12)
     this.type = 'interactable'
     this.dialogueId = dialogueId
     this.hint = hint
@@ -36,7 +36,7 @@ export class Interactable extends BaseObject {
   async handleKeyInteraction(player, game) {
     if (!player.checkCollision(this) || !this.dialogueId) return false
     game.stop()
-    await Dialogue.play(entity.dialogueId)
+    await Dialogue.play(this.dialogueId)
     game.start()
     return true
   }
@@ -52,12 +52,12 @@ export class Interactable extends BaseObject {
 
     if (this.hint) {
       ctx.fillStyle = 'white'
-      ctx.font = '12px SourceHanSerifCN, serif, sans-serif'
+      ctx.font = '5px HarmonyOS Sans SC, serif, sans-serif'
       const textWidth = ctx.measureText(this.hint).width
       ctx.fillText(
         this.hint,
         this.r.x + this.width / 2 - textWidth / 2,
-        this.r.y - 16 + Math.sin(this.bobOffset) * 4
+        this.r.y - 5 + Math.sin(this.bobOffset) * 4
       )
     }
   }
