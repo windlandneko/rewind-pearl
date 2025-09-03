@@ -26,28 +26,28 @@ class Dialogue {
 
   #keyboardListeners = []
 
-  #registerKeyboardListeners() {
-    this.#clearKeyboardListeners()
+  #triggerSkip(key, delayTime) {
+    const k = 0.6
+    delayTime = k * delayTime + (1 - k) * 30
+
+    this.next(true)
+    setTimeout(() => {
+      if (keyboard.isActive(key)) this.#triggerSkip(key, delayTime)
+    }, delayTime)
+  }
+
+  #addKeyboardListeners() {
     this.#keyboardListeners.push(
       keyboard.onKeydown(['Enter', 'Space'], () => {
         this.next()
       }),
       keyboard.onKeydown(['LCtrl', 'RCtrl'], key => {
-        const k = 0.6
-        const triggerSkip = t => {
-          if (keyboard.isActive(key)) {
-            this.next(true)
-            t = k * t + (1 - k) * 30
-            setTimeout(() => triggerSkip(t), t)
-          }
-        }
-
-        setTimeout(() => triggerSkip(200), 200)
+        this.#triggerSkip(key, 200)
       })
     )
   }
 
-  #clearKeyboardListeners() {
+  #removeKeyboardListeners() {
     this.#keyboardListeners.forEach(removeListener => removeListener())
     this.#keyboardListeners = []
   }
@@ -74,7 +74,10 @@ class Dialogue {
     )
 
     // 注册键盘监听器
-    this.#registerKeyboardListeners()
+    this.#addKeyboardListeners()
+    ;['LCtrl', 'RCtrl'].forEach(key => {
+      if (keyboard.isActive(key)) this.#triggerSkip(key, 200)
+    })
 
     const promise = new Promise(res => {
       this.onEnd = res
@@ -99,7 +102,7 @@ class Dialogue {
     this.$dialogue.classList.remove('visible')
     this.characters.forEach(character => this.#onRemove(character))
 
-    this.#clearKeyboardListeners()
+    this.#removeKeyboardListeners()
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
 
@@ -325,7 +328,7 @@ class Dialogue {
     if (Asset.has(image)) {
       image = Asset.get(image)
     } else {
-      console.warn('[Dialogue] (updateCharacterEmotion) 角色资源不存在:', image)
+      console.warn('[Dialogue] (updateCharacterEmotion) 立绘图片不存在:', image)
       image = Asset.get('character/gunmu')
     }
 

@@ -113,6 +113,7 @@ class Keyboard {
     ['NumpadSubtract', 'Sub'],
     ['NumpadDecimal', 'Dec'],
     ['NumpadDivide', 'Div'],
+    ['NumpadEnter', 'Enter'],
 
     // Miscellaneous
     ['ContextMenu', 'Apps'],
@@ -131,7 +132,7 @@ class Keyboard {
       const key = this.KEYMAP.get(event.code)
 
       if (!this.#record.has(key)) {
-        console.warn(`[Keyboard] 用户触发了一个未知的按键: ${key}`)
+        console.warn('[Keyboard] 用户按下了一个未知的按键:', event)
         return
       }
 
@@ -148,7 +149,7 @@ class Keyboard {
       const key = this.KEYMAP.get(event.code)
 
       if (!this.#record.has(key)) {
-        console.warn(`[Keyboard] 用户触发了一个未知的按键: ${key}`)
+        console.warn('[Keyboard] 用户松开了一个未知的按键:', event)
         return
       }
 
