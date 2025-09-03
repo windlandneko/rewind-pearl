@@ -1,6 +1,6 @@
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 
-export class Platform extends AABBObject {
+export class Platform extends BaseObject {
   constructor(x, y, width, height) {
     super(x, y, width, height)
     this.type = 'platform'

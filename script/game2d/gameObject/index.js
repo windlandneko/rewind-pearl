@@ -1,4 +1,4 @@
-export { AABBObject } from './AABBObject.js'
+export { BaseObject } from './BaseObject.js'
 export { Player } from './Player.js'
 export { Platform } from './Platform.js'
 export { Enemy } from './Enemy.js'

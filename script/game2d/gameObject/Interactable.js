@@ -1,7 +1,7 @@
 import Dialogue from '../../Dialogue.js'
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 
-export class Interactable extends AABBObject {
+export class Interactable extends BaseObject {
   bobOffset = 0
   color = '#9C27B0'
   highlightColor = '#FFD700'

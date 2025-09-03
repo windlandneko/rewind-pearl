@@ -6,7 +6,7 @@ import {
   Enemy,
   Interactable,
   Collectible,
-  AABBObject,
+  BaseObject,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
 import Dialogue from '../Dialogue.js'
@@ -21,7 +21,7 @@ export class Game {
   // 游戏对象
   /** @type {Player} */
   player = null
-  /** @type {AABBObject[]} */
+  /** @type {BaseObject[]} */
   gameObjects = []
 
   // 渲染缓存（避免每帧重复过滤）

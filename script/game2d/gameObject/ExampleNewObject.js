@@ -1,10 +1,10 @@
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 
 /**
  * 示例：新游戏物件类型
- * 展示如何继承AABBObject并实现与玩家的交互
+ * 展示如何继承BaseObject并实现与玩家的交互
  */
-export class ExampleNewObject extends AABBObject {
+export class ExampleNewObject extends BaseObject {
   type = 'example'
   color = '#00FF00'
   interactionCount = 0

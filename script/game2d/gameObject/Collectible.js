@@ -1,6 +1,6 @@
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 
-export class Collectible extends AABBObject {
+export class Collectible extends BaseObject {
   constructor(x, y) {
     super(x, y, 20, 20)
     this.type = 'collectible'

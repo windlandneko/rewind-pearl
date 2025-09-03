@@ -1,6 +1,6 @@
 import Vec2 from '../Vector.js'
 
-export class AABBObject {
+export class BaseObject {
   type = 'default'
   removed = false
 

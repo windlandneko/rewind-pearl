@@ -1,7 +1,7 @@
 import Vec2 from '../Vector.js'
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 
-export class Enemy extends AABBObject {
+export class Enemy extends BaseObject {
   color = '#FF5722'
   speed = 50
   direction = 1

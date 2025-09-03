@@ -1,8 +1,8 @@
-import { AABBObject } from './AABBObject.js'
+import { BaseObject } from './BaseObject.js'
 import Vec2 from '../Vector.js'
 import stateMachine from '../../stateMachine.js'
 
-export class Player extends AABBObject {
+export class Player extends BaseObject {
   color = 'blue'
 
   gravity = 500 // 重力加速度
