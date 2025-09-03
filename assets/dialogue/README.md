@@ -87,6 +87,7 @@
 {
   "action": "dialogue",
   "id": "wy",
+  "title_color": "#ffcc00",
   "title": "王源",
   "subtitle": "葬送的芙蓉王",
   "emotion": "smile",
@@ -98,6 +99,7 @@
 
 - `action`: "dialogue"（可选，不写则默认为对话事件）
 - `id`: 说话角色的标识符（必须是已添加的角色）
+- `title_color`: 修改角色名称颜色（可选），之后的名称将使用该颜色
 - `title`: 修改角色名称（可选），之后的对话将使用该名称
 - `subtitle`: 修改角色副标题（可选），之后的对话将使用该副标题
 - `emotion`: 说话时的表情（可选，不填保持表情不变）

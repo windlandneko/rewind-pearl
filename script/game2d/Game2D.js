@@ -68,7 +68,7 @@ export class Game {
     this.canvas.classList.add('hidden')
   }
 
-  #registerKeyboardListeners() {
+  #addKeyboardListeners() {
     this.#keyboardListeners.push(
       Keyboard.onKeydown(['E'], async () => {
         for (const entity of this.#renderGroups.interactables) {
@@ -76,16 +76,14 @@ export class Game {
         }
       }),
       Keyboard.onKeydown(['Esc'], () => this.pause()),
-      Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
-        this.player.onJumpInput()
-      }),
+      Keyboard.onKeydown(['W', 'Up', 'Space'], () => this.player.onJumpInput()),
       Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
         this.player.jumpKeyPressed = false
       })
     )
   }
 
-  #clearKeyboardListeners() {
+  #removeKeyboardListeners() {
     this.#keyboardListeners.forEach(removeListener => removeListener())
     this.#keyboardListeners = []
   }
@@ -187,6 +185,7 @@ export class Game {
 
       // 中途NPC - 游戏提示
       new Interactable(320, 160, 'level1_npc', '妈妈生的'),
+      new Interactable(36, 160, 'test_scene', 'test'),
 
       // 终点NPC - 关卡完成
       new Interactable(this.levelWidth - 60, 75, 'level1_end', '恭喜通关！')
@@ -196,11 +195,25 @@ export class Game {
     this.#setupCamera()
   }
 
+  exportGameState() {
+    return {
+      player: this.player,
+      gameObjects: this.gameObjects,
+      camera: this.camera,
+    }
+  }
+
+  importGameState(state) {
+    this.player = state.player
+    this.gameObjects = state.gameObjects
+    this.camera = state.camera
+  }
+
   start() {
     this.canvas.classList.remove('hidden')
 
     this.isRunning = true
-    this.#registerKeyboardListeners()
+    this.#addKeyboardListeners()
 
     // Update Loop
     this.updateIntervalHandler = setInterval(() => {
@@ -220,7 +233,7 @@ export class Game {
 
   stop() {
     this.isRunning = false
-    this.#clearKeyboardListeners()
+    this.#removeKeyboardListeners()
     clearInterval(this.updateIntervalHandler)
     cancelAnimationFrame(this.animationFrameHandler)
   }
