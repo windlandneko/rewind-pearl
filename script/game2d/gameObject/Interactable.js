@@ -2,6 +2,7 @@ import Dialogue from '../../Dialogue.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Interactable extends BaseObject {
+  type = 'interactable'
   bobOffset = 0
   color = '#9C27B0'
   highlightColor = '#FFD700'
@@ -9,7 +10,6 @@ export class Interactable extends BaseObject {
 
   constructor(x, y, dialogueId, hint) {
     super(x, y, 12, 12)
-    this.type = 'interactable'
     this.dialogueId = dialogueId
     this.hint = hint
   }

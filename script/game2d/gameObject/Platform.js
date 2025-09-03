@@ -1,10 +1,11 @@
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
+  type = 'platform'
+  color = '#666'
+
   constructor(x, y, width, height) {
     super(x, y, width, height)
-    this.type = 'platform'
-    this.color = '#666'
   }
 
   /**

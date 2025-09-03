@@ -1,12 +1,13 @@
 import { BaseObject } from './BaseObject.js'
 
 export class Collectible extends BaseObject {
+  type = 'collectible'
+  color = '#FFC107'
+  bonus = 10
+  bobOffset = 0
+
   constructor(x, y) {
     super(x, y, 8, 8)
-    this.type = 'collectible'
-    this.color = '#FFC107'
-    this.bonus = 10
-    this.bobOffset = 0
   }
 
   update(dt) {

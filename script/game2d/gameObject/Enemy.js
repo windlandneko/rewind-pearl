@@ -2,6 +2,7 @@ import Vec2 from '../Vector.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Enemy extends BaseObject {
+  type = 'enemy'
   color = '#FF5722'
   speed = 20
   direction = 1
@@ -10,7 +11,6 @@ export class Enemy extends BaseObject {
 
   constructor(x, y) {
     super(x, y, 8, 8)
-    this.type = 'enemy'
     this.anchor = new Vec2(x, y)
   }
 
