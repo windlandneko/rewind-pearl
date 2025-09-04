@@ -44,11 +44,24 @@ export class Game {
   maxTick
   #gameStateHistory = new Map()
 
+  // 时间回溯视觉效果
+  isTimeTravelPreview = false
+  timeTravelCircleRadius = 0
+  timeTravelStartTime = 0
+  timeTravelMaxRadius = 0
+  timeTravelTargetTick = 0
+  timeTravelPreviewCanvas = null
+  timeTravelPreviewCtx = null
+
   #keyboardListeners = []
 
   constructor() {
     /** @type {CanvasRenderingContext2D} */
     this.ctx = this.canvas.getContext('2d')
+
+    // 创建时间回溯预览画布
+    this.timeTravelPreviewCanvas = document.createElement('canvas')
+    this.timeTravelPreviewCtx = this.timeTravelPreviewCanvas.getContext('2d')
 
     const resizeCanvas = () => {
       const main = document.querySelector('main')
@@ -56,11 +69,32 @@ export class Game {
 
       const DPR = devicePixelRatio
 
-      this.ctx.scale(DPR, DPR)
+      // 重置变换矩阵
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0)
+      this.timeTravelPreviewCtx.setTransform(1, 0, 0, 1, 0, 0)
+
       this.canvas.width = this.displayWidth = width * DPR
       this.canvas.height = this.displayHeight = height * DPR
 
-      this.cameraScale = this.displayHeight / this.levelHeight
+      // 同步预览画布尺寸
+      this.timeTravelPreviewCanvas.width = this.displayWidth
+      this.timeTravelPreviewCanvas.height = this.displayHeight
+
+      // 应用DPR缩放
+      this.ctx.scale(DPR, DPR)
+      this.timeTravelPreviewCtx.scale(DPR, DPR)
+
+      // 计算摄像机缩放（只有在关卡已加载时）
+      if (this.levelHeight && this.displayHeight) {
+        this.cameraScale = this.displayHeight / this.levelHeight
+
+        // 如果摄像机已经存在，更新视窗尺寸
+        if (this.camera) {
+          const cameraWidth =
+            this.levelHeight * (this.displayWidth / this.displayHeight)
+          this.camera.setViewportSize(cameraWidth, this.levelHeight)
+        }
+      }
 
       this.ctx.imageSmoothingEnabled = false
       this.ctx.webkitImageSmoothingEnabled = false
@@ -68,6 +102,14 @@ export class Game {
       this.ctx.msImageSmoothingEnabled = false
       this.ctx.textBaseline = 'top'
       this.ctx.textAlign = 'left'
+
+      // 设置预览画布属性
+      this.timeTravelPreviewCtx.imageSmoothingEnabled = false
+      this.timeTravelPreviewCtx.webkitImageSmoothingEnabled = false
+      this.timeTravelPreviewCtx.mozImageSmoothingEnabled = false
+      this.timeTravelPreviewCtx.msImageSmoothingEnabled = false
+      this.timeTravelPreviewCtx.textBaseline = 'top'
+      this.timeTravelPreviewCtx.textAlign = 'left'
     }
 
     resizeCanvas()
@@ -95,7 +137,8 @@ export class Game {
         this.player.inputQueue.push('keyup:jump')
       }),
 
-      Keyboard.onKeydown(['R'], () => this.toggleTimeTravelMode())
+      Keyboard.onKeydown(['R'], () => this.startTimeTravelPreview()),
+      Keyboard.onKeyup(['R'], () => this.endTimeTravelPreview())
     )
   }
 
@@ -255,7 +298,103 @@ export class Game {
    * 保存游戏状态快照到历史记录
    */
   #saveSnapshot() {
-    this.#gameStateHistory.set(this.tick, this.exportGameState())
+    const gameState = this.exportGameState()
+    // 添加玩家状态
+    gameState.push({
+      ...this.player.state,
+      type: 'player',
+    })
+
+    this.#gameStateHistory.set(this.tick, gameState)
+    this.#gameStateHistory.delete(
+      this.tick - GameConfig.MAX_TIME_TRAVEL_DISTANCE
+    )
+  }
+
+  /**
+   * 开始时间回溯预览
+   */
+  startTimeTravelPreview() {
+    if (!this.isRunning || this.isTimeTraveling || !this.cameraScale) return
+
+    this.isTimeTravelPreview = true
+    this.timeTravelStartTime = Date.now()
+    this.timeTravelCircleRadius = 0
+
+    // 计算最大圆圈半径（对角线的一半）
+    this.timeTravelMaxRadius =
+      Math.sqrt(
+        Math.pow(this.displayWidth / 2, 2) + Math.pow(this.displayHeight / 2, 2)
+      ) / this.cameraScale
+
+    // 计算目标tick（5秒前，即5000tick前）
+    this.timeTravelTargetTick = Math.max(0, this.tick - 500)
+  }
+
+  /**
+   * 结束时间回溯预览
+   */
+  endTimeTravelPreview() {
+    if (!this.isTimeTravelPreview) return
+
+    const holdTime = Date.now() - this.timeTravelStartTime
+
+    if (holdTime >= 3000) {
+      // 长按超过3秒，触发时间回溯
+      this.executeTimeTravel()
+    } else {
+      // 快速松开，圆圈缩小消失
+      this.isTimeTravelPreview = false
+      this.timeTravelCircleRadius = 0
+    }
+  }
+
+  /**
+   * 执行时间回溯
+   */
+  executeTimeTravel() {
+    const targetState = this.#gameStateHistory.get(this.timeTravelTargetTick)
+    if (!targetState) {
+      console.warn(`[Game2D] 无法找到tick ${this.timeTravelTargetTick} 的状态`)
+      this.isTimeTravelPreview = false
+      return
+    }
+
+    // 创建ghost player
+    const ghost = new GhostPlayer()
+    ghost.state = this.player.state
+    ghost.stateHistory = this.player.stateHistory
+    this.ghostPlayers.push(ghost)
+
+    // 分离玩家状态和游戏对象状态
+    const playerState = targetState.find(state => state.type === 'player')
+    const gameObjectStates = targetState.filter(
+      state => state.type !== 'player'
+    )
+
+    // 回溯游戏对象状态
+    this.importGameState(gameObjectStates)
+    this.tick = this.timeTravelTargetTick
+
+    // 重新创建玩家并设置状态
+    if (playerState) {
+      this.player.r.x = playerState.rx || this.levelData.spawnpoint.x
+      this.player.r.y = playerState.ry || this.levelData.spawnpoint.y
+      this.player.v.x = playerState.vx || 0
+      this.player.v.y = playerState.vy || 0
+      this.player.health = playerState.health || this.player.health
+      this.player.score = playerState.score || this.player.score
+    } else {
+      // 如果没有找到玩家状态，重置到初始位置
+      this.player.r.x = this.levelData.spawnpoint.x
+      this.player.r.y = this.levelData.spawnpoint.y
+      this.player.v.x = 0
+      this.player.v.y = 0
+    }
+
+    // 重置预览状态
+    this.isTimeTravelPreview = false
+    this.timeTravelCircleRadius = 0
   }
 
   /**
@@ -317,21 +456,40 @@ export class Game {
    * 更新游戏逻辑
    */
   async update(dt) {
-    window.dbg = this
-
     if (this.isTimeTraveling) {
-      const previousTick = this.tick
-      if (Keyboard.isActive('Left')) this.tick--
-      if (Keyboard.isActive('Right')) this.tick++
-      if (this.#gameStateHistory.has(this.tick)) {
-        const targetState = this.#gameStateHistory.get(this.tick)
-        this.importGameState(targetState)
-        this.ghostPlayers.forEach(ghost => {
-          if (ghost.stateHistory.has(this.tick))
-            ghost.state = ghost.stateHistory.get(this.tick)
-          else ghost.removed = true
-        })
-      } else this.tick = previousTick
+      const tick = Math.max(0, this.tick - 5 * 100)
+
+      const targetState = this.#gameStateHistory.get(tick)
+      this.importGameState(targetState)
+      this.ghostPlayers.forEach(ghost => {
+        if (ghost.stateHistory.has(this.tick))
+          ghost.state = ghost.stateHistory.get(this.tick)
+        else ghost.removed = true
+      })
+
+      this.isTimeTraveling = false
+    }
+
+    // 更新时间回溯预览效果
+    if (this.isTimeTravelPreview) {
+      const holdTime = Date.now() - this.timeTravelStartTime
+
+      if (holdTime >= 3000) {
+        // 长按超过3秒，圆圈快速扩大到无穷大
+        this.timeTravelCircleRadius = Math.min(
+          this.timeTravelCircleRadius + this.timeTravelMaxRadius * dt * 10,
+          this.timeTravelMaxRadius * 2
+        )
+      } else {
+        // 圆圈缓缓增大
+        const progress = holdTime / 3000
+        this.timeTravelCircleRadius = this.timeTravelMaxRadius * 0.1 * progress
+      }
+
+      // 只在有历史状态时渲染预览画面
+      if (this.#gameStateHistory.has(this.timeTravelTargetTick)) {
+        this.renderTimeTravelPreview()
+      }
     }
 
     if (!this.isRunning) return
@@ -408,10 +566,98 @@ export class Game {
   }
 
   /**
+   * 渲染时间回溯预览画面
+   */
+  renderTimeTravelPreview() {
+    const targetState = this.#gameStateHistory.get(this.timeTravelTargetTick)
+    if (!targetState) return
+
+    // 清空预览画布
+    this.timeTravelPreviewCtx.clearRect(
+      0,
+      0,
+      this.displayWidth,
+      this.displayHeight
+    )
+    this.timeTravelPreviewCtx.save()
+
+    // 应用相机变换
+    this.timeTravelPreviewCtx.scale(this.cameraScale, this.cameraScale)
+    this.timeTravelPreviewCtx.translate(
+      -this.camera.position.x,
+      -this.camera.position.y
+    )
+
+    // 临时保存当前状态
+    const currentGameObjects = [...this.gameObjects]
+    const currentRenderGroups = { ...this.renderGroups }
+
+    try {
+      // 分离玩家状态和游戏对象状态
+      const playerState = targetState.find(state => state.type === 'player')
+      const gameObjectStates = targetState.filter(
+        state => state.type !== 'player'
+      )
+
+      // 临时加载目标状态
+      this.importGameState(gameObjectStates)
+
+      // 渲染目标状态的游戏画面
+      this.#renderBackgroundGrid(this.timeTravelPreviewCtx)
+
+      // 渲染游戏对象
+      this.renderGroups.platforms.forEach(entity =>
+        entity.render(this.timeTravelPreviewCtx, this.cameraScale)
+      )
+      this.renderGroups.collectibles.forEach(entity =>
+        entity.render(this.timeTravelPreviewCtx, this.cameraScale)
+      )
+      this.renderGroups.enemies.forEach(entity =>
+        entity.render(this.timeTravelPreviewCtx, this.cameraScale)
+      )
+      this.renderGroups.interactables.forEach(entity =>
+        entity.render(this.timeTravelPreviewCtx, this.cameraScale)
+      )
+
+      // 渲染目标状态的玩家（简单绘制一个矩形代表玩家）
+      if (playerState) {
+        this.timeTravelPreviewCtx.fillStyle = 'rgba(0, 255, 255, 0.8)'
+        this.timeTravelPreviewCtx.fillRect(
+          playerState.rx || this.levelData.spawnpoint.x,
+          playerState.ry || this.levelData.spawnpoint.y,
+          16, // 玩家宽度
+          16 // 玩家高度
+        )
+      }
+    } catch (error) {
+      console.warn('[Game2D] 渲染时间回溯预览时出错:', error)
+    } finally {
+      // 恢复当前状态
+      this.gameObjects = currentGameObjects
+      this.renderGroups = currentRenderGroups
+      this.timeTravelPreviewCtx.restore()
+    }
+  }
+
+  /**
    * 渲染游戏画面
    */
   render() {
     this.ctx.clearRect(0, 0, this.displayWidth, this.displayHeight)
+
+    // 如果摄像机还没有设置，显示加载信息
+    if (!this.cameraScale || !this.camera || !this.player) {
+      this.ctx.fillStyle = '#fff'
+      this.ctx.font = '32px SourceHanSerifCN, serif, sans-serif'
+      this.ctx.textAlign = 'center'
+      this.ctx.fillText(
+        '游戏加载中...',
+        this.displayWidth / 2 / devicePixelRatio,
+        this.displayHeight / 2 / devicePixelRatio
+      )
+      return
+    }
+
     this.ctx.save()
 
     // 摄像机缩放
@@ -441,10 +687,93 @@ export class Game {
 
     this.ctx.restore()
 
+    // 渲染时间回溯圆圈效果
+    if (this.isTimeTravelPreview && this.timeTravelCircleRadius > 0) {
+      this.#renderTimeTravelCircle()
+    }
+
     this.#renderTimeline()
 
     // 调试数据
     this.#renderDebugUI()
+  }
+
+  /**
+   * 渲染时间回溯圆圈效果
+   */
+  #renderTimeTravelCircle() {
+    // 确保必要的对象存在
+    if (!this.player || !this.camera || !this.cameraScale) return
+
+    this.ctx.save()
+
+    // 计算玩家在屏幕上的位置
+    const playerScreenX =
+      (this.player.r.x - this.camera.position.x) * this.cameraScale
+    const playerScreenY =
+      (this.player.r.y - this.camera.position.y) * this.cameraScale
+
+    // 创建圆形蒙版
+    this.ctx.globalCompositeOperation = 'source-over'
+
+    // 绘制预览画面到圆形区域
+    if (this.timeTravelPreviewCanvas) {
+      // 创建圆形裁剪路径
+      this.ctx.beginPath()
+      this.ctx.arc(
+        playerScreenX,
+        playerScreenY,
+        this.timeTravelCircleRadius * this.cameraScale,
+        0,
+        Math.PI * 2
+      )
+      this.ctx.clip()
+
+      // 绘制预览画面
+      this.ctx.drawImage(this.timeTravelPreviewCanvas, 0, 0)
+    }
+
+    this.ctx.restore()
+
+    // 绘制圆圈边框
+    this.ctx.save()
+    this.ctx.strokeStyle = '#00ffff'
+    this.ctx.lineWidth = 3
+    this.ctx.setLineDash([5, 5])
+    this.ctx.beginPath()
+    this.ctx.arc(
+      playerScreenX,
+      playerScreenY,
+      this.timeTravelCircleRadius * this.cameraScale,
+      0,
+      Math.PI * 2
+    )
+    this.ctx.stroke()
+    this.ctx.restore()
+
+    // 绘制提示文字
+    const holdTime = Date.now() - this.timeTravelStartTime
+    this.ctx.save()
+    this.ctx.fillStyle = '#00ffff'
+    this.ctx.font = '24px SourceHanSerifCN, serif, sans-serif'
+    this.ctx.textAlign = 'center'
+
+    if (holdTime < 3000) {
+      const remainingTime = ((3000 - holdTime) / 1000).toFixed(1)
+      this.ctx.fillText(
+        `长按 ${remainingTime}s 激活时间回溯`,
+        this.displayWidth / 2,
+        this.displayHeight - 100
+      )
+    } else {
+      this.ctx.fillText(
+        '时间回溯激活中...',
+        this.displayWidth / 2,
+        this.displayHeight - 100
+      )
+    }
+
+    this.ctx.restore()
   }
 
   /**
@@ -497,12 +826,12 @@ export class Game {
   /**
    * 渲染背景网格
    */
-  #renderBackgroundGrid() {
+  #renderBackgroundGrid(ctx = this.ctx) {
     const viewport = this.camera.viewport
     const gridSize = GameConfig.GRID_SIZE
 
-    this.ctx.strokeStyle = '#444'
-    this.ctx.lineWidth = 1 / this.cameraScale
+    ctx.strokeStyle = '#444'
+    ctx.lineWidth = 1 / this.cameraScale
 
     // 计算网格绘制范围（只绘制可见区域）
     const startX = Math.floor(viewport.x / gridSize) * gridSize
@@ -512,18 +841,18 @@ export class Game {
 
     // 绘制垂直线
     for (let x = startX; x <= endX; x += gridSize) {
-      this.ctx.beginPath()
-      this.ctx.moveTo(x, startY)
-      this.ctx.lineTo(x, endY)
-      this.ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(x, startY)
+      ctx.lineTo(x, endY)
+      ctx.stroke()
     }
 
     // 绘制水平线
     for (let y = startY; y <= endY; y += gridSize) {
-      this.ctx.beginPath()
-      this.ctx.moveTo(startX, y)
-      this.ctx.lineTo(endX, y)
-      this.ctx.stroke()
+      ctx.beginPath()
+      ctx.moveTo(startX, y)
+      ctx.lineTo(endX, y)
+      ctx.stroke()
     }
   }
 
@@ -531,6 +860,9 @@ export class Game {
    * 渲染UI
    */
   #renderDebugUI() {
+    // 如果玩家还不存在，不渲染调试UI
+    if (!this.player) return
+
     // 渲染生命值、分数等UI元素
     this.ctx.fillStyle = '#fff'
     this.ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
@@ -544,23 +876,28 @@ export class Game {
     this.ctx.fillText('• 土狼时间: 离开平台后0.15秒内仍可跳跃', 20, 140)
     this.ctx.fillText('• 二段跳: 空中可再跳1次', 20, 180)
     this.ctx.fillText('• 跳跃缓冲: 提前按跳跃键会在落地时自动跳跃', 20, 220)
+    this.ctx.fillText('• 时间回溯: 长按R键3秒回到5秒前', 20, 260)
 
     // 当前状态指示
     if (this.player.coyoteTimer > 0 && !this.player.onGround) {
       this.ctx.fillStyle = 'orange'
-      this.ctx.fillText('土狼时间', 20, 190)
+      this.ctx.fillText('土狼时间', 20, 300)
     }
     if (this.player.jumpBufferTimer > 0) {
       this.ctx.fillStyle = 'cyan'
-      this.ctx.fillText('跳跃缓冲', 20, 210)
+      this.ctx.fillText('跳跃缓冲', 20, 320)
     }
     if (this.player.airJumpsCount > 0) {
       this.ctx.fillStyle = 'lightblue'
       this.ctx.fillText(
         `已使用空中跳跃: ${this.player.airJumpsCount}/${this.player.maxAirJumps}`,
         20,
-        230
+        340
       )
+    }
+    if (this.isTimeTravelPreview) {
+      this.ctx.fillStyle = '#00ffff'
+      this.ctx.fillText('时间回溯预览中...', 20, 360)
     }
 
     // 调试信息：摄像机状态

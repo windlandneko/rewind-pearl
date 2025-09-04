@@ -8,8 +8,6 @@ export class GhostPlayer extends Player {
   type = 'ghost_player'
   color = 'rgba(100, 100, 255, 0.7)' // 半透明蓝色
 
-  tolerance = 0.1
-
   update(dt, game) {
     if (!this.stateHistory.has(game.tick)) {
       this.removed = true
@@ -20,31 +18,34 @@ export class GhostPlayer extends Player {
     this.inputQueue = this.inputHistory.get(game.tick) || []
     super.update(dt, game)
 
-    this.validateState(game.tick)
+    const record = this.stateHistory.get(game.tick)
+    this.validateState(record)
+    this.state = record
   }
 
-  validateState(tick) {
-    if (this.removed) return
-
-    const record = this.stateHistory.get(tick)
+  validateState(record) {
     const state = this.state
 
     if (
       !Object.keys(record).every(
-        key => key === 'inputQueue' || record[key] === state[key]
+        key =>
+          key === 'inputQueue' ||
+          (typeof record[key] === 'number'
+            ? Math.abs(record[key] - state[key]) <= 1e-3
+            : record[key] === state[key])
       )
     ) {
       console.log(
         '时空结构被破坏',
-        Object.keys(record).filter(key => record[key] !== state[key])
+        Object.keys(record)
+          .filter(key => record[key] !== state[key])
+          .map(key => `${key}: ${record[key]} -> ${state[key]}`)
       )
     }
   }
 
   render(ctx, cameraScale) {
     if (this.removed) return
-
-    // console.log(this.r.x, this.r.y)
 
     // 绘制半透明的玩家
     ctx.save()

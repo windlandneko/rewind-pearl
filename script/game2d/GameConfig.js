@@ -5,6 +5,9 @@ export default {
   // 逻辑帧更新间隔时间（毫秒）
   UPDATE_INTERVAL: 10,
 
+  // 最大时间回溯距离（逻辑帧）
+  MAX_TIME_TRAVEL_DISTANCE: 6000,
+
   // 渲染配置
   GRID_SIZE: 8,
   TILE_SIZE: 8,
