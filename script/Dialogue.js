@@ -166,11 +166,11 @@ class Dialogue {
     const { id, emotion = 'normal', position } = event
 
     if (!id) {
-      console.warn('[Dialogue] (onAddCharacter) ID无效:', id)
+      console.warn('[Dialogue] (action: add) 要创建的角色ID无效:', id)
       return
     }
     if (this.characters.has(id)) {
-      console.warn('[Dialogue] (onAddCharacter) 角色已存在:', id)
+      console.warn('[Dialogue] (action: add) 要创建的角色已存在:', id)
       return
     }
 
@@ -198,34 +198,45 @@ class Dialogue {
    */
   #onDialogue(event, skip) {
     const { id, emotion, text, wait } = event
-    const baseCharacter = this.characters.get(id)
-    if (!baseCharacter && id) {
-      console.warn('[Dialogue] (onDialogue) 角色ID无效或不存在:', id)
+
+    if (id !== null && !this.characters.has(id)) {
+      console.warn('[Dialogue] (action: dialogue) 对话角色ID无效:', id)
       return
     }
-    const character = { ...baseCharacter, ...event }
 
-    this.characters.set(id, character)
+    if (id !== null) {
+      const character = { ...this.characters.get(id), ...event }
 
-    this.currentSpeaker = character
+      this.characters.set(id, character)
 
-    // 移到最前
-    if (character.position === 'left') {
-      this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
-      this.leftCharacter.push(character)
+      this.currentSpeaker = character
+
+      // 移到最前
+      if (character.position === 'left') {
+        this.leftCharacter = this.leftCharacter.filter(c => c.id !== id)
+        this.leftCharacter.push(character)
+      } else {
+        this.rightCharacter = this.rightCharacter.filter(c => c.id !== id)
+        this.rightCharacter.push(character)
+      }
+
+      this.#updatePosition()
+      character.$el.classList.add('highlighted')
+      this.$modernTitle.style.setProperty(
+        '--color',
+        character?.title_color ?? '#ffcc00'
+      )
+      this.$modernTitle.textContent = character?.title ?? ''
+      this.$modernSubtitle.textContent = character?.subtitle ?? ''
+      if (emotion) this.#updateCharacterEmotion(character, emotion)
+
+      this.$modernText.classList.remove('narration')
     } else {
-      this.rightCharacter = this.rightCharacter.filter(c => c.id !== id)
-      this.rightCharacter.push(character)
+      this.#updatePosition()
+      this.$modernTitle.textContent = ''
+      this.$modernSubtitle.textContent = ''
+      this.$modernText.classList.add('narration')
     }
-
-    this.#updatePosition()
-    this.$modernTitle.style.setProperty(
-      '--color',
-      character?.title_color || '#ffcc00'
-    )
-    this.$modernTitle.textContent = character?.title ?? ''
-    this.$modernSubtitle.textContent = character?.subtitle ?? ''
-    if (emotion) this.#updateCharacterEmotion(character, emotion)
 
     if (text === null) {
       this.$touhou.classList.remove('visible')
@@ -302,7 +313,10 @@ class Dialogue {
   #onRemove(event) {
     const { id } = event
     const character = this.characters.get(id)
-    if (!character) return
+    if (!character) {
+      console.warn(`[Dialogue] (action: remove) 要删除的角色不存在: ${id}`)
+      return
+    }
 
     this.characters.delete(id)
     character.$el.classList.add('remove')
@@ -357,8 +371,7 @@ class Dialogue {
       character.$el.style.left = `calc(${offset})`
       character.$el.style.right = 'auto'
       character.$el.style.zIndex = 10 + index
-      if (index === length - 1) character.$el.classList.add('highlighted')
-      else character.$el.classList.remove('highlighted')
+      character.$el.classList.remove('highlighted')
     })
 
     this.rightCharacter.forEach((character, index, { length }) => {
@@ -381,8 +394,7 @@ class Dialogue {
       character.$el.style.right = `calc(${offset})`
       character.$el.style.left = 'auto'
       character.$el.style.zIndex = 10 + index
-      if (index === length - 1) character.$el.classList.add('highlighted')
-      else character.$el.classList.remove('highlighted')
+      character.$el.classList.remove('highlighted')
     })
   }
 

@@ -119,6 +119,10 @@
   line-height: 1.5;
 }
 
+.modern-style-text .text.narration {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .modern-style-text .title {
   --color: #ffcc00;
 
