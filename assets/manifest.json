@@ -2,7 +2,6 @@
   "audio": {
     "test": "audio/獣の知性 - [TH19] 東方獣王園.mp3"
   },
-
   "character": {
     "gunmu": "character/gunmu/normal.png",
     "dingzhen": {
@@ -26,21 +25,46 @@
       "smile": "character/wangyuan/smile.png",
       "surprise": "character/wangyuan/surprise.png",
       "sweat": "character/wangyuan/sweat.png"
+    },
+    "qie": {
+      "angry": "character/qie/angry.png",
+      "normal": "character/qie/normal.png"
+    },
+    "furongwangyuan": {
+      "normal": "character/furongwangyuan/normal.png"
+    },
+    "diangun": {
+      "normal": "character/diangun/normal.png",
+      "cry": "character/diangun/cry.png"
+    },
+    "xiaozhangyu": {
+      "normal": "character/xiaozhangyu/normal.png"
+    },
+    "hajimi": {
+      "normal": "character/hajimi/normal.png"
     }
   },
-
   "dialogue": {
     "prologue": "dialogue/prologue.json",
+    "chapter1_end": "dialogue/chapter1_end.json",
+    "chapter1_start": "dialogue/chapter1_start.json",
+    "chapter2_start": "dialogue/chapter2_start.json",
+    "chapter2_end": "dialogue/chapter2_end.json",
+    "chapter2_defeat": "dialogue/chapter2_defeat.json",
+    "chapter3_start": "dialogue/chapter3_start.json",
+    "chapter3_curtain1": "dialogue/chapter3_curtain1.json",
+    "chapter3_curtain2.0": "dialogue/chapter3_curtain2.0.json",
+    "chapter3_curtain2.5": "dialogue/chapter3_curtain2.5.json",
+    "chapter3_curtain3": "dialogue/chapter3_curtain3.json",
+    "chapter4_start": "dialogue/chapter4_start.json",
+    "chapter4_end": "dialogue/chapter4_end.json",
+    "chapter5_end4": "dialogue/chapter5_end4.json",
+    "chapter5_end5": "dialogue/chapter5_end5.json",
     "test_scene": "dialogue/test_scene.json",
     "level1_start": "dialogue/level1_start.json",
     "level1_end": "dialogue/level1_end.json",
     "level1_npc": "dialogue/level1_npc.json"
   },
-
-  "level": {
-    "test_level": "level/test_level.json"
-  },
-
   "background": {
     "test_bg": "background/title_bg.png"
   }

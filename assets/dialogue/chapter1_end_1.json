@@ -1,0 +1,81 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+        "id":"dingzhen",
+        "text":"（揉脑袋）这玩意闻多了竟然也会难受么，还好让这玩意住嘴了。"
+    },
+    {
+        "action":"add",
+        "id": "qie",
+        "title": "芝士企鹅",
+        "subtitle": "高松灯",
+        "key": "zhishiqie",
+        "emotion": "normal",
+        "position": "right"
+    },
+    {
+        "id":"qie",
+        "text":"（暴风雨吸入灵感菇）咕咕嘎嘎！孺子可教也！现在快跪下来哭着求高松灯大人原谅泥的无礼之举！"
+    },
+    {
+        "id":"dingzhen",
+        "text":"（拽住高松灯的企鹅胳膊）真的假的，就你这样？"
+    },
+    {
+        "id":"qie",
+        "text":"亚达亚达，放过瓦达西吧瓦达西什么都会做的——"
+    },
+    {
+        "id":"dingzhen",
+        "text":"（松开）那就让我成为你的master吧，现在立刻告诉我怎么从这里出去，我知道这很难但是这是命令。"
+    },
+    {
+        "id":"qie",
+        "text":"（不情不愿但还是顺从了）哼，不和你计较了......看在你帮我拿到灵感菇的份上窝就带你离开这里吧！"
+    },
+    {
+        "action":"remove",
+        "id":"dingzhen"
+    },
+    {
+        "action":"remove",
+        "id":"qie"
+    },
+    {
+        "id":null,
+        "text":"（彩蛋走向）"
+    },
+    {
+        "id":null,
+        "text":"（丁真并没有拿走码头的灵感菇，而是把码头的一块形似灵感菇的石头搬了回来（话说为什么要搬石头啊喂！！））"
+    },
+    {
+        "action":"add",
+        "id": "qie",
+        "title": "芝士企鹅",
+        "subtitle": "高松灯",
+        "key": "zhishiqie",
+        "emotion": "normal",
+        "position": "left"
+    },
+    {
+        "id":"qie",
+        "text":"（大喜过望）芝（这）可比灵感菇劲多了！窝原谅泥的无礼之举了。现在窝决定大发慈悲带泥离开这里。"
+    },
+    {
+        "action":"remove",
+        "id":"qie"
+    }
+  ]
+}

@@ -18,10 +18,11 @@ async function init(skipAssetLoading = false) {
     throw error
   }
 
-  await Dialogue.play('test_scene')
+  // await Dialogue.play('prologue')
+  // await Dialogue.play('test_scene')
   // await wait(1000)
-  Game2D.loadLevel('test_level')
-  Game2D.start()
+  Game2D.loadLevel()
+  Game2D.startLevel()
 }
 
 $('#loading-retry').addEventListener('click', () => init())
