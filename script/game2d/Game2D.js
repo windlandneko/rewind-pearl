@@ -7,6 +7,7 @@ import {
   Interactable,
   Collectible,
   BaseObject,
+  GhostPlayer,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
 import Asset from '../Asset.js'
@@ -20,11 +21,13 @@ export class Game {
   // 游戏对象
   /** @type {Player} */
   player = null
+  /** @type {GhostPlayer[]} */
+  ghostPlayers = []
   /** @type {BaseObject[]} */
   gameObjects = []
 
   // 渲染缓存（避免每帧重复过滤）
-  #renderGroups = {
+  renderGroups = {
     platforms: [],
     collectibles: [],
     enemies: [],
@@ -35,6 +38,11 @@ export class Game {
   isRunning = false
   camera = new Camera()
   cameraScale
+
+  // 时间回溯系统
+  tick = 0
+  maxTick
+  #gameStateHistory = new Map()
 
   #keyboardListeners = []
 
@@ -71,15 +79,23 @@ export class Game {
   #addKeyboardListeners() {
     this.#keyboardListeners.push(
       Keyboard.onKeydown(['E'], async () => {
-        for (const entity of this.#renderGroups.interactables) {
-          if (await entity.handleKeyInteraction?.(this.player, this)) break
-        }
+        if (!this.isRunning) return
+        this.player.inputQueue.push('keydown:interact')
       }),
-      Keyboard.onKeydown(['Esc'], () => this.pause()),
-      Keyboard.onKeydown(['W', 'Up', 'Space'], () => this.player.onJumpInput()),
+      Keyboard.onKeydown(['Esc'], () => {
+        if (!this.isRunning) return
+        this.pause()
+      }),
+      Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
+        if (!this.isRunning) return
+        this.player.inputQueue.push('keydown:jump')
+      }),
       Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
-        this.player.jumpKeyPressed = false
-      })
+        if (!this.isRunning) return
+        this.player.inputQueue.push('keyup:jump')
+      }),
+
+      Keyboard.onKeydown(['R'], () => this.toggleTimeTravelMode())
     )
   }
 
@@ -92,7 +108,10 @@ export class Game {
    * 加载关卡数据
    */
   loadLevel(levelId) {
+    this.tick = 0
+    this.maxTick = 0
     this.gameObjects = []
+    this.#gameStateHistory = new Map()
 
     if (!Asset.has(`level/${levelId}`)) {
       console.error(`[Game2D] (loadLevel) 关卡 ${levelId} 不存在！`)
@@ -111,6 +130,8 @@ export class Game {
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
+
+    this.ghostPlayers = []
 
     // 添加平台到游戏对象数组
     this.gameObjects.push(
@@ -164,7 +185,7 @@ export class Game {
     // 添加敌人 - 在各个平台上巡逻
     this.gameObjects.push(
       // 起始区域敌人（简单）
-      new Enemy(150, 127),
+      new Enemy(20, 150),
 
       // 中层敌人
       new Enemy(300, 75),
@@ -195,18 +216,68 @@ export class Game {
     this.#setupCamera()
   }
 
-  exportGameState() {
-    return {
-      player: this.player,
-      gameObjects: this.gameObjects,
-      camera: this.camera,
-    }
+  importGameState(state) {
+    this.gameObjects = state.map(state => {
+      let entity
+      switch (state.type) {
+        case 'default':
+          entity = new BaseObject()
+          break
+        case 'platform':
+          entity = new Platform()
+          break
+        case 'enemy':
+          entity = new Enemy()
+          break
+        case 'collectible':
+          entity = new Collectible()
+          break
+        case 'interactable':
+          entity = new Interactable()
+          break
+        default:
+          entity = new BaseObject()
+          console.warn(`[Game2D] 未处理的对象类型: ${state.type}`, state)
+      }
+      entity.state = state
+      return entity
+    })
+
+    // 更新渲染组以反映新状态
+    this.#updateRenderGroups()
   }
 
-  importGameState(state) {
-    this.player = state.player
-    this.gameObjects = state.gameObjects
-    this.camera = state.camera
+  exportGameState() {
+    return this.gameObjects.map(obj => obj.state)
+  }
+
+  /**
+   * 保存游戏状态快照到历史记录
+   */
+  #saveSnapshot() {
+    this.#gameStateHistory.set(this.tick, this.exportGameState())
+  }
+
+  /**
+   * 时间回溯
+   */
+  toggleTimeTravelMode() {
+    this.pause()
+    this.isTimeTraveling = !this.isTimeTraveling
+
+    if (this.isTimeTraveling) {
+      const state = this.player.state
+
+      const ghost = new GhostPlayer()
+      ghost.state = state
+      ghost.stateHistory = this.player.stateHistory
+      this.ghostPlayers.push(ghost)
+
+      this.player = new Player()
+      this.player.state = state
+    } else {
+      // 回溯完成
+    }
   }
 
   start() {
@@ -231,6 +302,10 @@ export class Game {
     this.#updateRenderGroups()
   }
 
+  pause() {
+    this.isRunning = !this.isRunning
+  }
+
   stop() {
     this.isRunning = false
     this.#removeKeyboardListeners()
@@ -241,7 +316,30 @@ export class Game {
   /**
    * 更新游戏逻辑
    */
-  update(dt) {
+  async update(dt) {
+    window.dbg = this
+
+    if (this.isTimeTraveling) {
+      const previousTick = this.tick
+      if (Keyboard.isActive('Left')) this.tick--
+      if (Keyboard.isActive('Right')) this.tick++
+      if (this.#gameStateHistory.has(this.tick)) {
+        const targetState = this.#gameStateHistory.get(this.tick)
+        this.importGameState(targetState)
+        this.ghostPlayers.forEach(ghost => {
+          if (ghost.stateHistory.has(this.tick))
+            ghost.state = ghost.stateHistory.get(this.tick)
+          else ghost.removed = true
+        })
+      } else this.tick = previousTick
+    }
+
+    if (!this.isRunning) return
+
+    this.tick++
+    this.maxTick = Math.max(this.maxTick, this.tick)
+    this.#saveSnapshot()
+
     // 移除标记为删除的对象
     const objectsToRemove = this.gameObjects.filter(obj => obj.removed)
     if (objectsToRemove.length > 0) {
@@ -249,19 +347,21 @@ export class Game {
       this.#updateRenderGroups()
     }
 
-    // 更新玩家
-    this.player.update(dt)
-
-    // 水平移动输入
+    // 外部输入事件
     const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
     const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
     if (keyLeft && !keyRight) {
-      this.player.onHorizontalInput(-1, dt)
+      this.player.inputQueue.push('walk:left')
     } else if (keyRight && !keyLeft) {
-      this.player.onHorizontalInput(1, dt)
+      this.player.inputQueue.push('walk:right')
     } else {
-      this.player.onHorizontalInput(0, dt)
+      this.player.inputQueue.push('walk:stop')
     }
+
+    // 更新玩家
+    this.ghostPlayers.forEach(ghost => ghost.update(dt, this))
+    this.player.update(dt, this)
+    this.player.stateHistory.set(this.tick, this.player.state)
 
     // 世界边界
     if (this.levelData.worldBorder) {
@@ -285,17 +385,22 @@ export class Game {
         this.player.r.x = this.levelData.spawnpoint.x
         this.player.r.y = this.levelData.spawnpoint.y
         // todo
-        stateMachine.emit('map:enter/bottom')
       }
     }
 
     // 更新游戏对象本身
     this.gameObjects.forEach(entity => entity.update(dt))
 
-    // 更新游戏对象与玩家的互动（碰撞检测等）
+    // 重置落地状态
     this.player.onGround = false
+    this.ghostPlayers.forEach(ghost => {
+      ghost.onGround = false
+    })
+
+    // 更新游戏对象与玩家的互动（碰撞检测等）
     this.gameObjects.forEach(obj => {
       obj.interactWithPlayer(this.player, this)
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
     })
 
     // 更新摄像机
@@ -317,23 +422,26 @@ export class Game {
     this.#renderBackgroundGrid()
 
     // 按优先级渲染游戏对象
-    this.#renderGroups.platforms.forEach(entity =>
+    this.renderGroups.platforms.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
-    this.#renderGroups.collectibles.forEach(entity =>
+    this.renderGroups.collectibles.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
-    this.#renderGroups.enemies.forEach(entity =>
+    this.renderGroups.enemies.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
-    this.#renderGroups.interactables.forEach(entity =>
+    this.renderGroups.interactables.forEach(entity =>
       entity.render(this.ctx, this.cameraScale)
     )
 
     // 渲染玩家
+    this.ghostPlayers.forEach(ghost => ghost.render(this.ctx, this.cameraScale))
     this.player.render(this.ctx, this.cameraScale)
 
     this.ctx.restore()
+
+    this.#renderTimeline()
 
     // 调试数据
     this.#renderDebugUI()
@@ -343,16 +451,16 @@ export class Game {
    * 更新渲染组缓存
    */
   #updateRenderGroups() {
-    this.#renderGroups.platforms = this.gameObjects.filter(
+    this.renderGroups.platforms = this.gameObjects.filter(
       obj => obj.type === 'platform'
     )
-    this.#renderGroups.collectibles = this.gameObjects.filter(
+    this.renderGroups.collectibles = this.gameObjects.filter(
       obj => obj.type === 'collectible'
     )
-    this.#renderGroups.enemies = this.gameObjects.filter(
+    this.renderGroups.enemies = this.gameObjects.filter(
       obj => obj.type === 'enemy'
     )
-    this.#renderGroups.interactables = this.gameObjects.filter(
+    this.renderGroups.interactables = this.gameObjects.filter(
       obj => obj.type === 'interactable'
     )
   }
@@ -499,6 +607,184 @@ export class Game {
           this.cameraScale
       )
     )
+    this.ctx.restore()
+  }
+
+  /**
+   * 渲染时间线（在时间回溯模式下）
+   */
+  #renderTimeline() {
+    const timelineHeight = 60
+    const timelineY = this.displayHeight - timelineHeight - 20
+    const timelineX = 50
+    const timelineWidth = this.displayWidth - 100
+
+    this.ctx.save()
+
+    // 绘制时间线背景
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+    this.ctx.fillRect(timelineX, timelineY, timelineWidth, timelineHeight)
+
+    // 绘制时间线边框
+    this.ctx.strokeStyle = '#fff'
+    this.ctx.lineWidth = 2
+    this.ctx.strokeRect(timelineX, timelineY, timelineWidth, timelineHeight)
+
+    // 计算刻度位置 - 当前tick固定在中心
+    const centerX = timelineX + timelineWidth / 2
+    const pixelsPerTick = timelineWidth / Math.max(this.maxTick, 100) // 最小显示100个tick的范围
+
+    // 绘制主时间轴
+    this.ctx.strokeStyle = '#888'
+    this.ctx.lineWidth = 1
+    this.ctx.beginPath()
+    this.ctx.moveTo(timelineX, timelineY + timelineHeight / 2)
+    this.ctx.lineTo(timelineX + timelineWidth, timelineY + timelineHeight / 2)
+    this.ctx.stroke()
+
+    // 绘制tick刻度
+    for (let tick = 0; tick <= this.maxTick; tick++) {
+      const x = centerX + (tick - this.tick) * pixelsPerTick
+
+      if (x < timelineX || x > timelineX + timelineWidth) continue
+
+      let tickHeight = 5
+      let tickColor = '#666'
+
+      // 特殊标记
+      if (tick === 0) {
+        tickHeight = 15
+        tickColor = '#00ff00' // 绿色标记tick=0
+      } else if (tick === this.maxTick) {
+        tickHeight = 15
+        tickColor = '#ff0000' // 红色标记最大tick
+      } else if (tick % 10 === 0) {
+        tickHeight = 10
+        tickColor = '#aaa'
+      }
+
+      this.ctx.strokeStyle = tickColor
+      this.ctx.lineWidth = 1
+      this.ctx.beginPath()
+      this.ctx.moveTo(x, timelineY + timelineHeight / 2 - tickHeight / 2)
+      this.ctx.lineTo(x, timelineY + timelineHeight / 2 + tickHeight / 2)
+      this.ctx.stroke()
+
+      // 绘制重要刻度的数字标签
+      if (
+        tick === 0 ||
+        tick === this.maxTick ||
+        (tick % 50 === 0 && tick > 0)
+      ) {
+        this.ctx.fillStyle = tickColor
+        this.ctx.font = '12px FiraCode, monospace'
+        this.ctx.textAlign = 'center'
+        this.ctx.fillText(tick.toString(), x, timelineY + timelineHeight - 5)
+      }
+    }
+
+    // 绘制当前位置指示器（固定在中心）
+    this.ctx.fillStyle = '#ffff00'
+    this.ctx.strokeStyle = '#ffaa00'
+    this.ctx.lineWidth = 2
+    this.ctx.beginPath()
+    // 绘制一个三角形指示器
+    this.ctx.moveTo(centerX, timelineY)
+    this.ctx.lineTo(centerX - 8, timelineY - 10)
+    this.ctx.lineTo(centerX + 8, timelineY - 10)
+    this.ctx.closePath()
+    this.ctx.fill()
+    this.ctx.stroke()
+
+    // 绘制当前tick的垂直线
+    this.ctx.strokeStyle = '#ffff00'
+    this.ctx.lineWidth = 2
+    this.ctx.beginPath()
+    this.ctx.moveTo(centerX, timelineY)
+    this.ctx.lineTo(centerX, timelineY + timelineHeight)
+    this.ctx.stroke()
+
+    // 绘制ghost player存活时间范围
+    this.ghostPlayers.forEach((ghost, index) => {
+      if (!ghost.stateHistory) return
+
+      // 获取ghost的存活时间范围
+      const ghostTicks = Array.from(ghost.stateHistory.keys()).sort(
+        (a, b) => a - b
+      )
+      if (ghostTicks.length === 0) return
+
+      const startTick = ghostTicks[0]
+      const endTick = ghostTicks[ghostTicks.length - 1]
+
+      const startX = centerX + (startTick - this.tick) * pixelsPerTick
+      const endX = centerX + (endTick - this.tick) * pixelsPerTick
+
+      // 只绘制可见范围内的部分
+      const visibleStartX = Math.max(startX, timelineX)
+      const visibleEndX = Math.min(endX, timelineX + timelineWidth)
+
+      if (visibleStartX < visibleEndX) {
+        // 为每个ghost使用不同的颜色和位置
+        const colors = [
+          'rgba(100, 100, 255, 0.6)',
+          'rgba(255, 100, 100, 0.6)',
+          'rgba(100, 255, 100, 0.6)',
+        ]
+        const color = colors[index % colors.length]
+        const barY = timelineY + 10 + index * 8
+        const barHeight = 6
+
+        this.ctx.fillStyle = color
+        this.ctx.fillRect(
+          visibleStartX,
+          barY,
+          visibleEndX - visibleStartX,
+          barHeight
+        )
+
+        // 绘制边框
+        this.ctx.strokeStyle = color.replace('0.6', '1.0')
+        this.ctx.lineWidth = 1
+        this.ctx.strokeRect(
+          visibleStartX,
+          barY,
+          visibleEndX - visibleStartX,
+          barHeight
+        )
+
+        // 在ghost存活范围的开始和结束位置绘制标记
+        if (startX >= timelineX && startX <= timelineX + timelineWidth) {
+          this.ctx.fillStyle = '#00ff00'
+          this.ctx.fillRect(startX - 1, barY - 2, 2, barHeight + 4)
+        }
+        if (endX >= timelineX && endX <= timelineX + timelineWidth) {
+          this.ctx.fillStyle = '#ff0000'
+          this.ctx.fillRect(endX - 1, barY - 2, 2, barHeight + 4)
+        }
+      }
+    })
+
+    // 绘制时间线信息
+    this.ctx.fillStyle = '#fff'
+    this.ctx.font = '14px FiraCode, monospace'
+    this.ctx.textAlign = 'left'
+    this.ctx.fillText(
+      `当前: ${this.tick}/${this.maxTick}`,
+      timelineX + 5,
+      timelineY - 5
+    )
+
+    // 绘制操作提示
+    this.ctx.fillStyle = '#aaa'
+    this.ctx.font = '12px FiraCode, monospace'
+    this.ctx.textAlign = 'right'
+    this.ctx.fillText(
+      '← → 调整时间  R 退出回溯',
+      timelineX + timelineWidth - 5,
+      timelineY - 5
+    )
+
     this.ctx.restore()
   }
 }

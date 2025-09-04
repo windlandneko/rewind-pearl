@@ -67,7 +67,8 @@ export class Enemy extends BaseObject {
       bobOffset: this.bobOffset,
       speed: this.speed,
       patrolRange: this.patrolRange,
-      anchor: { x: this.anchor.x, y: this.anchor.y },
+      anchorX: this.anchor.x,
+      anchorY: this.anchor.y,
     }
   }
 
@@ -77,7 +78,7 @@ export class Enemy extends BaseObject {
     this.bobOffset = state.bobOffset
     this.speed = state.speed
     this.patrolRange = state.patrolRange
-    this.anchor.x = state.anchor.x
-    this.anchor.y = state.anchor.y
+    this.anchor.x = state.anchorX
+    this.anchor.y = state.anchorY
   }
 }

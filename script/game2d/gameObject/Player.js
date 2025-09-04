@@ -34,6 +34,10 @@ export class Player extends BaseObject {
   previousOnGround = false
   previousPosition = null
 
+  inputQueue = []
+  inputHistory = new Map()
+  stateHistory = new Map()
+
   constructor(x, y) {
     super(x, y, 10, 16)
     this.previousPosition = new Vec2(x, y)
@@ -44,7 +48,42 @@ export class Player extends BaseObject {
     }
   }
 
-  update(dt) {
+  async processInputEvents(dt, game) {
+    if (this.inputQueue.length)
+      this.inputHistory.set(game.tick, [...this.inputQueue])
+
+    while (this.inputQueue.length) {
+      const event = this.inputQueue.shift()
+      switch (event) {
+        case 'keydown:interact':
+          for (const entity of game.renderGroups.interactables) {
+            if (await entity.handleKeyInteraction?.(this, game)) break
+          }
+          break
+        case 'keydown:jump':
+          this.onJumpInput()
+          break
+        case 'keyup:jump':
+          this.jumpKeyPressed = false
+          break
+        case 'walk:left':
+          this.onHorizontalInput(-1, dt)
+          break
+        case 'walk:right':
+          this.onHorizontalInput(1, dt)
+          break
+        case 'walk:stop':
+          this.onHorizontalInput(0, dt)
+          break
+        default:
+          console.warn(`[Game2D] 没见过的输入事件: ${event}`)
+      }
+    }
+  }
+
+  update(dt, game) {
+    this.processInputEvents(dt, game)
+
     this.previousPosition.x = this.r.x
     this.previousPosition.y = this.r.y
 
@@ -270,6 +309,8 @@ export class Player extends BaseObject {
       health: this.health,
       score: this.score,
       onGround: this.onGround,
+      inputQueue: this.inputQueue,
+      inputHistory: this.inputHistory,
 
       // 跳跃相关状态
       jumpKeyPressed: this.jumpKeyPressed,
@@ -283,10 +324,8 @@ export class Player extends BaseObject {
 
       // 前一帧状态
       previousOnGround: this.previousOnGround,
-      previousPosition: {
-        x: this.previousPosition.x,
-        y: this.previousPosition.y,
-      },
+      previousPositionX: this.previousPosition.x,
+      previousPositionY: this.previousPosition.y,
     }
   }
 
@@ -297,6 +336,8 @@ export class Player extends BaseObject {
     this.health = state.health
     this.score = state.score
     this.onGround = state.onGround
+    this.inputQueue = state.inputQueue
+    this.inputHistory = state.inputHistory
 
     // 跳跃相关状态
     this.jumpKeyPressed = state.jumpKeyPressed
@@ -310,7 +351,7 @@ export class Player extends BaseObject {
 
     // 前一帧状态
     this.previousOnGround = state.previousOnGround
-    this.previousPosition.x = state.previousPosition.x
-    this.previousPosition.y = state.previousPosition.y
+    this.previousPosition.x = state.previousPositionX
+    this.previousPosition.y = state.previousPositionY
   }
 }

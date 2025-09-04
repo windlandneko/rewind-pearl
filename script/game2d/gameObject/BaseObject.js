@@ -66,8 +66,10 @@ export class BaseObject {
   get state() {
     return {
       type: this.type,
-      r: { x: this.r.x, y: this.r.y },
-      v: { x: this.v.x, y: this.v.y },
+      rx: this.r.x,
+      ry: this.r.y,
+      vx: this.v.x,
+      vy: this.v.y,
       width: this.width,
       height: this.height,
       color: this.color,
@@ -80,10 +82,10 @@ export class BaseObject {
    */
   set state(state) {
     this.type = state.type
-    this.r.x = state.r.x
-    this.r.y = state.r.y
-    this.v.x = state.v.x
-    this.v.y = state.v.y
+    this.r.x = state.rx
+    this.r.y = state.ry
+    this.v.x = state.vx
+    this.v.y = state.vy
     this.width = state.width
     this.height = state.height
     this.color = state.color
