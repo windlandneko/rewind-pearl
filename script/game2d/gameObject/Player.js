@@ -55,6 +55,26 @@ export class Player extends BaseObject {
     // 重力
     acceleration.y += this.gravity
 
+    // 空气阻力
+    if (this.v.len() > 0) {
+      const dragMagnitude = this.airResistance * this.v.len() ** 2
+      const airDrag = this.v.norm().mul(-dragMagnitude)
+      acceleration.addTo(airDrag)
+    }
+
+    // 地面摩擦力
+    if (this.onGround && Math.abs(this.v.x) > 0) {
+      const frictionForce = Math.sign(this.v.x) * -this.groundFriction
+      acceleration.x += frictionForce
+
+      // 防止摩擦力使速度反向
+      if (Math.sign(this.v.x + frictionForce * dt) !== Math.sign(this.v.x)) {
+        console.log(this.v.x, frictionForce * dt)
+        this.v.x = 0
+        acceleration.x = 0
+      }
+    }
+
     // 更新速度
     this.v.addTo(acceleration.mul(dt))
 

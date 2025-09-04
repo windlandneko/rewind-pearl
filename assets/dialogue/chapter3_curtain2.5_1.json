@@ -1,0 +1,70 @@
+{
+    "text_style": "modern",
+    "auto_next_delay": null,
+    "events": [
+        {
+            "id": null,
+            "text": "（丁真正在收集乐谱，此时他又看见地上散落的一只破碎的锐刻五代）"
+        },
+        {
+            "action": "add",
+            "id": "dingzhen",
+            "title": "丁真",
+            "subtitle": "理塘王",
+            "key": "dingzhen",
+            "emotion": "normal",
+            "position": "left"
+        },
+        {
+            "id": "dingzhen",
+            "text": "（捡起来）（困惑）这里为什么会有锐刻五代......"
+        },
+        {
+            "id": null,
+            "text": "（乐谱收集完毕后，破碎的乐章自己拼合起来，又消失在空中）"
+        },
+        {
+            "action": "add",
+            "id": "xiaozhangyu",
+            "title": "? ? ?",
+            "subtitle": "小章鱼",
+            "key": "xiaozhangyu",
+            "emotion": "normal",
+            "postion": "right"
+        },
+        {
+            "id": "xiaozhangyu",
+            "text": "（激动地哭出来）谢谢你，我终于又可以听见那熟悉的歌声了。"
+        },
+        {
+            "id": null,
+            "text": "（此时响起春日影的伴奏，小章鱼跟着哼唱起来）"
+        },
+        {
+            "id": "xiaozhangyu",
+            "title": "丰川祥子",
+            "subtitle": "小章鱼",
+            "text": "我现在就带你出去。还有，如果你遇见了高松灯，可不可以告诉她，丰川祥子其实很想她们？"
+        },
+        {
+            "id": "dingzhen",
+            "text": "...好。"
+        },
+        {
+            "id": null,
+            "text": "（丰川祥子带着丁真来到了一个山洞）"
+        },
+        {
+            "id": "xiaozhangyu",
+            "text": "穿过这个山洞，你会看到那位大人的。"
+        },
+        {
+            "action": "remove",
+            "id": "dingzhen"
+        },
+        {
+            "action": "remove",
+            "id": "xiaozhangyu"
+        }
+    ]
+}

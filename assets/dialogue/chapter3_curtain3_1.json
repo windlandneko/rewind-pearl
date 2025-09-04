@@ -1,0 +1,52 @@
+{
+    "text_style": "modern",
+    "auto_next_delay": null,
+    "events": [
+        {
+            "id": null,
+            "text": "（山洞里传来奇怪的音乐声）"
+        },
+        {
+            "id": null,
+            "text": "（丁真走过去，原来是一个小人在跳来跳去）"
+        },
+        {
+            "action": "add",
+            "id": "dingzhen",
+            "title": "丁真",
+            "subtitle": "理塘王",
+            "key": "dingzhen",
+            "emotion": "normal",
+            "position": "left"
+        },
+        {
+            "action": "add",
+            "id": "hajimi",
+            "title": "东海帝王",
+            "subtitle": "曼 波",
+            "key": "hajimi",
+            "emotion": "normal",
+            "position": "right"
+        },
+        {
+            "id": "hajimi",
+            "text": "你好，我是东海帝王！你要来杯蜂蜜水吗？前面的路可不好走，喝一杯休息休息再走吧。"
+        },
+        {
+            "id": null,
+            "text": "（丁真去寻找蜂蜜水，并分给了东海帝王一杯）"
+        },
+        {
+            "id": "hajimi",
+            "text": "（高兴地跳起来）哈基米~前面那个人可不好对付，你要加油哦~"
+        },
+        {
+            "action": "remove",
+            "id": "hajimi"
+        },
+        {
+            "action": "remove",
+            "id": "dingzhen"
+        }
+    ]
+}
