@@ -1,0 +1,61 @@
+{
+    "text_style": "modern",
+    "auto_next_delay": null,
+    "events":[
+        {
+            "id":null,
+            "text":"（丁真就这么等着金光将自己传回现实，但是什么都没有发生）"
+        },
+        {
+            "id":null,
+            "text":"（他发现自己好像和整个山体共感了一般）"
+        },
+        {
+            "id":null,
+            "text":"（闭上眼，他可以看见在山脚下捡石头的高松灯，可以看见再次消失的棍母，可以看见......）"
+        },
+        {
+            "action": "add",
+            "id": "dingzhen",
+            "title": "丁真",
+            "subtitle": "理塘王",
+            "key": "dingzhen",
+            "emotion": "angry",
+            "position": "left"
+        },
+        {
+            "id":"dingzhen",
+            "text":"这究竟怎么回事？！"
+        },
+        {
+            "id":null,
+            "text":"（这时，他的耳边传来源神如同鬼魅的笑声）"
+        },
+        {
+            "action":"add",
+            "id":"furongwangyuan",
+            "title":"芙蓉王源神",
+            "subtitle":"神人",
+            "key":"furongwangyuan",
+            "emotion":"phantom",
+            "position":"right"
+        },
+        {
+            "id":"furongwangyuan",
+            "text":"你看，我说吧，你就是那位大人选择的下一个继承人......真幸福啊，成为神人......"
+        },
+        {
+            "action":"remove",
+            "id":"furongwangyuan"
+        },
+        {
+            "id":"dingzhen",
+            "subtitle":"神人",
+            "text":"（惊恐）那位大人......那位大人......你奶奶个三角楼子的到底什么鬼大人！"
+        },
+        {
+            "action":"remove",
+            "id":"dingzhen"
+        }
+    ]
+}

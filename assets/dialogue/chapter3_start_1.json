@@ -1,0 +1,49 @@
+{
+    "text_style": "modern",
+    "auto_next_delay": null,
+    "events": [
+        {
+            "action": "add",
+            "id": "dingzhen",
+            "title": "丁真",
+            "subtitle": "理塘王",
+            "key": "dingzhen",
+            "emotion": "normal",
+            "position": "left"
+        },
+        {
+            "id": null,
+            "text": "（丁真发现高松灯已经等候多时）"
+        },
+        {
+            "action": "add",
+            "id": "qie",
+            "title": "芝士企鹅",
+            "subtitle": "高松灯",
+            "key": "qie",
+            "emotion": "normal",
+            "position": "right"
+        },
+        {
+            "id": "qie",
+            "text": "（不满）咕咕嘎嘎，泥怎么这么磨蹭！现在翻过最后一座山泥就可以回去了，窝没有办法上山，接下来就靠你了。"
+        },
+        {
+            "id": "dingzhen",
+            "emotion": "smile",
+            "text": "（松了一口气）芜湖！终于要走出这个鬼地方回家了。冲刺，冲刺！"
+        },
+        {
+            "action": "remove",
+            "id": "qie"
+        },
+        {
+            "id": "dingzhen",
+            "text": "（一阵强劲的音乐声响起，丁真向着山顶冲去）"
+        },
+        {
+            "action": "remove",
+            "id": "dingzhen"
+        }
+    ]
+}
