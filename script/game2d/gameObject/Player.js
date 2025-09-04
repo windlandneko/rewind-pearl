@@ -262,4 +262,55 @@ export class Player extends BaseObject {
       ctx.fillRect(x + i * 10 + 1, y + 1, 1, 1)
     }
   }
+
+  get state() {
+    return {
+      ...super.state,
+      // 游戏状态
+      health: this.health,
+      score: this.score,
+      onGround: this.onGround,
+
+      // 跳跃相关状态
+      jumpKeyPressed: this.jumpKeyPressed,
+      jumpTimer: this.jumpTimer,
+      coyoteTimer: this.coyoteTimer,
+      jumpBufferTimer: this.jumpBufferTimer,
+      airJumpsCount: this.airJumpsCount,
+
+      // 伤害状态
+      damageTimer: this.damageTimer,
+
+      // 前一帧状态
+      previousOnGround: this.previousOnGround,
+      previousPosition: {
+        x: this.previousPosition.x,
+        y: this.previousPosition.y,
+      },
+    }
+  }
+
+  set state(state) {
+    super.state = state
+
+    // 游戏状态
+    this.health = state.health
+    this.score = state.score
+    this.onGround = state.onGround
+
+    // 跳跃相关状态
+    this.jumpKeyPressed = state.jumpKeyPressed
+    this.jumpTimer = state.jumpTimer
+    this.coyoteTimer = state.coyoteTimer
+    this.jumpBufferTimer = state.jumpBufferTimer
+    this.airJumpsCount = state.airJumpsCount
+
+    // 伤害状态
+    this.damageTimer = state.damageTimer
+
+    // 前一帧状态
+    this.previousOnGround = state.previousOnGround
+    this.previousPosition.x = state.previousPosition.x
+    this.previousPosition.y = state.previousPosition.y
+  }
 }

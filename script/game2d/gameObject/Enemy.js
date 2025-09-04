@@ -59,4 +59,25 @@ export class Enemy extends BaseObject {
     ctx.fillStyle = 'red'
     ctx.fillRect(x, y, this.width, this.height)
   }
+
+  get state() {
+    return {
+      ...super.state,
+      direction: this.direction,
+      bobOffset: this.bobOffset,
+      speed: this.speed,
+      patrolRange: this.patrolRange,
+      anchor: { x: this.anchor.x, y: this.anchor.y },
+    }
+  }
+
+  set state(state) {
+    super.state = state
+    this.direction = state.direction
+    this.bobOffset = state.bobOffset
+    this.speed = state.speed
+    this.patrolRange = state.patrolRange
+    this.anchor.x = state.anchor.x
+    this.anchor.y = state.anchor.y
+  }
 }

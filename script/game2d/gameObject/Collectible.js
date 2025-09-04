@@ -31,4 +31,18 @@ export class Collectible extends BaseObject {
       this.height
     )
   }
+
+  get state() {
+    return {
+      ...super.state,
+      bonus: this.bonus,
+      bobOffset: this.bobOffset,
+    }
+  }
+
+  set state(state) {
+    super.state = state
+    this.bonus = state.bonus
+    this.bobOffset = state.bobOffset
+  }
 }

@@ -61,4 +61,22 @@ export class Interactable extends BaseObject {
       )
     }
   }
+
+  get state() {
+    return {
+      ...super.state,
+      bobOffset: this.bobOffset,
+      isHighlighted: this.isHighlighted,
+      highlightColor: this.highlightColor,
+      hint: this.hint,
+    }
+  }
+
+  set state(state) {
+    super.state = state
+    this.bobOffset = state.bobOffset
+    this.isHighlighted = state.isHighlighted
+    this.highlightColor = state.highlightColor
+    this.hint = state.hint
+  }
 }

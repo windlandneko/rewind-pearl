@@ -1,5 +1,6 @@
 export { BaseObject } from './BaseObject.js'
 export { Player } from './Player.js'
+export { GhostPlayer } from './GhostPlayer.js'
 export { Platform } from './Platform.js'
 export { Enemy } from './Enemy.js'
 export { Interactable } from './Interactable.js'

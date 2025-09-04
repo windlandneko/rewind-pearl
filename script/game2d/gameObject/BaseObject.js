@@ -2,6 +2,7 @@ import Vec2 from '../Vector.js'
 
 export class BaseObject {
   type = 'default'
+  color = 'red'
   removed = false
 
   constructor(x, y, width, height) {
@@ -57,5 +58,35 @@ export class BaseObject {
         ctx.fillRect(tileX, tileY, tileWidth, tileHeight)
       }
     }
+  }
+
+  /**
+   * 导出对象状态用于时间回溯
+   */
+  get state() {
+    return {
+      type: this.type,
+      r: { x: this.r.x, y: this.r.y },
+      v: { x: this.v.x, y: this.v.y },
+      width: this.width,
+      height: this.height,
+      color: this.color,
+      removed: this.removed,
+    }
+  }
+
+  /**
+   * 从状态数据恢复对象
+   */
+  set state(state) {
+    this.type = state.type
+    this.r.x = state.r.x
+    this.r.y = state.r.y
+    this.v.x = state.v.x
+    this.v.y = state.v.y
+    this.width = state.width
+    this.height = state.height
+    this.color = state.color
+    this.removed = state.removed
   }
 }
