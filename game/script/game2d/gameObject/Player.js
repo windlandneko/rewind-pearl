@@ -2,6 +2,7 @@ import { BaseObject } from './BaseObject.js'
 import Vec2 from '../Vector.js'
 
 export class Player extends BaseObject {
+  type = 'player'
   color = 'blue'
 
   gravity = 500 // 重力加速度

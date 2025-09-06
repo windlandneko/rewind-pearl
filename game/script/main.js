@@ -3,7 +3,12 @@ import Asset from './Asset.js'
 import Loading from './Loading.js'
 import Game2D from './game2d/Game2D.js'
 import { $, wait } from './utils.js'
-import { Level1 } from './game2d/Level.js'
+import * as LevelManager from './game2d/Level.js'
+
+// 检查用户登录
+if (!localStorage.getItem('rewind-pearl-username')) {
+  window.location.href = '../login/index.html'
+}
 
 async function init(skipAssetLoading = false) {
   try {
@@ -19,10 +24,25 @@ async function init(skipAssetLoading = false) {
     throw error
   }
 
-  // await Dialogue.play('prologue')
-  // await Dialogue.play('test_scene')
-  // await wait(1000)
-  Game2D.loadLevel(Level1)
+  const loadSaveData = localStorage.getItem('rewind-pearl-load-save')
+  if (loadSaveData) {
+    localStorage.removeItem('rewind-pearl-load-save')
+
+    try {
+      const saveData = JSON.parse(loadSaveData)
+      await loadGameFromSave(saveData)
+    } catch (error) {
+      console.error('加载存档失败:', error)
+      // 如果加载失败，启动新游戏
+      startNewGame()
+    }
+  } else {
+    startNewGame()
+  }
+}
+
+function startNewGame() {
+  Game2D.loadLevel(LevelManager.Level1)
   Game2D.start()
 }
 

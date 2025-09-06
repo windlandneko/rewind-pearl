@@ -12,6 +12,7 @@ export function Level1(game) {
   const width = 8 * 80
 
   game.levelData = {
+    name: 'Level1',
     height,
     width,
     worldBorder: true,

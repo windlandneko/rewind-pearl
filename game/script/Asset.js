@@ -156,8 +156,7 @@ class Asset {
         if (!total) return
         this.onProgress?.({ type: 'progress', count: loaded, total })
       }
-      img.onerror = () =>
-        rej(new Error(`[Asset] Failed to load image: ${url}`))
+      img.onerror = () => rej(new Error(`[Asset] Failed to load image: ${url}`))
       img.src = url
     })
   }

@@ -10,8 +10,8 @@ import {
   GhostPlayer,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
-import Asset from '../Asset.js'
 import GameConfig from './GameConfig.js'
+import * as LevelManager from './Level.js'
 
 export class Game {
   listener = new EventListener()
@@ -150,7 +150,7 @@ export class Game {
     this.#setupCamera()
   }
 
-  importGameState(state) {
+  importGameObjects(state) {
     this.gameObjects = state.map(state => {
       let entity
       switch (state.type) {
@@ -181,7 +181,7 @@ export class Game {
     this.#updateRenderGroups()
   }
 
-  exportGameState() {
+  exportGameObjects() {
     return this.gameObjects.map(obj => obj.state)
   }
 
@@ -189,7 +189,7 @@ export class Game {
    * 保存游戏状态快照到历史记录
    */
   #saveSnapshot() {
-    this.#gameStateHistory.set(this.tick, this.exportGameState())
+    this.#gameStateHistory.set(this.tick, this.exportGameObjects())
     this.#gameStateHistory.delete(
       this.tick - GameConfig.MAX_TIME_TRAVEL_DISTANCE
     )
@@ -232,7 +232,7 @@ export class Game {
 
     this.tick = Math.max(1, this.tick - 5 * 100)
     const targetState = this.#gameStateHistory.get(this.tick)
-    this.importGameState(targetState)
+    this.importGameObjects(targetState)
     this.ghostPlayers.forEach(ghost => {
       if (ghost.stateHistory.has(this.tick))
         ghost.state = ghost.stateHistory.get(this.tick)
@@ -265,6 +265,125 @@ export class Game {
 
   pause() {
     this.isRunning = !this.isRunning
+  }
+
+  loadGame({
+    levelData,
+    gameObjects,
+    player,
+    ghostPlayers,
+    tick,
+    maxTick,
+    gameStateHistory,
+  }) {
+    console.log('加载存档:', {
+      levelData,
+      gameObjects,
+      player,
+      tick,
+      maxTick,
+      ghostPlayers,
+    })
+    this.stop()
+
+    const levelName = levelData.name || 'Level1'
+
+    this.loadLevel(LevelManager[levelName])
+
+    this.player.state = player
+
+    this.tick = tick
+    this.maxTick = maxTick
+    this.importGameObjects(gameObjects)
+
+    this.ghostPlayers = ghostPlayers.map(state => {
+      const ghost = new GhostPlayer()
+      ghost.state = state
+      ghost.stateHistory = state.stateHistory
+      return ghost
+    })
+
+    this.#gameStateHistory = new Map(gameStateHistory)
+
+    this.start()
+  }
+
+  saveGame(saveName = 'autosave') {
+    const currentUser = localStorage.getItem('rewind-pearl-username')
+    if (!currentUser) {
+      console.error('没有登录用户，无法保存游戏')
+      this.showNotification('保存失败：玩家未登录', false)
+      return false
+    }
+
+    const gameState = {
+      timestamp: Date.now(),
+      tick: this.tick,
+      maxTick: this.maxTick,
+      player: this.player?.state || {},
+      gameObjects: this.exportGameObjects(),
+      ghostPlayers: this.ghostPlayers.map(ghost => ({
+        ...ghost.state,
+        stateHistory: ghost.stateHistory,
+      })),
+      levelData: this.levelData,
+      gameStateHistory: Array.from(this.#gameStateHistory.entries()),
+    }
+
+    const savingsData = localStorage.getItem('rewind-pearl-savings')
+    const savings = savingsData ? JSON.parse(savingsData) : {}
+
+    if (!savings[currentUser]) {
+      savings[currentUser] = []
+    }
+
+    // 查找是否已存在同名存档
+    const existingIndex = savings[currentUser].findIndex(
+      save => save.name === saveName
+    )
+
+    const saveData = {
+      name: saveName,
+      data: gameState,
+    }
+
+    if (existingIndex >= 0) {
+      // 覆盖现有存档
+      savings[currentUser][existingIndex] = saveData
+    } else {
+      // 添加新存档
+      savings[currentUser].push(saveData)
+    }
+
+    localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
+    console.log(`游戏已保存: ${saveName}`)
+
+    this.showNotification('游戏已保存', true)
+    return true
+  }
+
+  showNotification(message, success = true) {
+    const notification = document.createElement('div')
+    notification.classList.add('save-notification')
+
+    const textElement = document.createElement('span')
+    textElement.classList.add('save-text')
+    textElement.textContent = message
+    notification.appendChild(textElement)
+
+    const iconElement = document.createElement('span')
+    iconElement.classList.add('save-icon')
+    iconElement.textContent = success ? '💾' : '❌'
+    notification.appendChild(iconElement)
+
+    const main = document.querySelector('main')
+    main.appendChild(notification)
+
+    notification.style.borderColor = success ? '#4a9eff' : '#ff4a4a'
+
+    setTimeout(() => notification.classList.add('show'), 0)
+    setTimeout(() => notification.classList.remove('show'), 3000)
+    setTimeout(() => notification.remove(), 4000)
   }
 
   stop() {
@@ -374,6 +493,8 @@ export class Game {
 
     // 更新摄像机
     this.camera.update(dt)
+
+    if (this.tick % 2000 === 0) this.saveGame()
   }
 
   /**
@@ -384,10 +505,9 @@ export class Game {
     if (this.timeTravelCircleRadius === 0 || !this.#gameStateHistory.has(tick))
       return
     const targetState = this.#gameStateHistory.get(tick)
+    const state = this.exportGameObjects()
 
-    const state = this.exportGameState()
-
-    this.importGameState(targetState)
+    this.importGameObjects(targetState)
 
     // 清空预览画布
     tmpctx.clearRect(0, 0, this.displayWidth, this.displayHeight)
@@ -422,7 +542,7 @@ export class Game {
 
     tmpctx.restore()
 
-    this.importGameState(state)
+    this.importGameObjects(state)
 
     const playerScreenX =
       (this.player.r.x + this.player.width / 2 - this.camera.position.x) *

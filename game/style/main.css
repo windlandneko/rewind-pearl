@@ -63,3 +63,32 @@ main {
   opacity: 0;
   pointer-events: none;
 }
+
+/* 保存提示样式 */
+.save-notification {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: 2px solid #4a9eff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  z-index: 1000;
+  transform: translateX(200%);
+  transition: transform 0.3s ease-in-out;
+}
+.save-notification.show {
+  transform: translateX(0);
+}
+
+.save-icon {
+  font-size: 1rem;
+}
+.save-text {
+  font-weight: bold;
+}
