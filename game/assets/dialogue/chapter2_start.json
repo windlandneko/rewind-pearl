@@ -1,48 +1,48 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "action": "add",
-            "id": "qie",
-            "title": "芝士企鹅",
-            "subtitle": "高松灯",
-            "key": "qie",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "id": "qie",
-            "text": "（芝士企鹅带着丁真来到了一个奇怪的工厂）"
-        },
-        {
-            "id": "qie",
-            "text": "接下来就需要泥一个人加油到达工厂的出口了。窝可以自己飞过去，但是泥，还是自求多福吧！"
-        },
-        {
-            "action": "remove",
-            "id": "qie"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（高松灯像直升机一样旋转着飞走了，一边飞一边发出“咕咕嘎嘎”的声音）"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（震惊脸）企鹅原来会飞吗......不对不对，这里是幻境，企鹅不会飞才不正常！"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "qie",
+      "title": "芝士企鹅",
+      "subtitle": "高松灯",
+      "key": "zhishiqie",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": null,
+      "text": "（芝士企鹅带着丁真来到了一个奇怪的工厂）"
+    },
+    {
+      "id": "qie",
+      "text": "接下来就需要泥一个人加油到达工厂的出口了。窝可以自己飞过去，但是泥，还是自求多福吧！"
+    },
+    {
+      "action": "remove",
+      "id": "qie"
+    },
+    {
+      "id": null,
+      "text": "（高松灯像直升机一样旋转着飞走了，一边飞一边发出“咕咕嘎嘎”的声音）"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（震惊脸）企鹅原来会飞吗......不对不对，这里是幻境，企鹅不会飞才不正常！"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    }
+  ]
 }

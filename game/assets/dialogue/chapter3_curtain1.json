@@ -1,82 +1,82 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "action": "add",
-            "id": "gunmu",
-            "title": " ",
-            "subtitle": " ",
-            "key": "gunmu",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "gunmu",
-            "text": "（但是，此刻有一堵无形的墙挡住了他）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（疑惑）这是什么？透明的？"
-        },
-        {
-            "id": null,
-            "text": "（这时，突然有个头顶尖尖的大头出现）"
-        },
-        {
-            "action": "remove",
-            "id": "gunmu"
-        },
-        {
-            "action": "add",
-            "id": "diangun",
-            "title": "电棍otto",
-            "subtitle": "职业选手",
-            "key": "diangun",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "diangun",
-            "text": "你是上山挑战的新人吗？盒盒盒盒，我叫电棍otto，如果你想上山，就得帮我收集所有【滚木】！不然你就别想过这关！"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（更加困惑）啥？滚木？不对，什么狗屁挑战？！快放我上去aaaaaaa"
-        },
-        {
-            "id": null,
-            "text": "（丁真只能老老实实收集滚木）"
-        },
-        {
-            "id": null,
-            "text": "（滚木全收集后，那堵无形的墙消失了）"
-        },
-        {
-            "id": null,
-            "text": "（这时，otto的身边出现了一个慈祥的老奶奶）"
-        },
-        {
-            "id": "diangun",
-            "emotion": "cry",
-            "text": "我终于见到你了妈妈"
-        },
-        {
-            "action": "remove",
-            "id": "diangun"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "gunmu",
+      "title": " ",
+      "subtitle": " ",
+      "key": "gunmu",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": null,
+      "text": "（但是，此刻有一堵无形的墙挡住了他）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（疑惑）这是什么？透明的？"
+    },
+    {
+      "id": null,
+      "text": "（这时，突然有个头顶尖尖的大头出现）"
+    },
+    {
+      "action": "remove",
+      "id": "gunmu"
+    },
+    {
+      "action": "add",
+      "id": "diangun",
+      "title": "电棍otto",
+      "subtitle": "职业选手",
+      "key": "gunmu",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "diangun",
+      "text": "你是上山挑战的新人吗？盒盒盒盒，我叫电棍otto，如果你想上山，就得帮我收集所有【滚木】！不然你就别想过这关！"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（更加困惑）啥？滚木？不对，什么狗屁挑战？！快放我上去aaaaaaa"
+    },
+    {
+      "id": null,
+      "text": "（丁真只能老老实实收集滚木）"
+    },
+    {
+      "id": null,
+      "text": "（滚木全收集后，那堵无形的墙消失了）"
+    },
+    {
+      "id": null,
+      "text": "（这时，otto的身边出现了一个慈祥的老奶奶）"
+    },
+    {
+      "id": "diangun",
+      "emotion": "cry",
+      "text": "我终于见到你了妈妈"
+    },
+    {
+      "action": "remove",
+      "id": "diangun"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    }
+  ]
 }

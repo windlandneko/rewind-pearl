@@ -62,7 +62,7 @@
       "position": "left"
     },
     {
-      "id": "dingzhen",
+      "id": null,
       "text": "（此时正在片场休息抽锐刻，无意中听见了两个龙套演员的对话。）"
     },
     {
@@ -71,7 +71,7 @@
       "text": "诈骗团伙？和我的保镖说去吧。"
     },
     {
-      "id": "dingzhen",
+      "id": null,
       "text": "（内心嗤笑一声，又吸了一大口锐刻，餍足地享受着尼古丁的簇拥。）"
     },
     {
@@ -80,12 +80,11 @@
       "text": "都市传说都比诈骗团伙可信。"
     },
     {
-      "id": "dingzhen",
+      "id": null,
       "text": "（抽完最后一口烟油，他眯了眯眼睛，缓缓将肺中的烟雾全部推出鼻腔，然后站起身来。）"
     },
     {
-      "id": "dingzhen",
-      "emotion": "surprise",
+      "id": null,
       "text": "（这时他看到了一个熟悉的人影在注视着自己。）"
     },
     {
@@ -104,12 +103,11 @@
     },
     {
       "id": "dingzhen",
-      "emotion": "surprise",
+      "emotion": "shock",
       "text": "不对，那是......那是......失踪的$wow:王源$！"
     },
     {
-      "id": "wangyuan",
-      "emotion": "smile",
+      "id": null,
       "text": "（冲他粲然一笑，挥了挥手）"
     },
     {
@@ -120,8 +118,7 @@
       "id": "wangyuan"
     },
     {
-      "id": "dingzhen",
-      "emotion": "sad",
+      "id": null,
       "text": "（随后丁真的眼前便是无尽的黑暗。）"
     },
     {
@@ -131,7 +128,7 @@
     },
     {
       "id": "dingzhen",
-      "emotion": "sad",
+      "emotion": "confused",
       "text": "为什么为什么！我被绑架了！"
     },
     {

@@ -1,52 +1,52 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "id": null,
-            "text": "（丁真终于利用自己的时空回溯能力打败了源神）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "action": "add",
-            "id": "furongwangyuan",
-            "title": "芙蓉王源神",
-            "subtitle": "源神",
-            "key": "furongwangyuan",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "furongwangyuan",
-            "text": "（一边咳嗽一边冷笑）呵呵......你永远都不可能离开这里......你就成为第二个我吧！"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（不解地看了一眼正在消散的源神）我会离开这个鬼地方，我不会成为第二个你。"
-        },
-        {
-            "id": null,
-            "text": "（此时祭坛上发出古怪的金光）"
-        },
-        {
-            "action":"remove",
-            "id":"furongwangyuan"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（兴奋）这一定就是回家的传送通道吧，终于能离开这个鬼地方了！"
-        },
-        {
-            "action":"remove",
-            "id":"dingzhen"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "id": null,
+      "text": "（丁真终于利用自己的时空回溯能力打败了源神）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "action": "add",
+      "id": "furongwangyuan",
+      "title": "芙蓉王源神",
+      "subtitle": "源神",
+      "key": "wangyuan",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "furongwangyuan",
+      "text": "（一边咳嗽一边冷笑）呵呵......你永远都不可能离开这里......你就成为第二个我吧！"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（不解地看了一眼正在消散的源神）我会离开这个鬼地方，我不会成为第二个你。"
+    },
+    {
+      "id": null,
+      "text": "（此时祭坛上发出古怪的金光）"
+    },
+    {
+      "action": "remove",
+      "id": "furongwangyuan"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（兴奋）这一定就是回家的传送通道吧，终于能离开这个鬼地方了！"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    }
+  ]
 }

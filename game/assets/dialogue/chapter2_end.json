@@ -1,162 +1,162 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "id": null,
-            "text": "（丁真在闯关时看见了一个坑洞，旁边是按压才能打开坑洞桥梁的机关）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（困惑）这玩意真的能过去吗......算了先试着跳过去吧。"
-        },
-        {
-            "id": null,
-            "text": "（然后果不其然地掉下去了）"
-        },
-        {
-            "id": "dingzhen",
-            "emotion": "angry",
-            "text": "嗯哼哼哼啊啊啊啊啊啊啊啊啊啊啊————"
-        },
-        {
-            "id": null,
-            "text": "（丁真试图抓住周围墙壁的突起处来活命，但是墙体却是光滑的铁皮，怎样都扒不住）"
-        },
-        {
-            "id": null,
-            "text": "（漆黑的坑洞没有一丝亮光，仿佛通向无尽的地狱，那通道张开血盆大口，仿佛在欢迎新食物的到来。）"
-        },
-        {
-            "id": null,
-            "text": "（他就这么心怀恐惧地坠下去等待自己的结局...）"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        },
-        {
-            "id": null,
-            "text": "（这时，他看见通道的尽头好像有点点亮光，然后迅速扩大）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "id": "dingzhen",
-            "text": "寄！这个高度我肯定要摔死的......"
-        },
-        {
-            "id": null,
-            "text": "（丁真紧紧闭住双眼）"
-        },
-        {
-            "id": "dingzhen",
-            "emotion": "surprise",
-            "text": "（意外地睁开双眼）欸，我没死还平安落地了？"
-        },
-        {
-            "id": "dingzhen",
-            "emotion": "normal",
-            "text": "（摸了一下地面，有水）这啥玩意？"
-        },
-        {
-            "id": null,
-            "text": "（他的身下有一格水，看来是这一格浅水抵抗了那能让他死好几个来回的巨大冲击力）"
-        },
-        {
-            "id": "dingzhen",
-            "text": "不是哥们，你说这扯不扯？"
-        },
-        {
-            "id": null,
-            "text": "（丁真起身，继续向前走，不知走了多久，他看见了一个巨大的祭坛）"
-        },
-        {
-            "id": null,
-            "text": "（那个熟悉的身影就站在祭坛上，梦（真的不是噩梦吗）开始的地方）"
-        },
-        {
-            "id": "dingzhen",
-            "emotion": "angry",
-            "text": "王源？！就是你小子让我来这鬼地方的对吧？说，这是不是你的阴谋！！"
-        },
-        {
-            "id": null,
-            "text": "（男人缓缓转过身，看着暴跳如雷的丁真）"
-        },
-        {
-            "action": "add",
-            "id": "wangyuan",
-            "title": "王源",
-            "subtitle": "? ? ?",
-            "key": "wangyuan",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "wangyuan",
-            "text": "（温柔一笑）你在说什么呢，这难道不是一个好去处么。没有该死的狗仔和私生饭，也没有天天push你的导演老板，可以毫无顾忌地抽烟......"
-        },
-        {
-            "id": "wangyuan",
-            "text": "幻境里没有饥饿和病痛，你甚至还可以成为【数据消除】干涉现实，这多是一件美事啊!"
-        },
-        {
-            "id": null,
-            "text": "（他缓缓抬起手，好像在释放什么神秘的仪式）"
-        },
-        {
-            "action": "remove",
-            "id": "wangyuan"
-        },
-        {
-            "action": "add",
-            "id": "furongwangyuan",
-            "title": "芙蓉王源神",
-            "subtitle": " ",
-            "key": "furongwangyuan",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "furongwangyuan",
-            "text": "还有，叫我芙蓉王源神，无礼的家伙。"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（不可置信）你这家伙在说什么啊。成为什么，还有我不想待在这里了快放我出————"
-        },
-        {
-            "id": null,
-            "text": "（丁真话还没说完，就看见了眼前的源神突然化成了十个）"
-        },
-        {
-            "id": "dingzhen",
-            "text": "靠北，怎么还有分身？！我打十个王源，真的假的......"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        },
-        {
-            "action": "remove",
-            "id": "furongwangyuan"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "id": null,
+      "text": "（丁真在闯关时看见了一个坑洞，旁边是按压才能打开坑洞桥梁的机关）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（困惑）这玩意真的能过去吗......算了先试着跳过去吧。"
+    },
+    {
+      "id": null,
+      "text": "（然后果不其然地掉下去了）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "嗯哼哼哼啊啊啊啊啊啊啊啊啊啊啊————"
+    },
+    {
+      "id": null,
+      "text": "（丁真试图抓住周围墙壁的突起处来活命，但是墙体却是光滑的铁皮，怎样都扒不住）"
+    },
+    {
+      "id": null,
+      "text": "（漆黑的坑洞没有一丝亮光，仿佛通向无尽的地狱，那通道张开血盆大口，仿佛在欢迎新食物的到来。）"
+    },
+    {
+      "id": null,
+      "text": "（他就这么心怀恐惧地坠下去等待自己的结局...）"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "id": null,
+      "text": "（这时，他看见通道的尽头好像有点点亮光，然后迅速扩大）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "寄！这个高度我肯定要摔死的......"
+    },
+    {
+      "id": null,
+      "text": "（丁真紧紧闭住双眼）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "shock",
+      "text": "（意外地睁开双眼）欸，我没死还平安落地了？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "（摸了一下地面，有水）这啥玩意？"
+    },
+    {
+      "id": null,
+      "text": "（他的身下有一格水，看来是这一格浅水抵抗了那能让他死好几个来回的巨大冲击力）"
+    },
+    {
+      "id": "dingzhen",
+      "text": "不是哥们，你说这扯不扯？"
+    },
+    {
+      "id": null,
+      "text": "（丁真起身，继续向前走，不知走了多久，他看见了一个巨大的祭坛）"
+    },
+    {
+      "id": null,
+      "text": "（那个熟悉的身影就站在祭坛上，梦（真的不是噩梦吗）开始的地方）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "王源？！就是你小子让我来这鬼地方的对吧？说，这是不是你的阴谋！！"
+    },
+    {
+      "id": null,
+      "text": "（男人缓缓转过身，看着暴跳如雷的丁真）"
+    },
+    {
+      "action": "add",
+      "id": "wangyuan",
+      "title": "王源",
+      "subtitle": "? ? ?",
+      "key": "wangyuan",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "wangyuan",
+      "text": "（温柔一笑）你在说什么呢，这难道不是一个好去处么。没有该死的狗仔和私生饭，也没有天天push你的导演老板，可以毫无顾忌地抽烟......"
+    },
+    {
+      "id": "wangyuan",
+      "text": "幻境里没有饥饿和病痛，你甚至还可以成为【数据消除】干涉现实，这多是一件美事啊!"
+    },
+    {
+      "id": null,
+      "text": "（他缓缓抬起手，好像在释放什么神秘的仪式）"
+    },
+    {
+      "action": "remove",
+      "id": "wangyuan"
+    },
+    {
+      "action": "add",
+      "id": "furongwangyuan",
+      "title": "芙蓉王源神",
+      "subtitle": " ",
+      "key": "wangyuan",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "furongwangyuan",
+      "text": "还有，叫我芙蓉王源神，无礼的家伙。"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（不可置信）你这家伙在说什么啊。成为什么，还有我不想待在这里了快放我出————"
+    },
+    {
+      "id": null,
+      "text": "（丁真话还没说完，就看见了眼前的源神突然化成了十个）"
+    },
+    {
+      "id": "dingzhen",
+      "text": "靠北，怎么还有分身？！我打十个王源，真的假的......"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "action": "remove",
+      "id": "furongwangyuan"
+    }
+  ]
 }

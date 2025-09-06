@@ -1,52 +1,52 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "id": null,
-            "text": "（丁真继续向前走，但他却怎么也望不见山洞的尽头）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（后怕）那个丰川祥子不会骗我吧......"
-        },
-        {
-            "id": null,
-            "text": "（这时，他看见了一个熟悉的祭坛）"
-        },
-        {
-            "id": "dingzhen",
-            "text": "（倒吸一口凉气）该死......怎么还是会遇见这小子！"
-        },
-        {
-            "action": "add",
-            "id": "furongwangyuan",
-            "title": "芙蓉王源神",
-            "subtitle": " ",
-            "key": "furongwangyuan",
-            "emotion": "normal",
-            "position": "right"
-        },
-        {
-            "id": "furongwangyuan",
-            "text": "（警觉）又？看来，那位大人给了你不少东西......不过，就此为止了！只有我能成为那位大人的心腹！！"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        },
-        {
-            "action": "remove",
-            "id": "furongwangyuan"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "id": null,
+      "text": "（丁真继续向前走，但他却怎么也望不见山洞的尽头）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（后怕）那个丰川祥子不会骗我吧......"
+    },
+    {
+      "id": null,
+      "text": "（这时，他看见了一个熟悉的祭坛）"
+    },
+    {
+      "id": "dingzhen",
+      "text": "（倒吸一口凉气）该死......怎么还是会遇见这小子！"
+    },
+    {
+      "action": "add",
+      "id": "furongwangyuan",
+      "title": "芙蓉王源神",
+      "subtitle": " ",
+      "key": "wangyuan",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "furongwangyuan",
+      "text": "（警觉）又？看来，那位大人给了你不少东西......不过，就此为止了！只有我能成为那位大人的心腹！！"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "action": "remove",
+      "id": "furongwangyuan"
+    }
+  ]
 }

@@ -1,48 +1,48 @@
 {
-    "text_style": "modern",
-    "auto_next_delay": null,
-    "events": [
-        {
-            "id": null,
-            "text": "（丁真继续向前走去，这时他看见了一个蓝色的小章鱼）"
-        },
-        {
-            "action": "add",
-            "id": "dingzhen",
-            "title": "丁真",
-            "subtitle": "理塘王",
-            "key": "dingzhen",
-            "emotion": "normal",
-            "position": "left"
-        },
-        {
-            "action": "add",
-            "id": "xiaozhangyu",
-            "title": "? ? ?",
-            "subtitle": "小章鱼",
-            "key": "xiaozhangyu",
-            "emotion": "normal",
-            "postion": "right"
-        },
-        {
-            "id": "xiaozhangyu",
-            "text": "（挡住丁真）迷途之子啊，告诉我，你要往何处去？"
-        },
-        {
-            "id": "dingzhen",
-            "text": "我要上山，可以告诉我往哪走吗？"
-        },
-        {
-            "id": "xiaozhangyu",
-            "text": "可以，你如果可以帮我收集乐谱，我就告诉你。"
-        },
-        {
-            "action": "remove",
-            "id": "dingzhen"
-        },
-        {
-            "action": "remove",
-            "id": "xiaozhangyu"
-        }
-    ]
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "id": null,
+      "text": "（丁真继续向前走去，这时他看见了一个蓝色的小章鱼）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "理塘王",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "action": "add",
+      "id": "xiaozhangyu",
+      "title": "? ? ?",
+      "subtitle": "小章鱼",
+      "key": "zhangyu",
+      "emotion": "normal",
+      "postion": "right"
+    },
+    {
+      "id": "xiaozhangyu",
+      "text": "（挡住丁真）迷途之子啊，告诉我，你要往何处去？"
+    },
+    {
+      "id": "dingzhen",
+      "text": "我要上山，可以告诉我往哪走吗？"
+    },
+    {
+      "id": "xiaozhangyu",
+      "text": "可以，你如果可以帮我收集乐谱，我就告诉你。"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "action": "remove",
+      "id": "xiaozhangyu"
+    }
+  ]
 }

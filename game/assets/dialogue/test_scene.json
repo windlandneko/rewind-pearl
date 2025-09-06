@@ -16,8 +16,8 @@
       "id": "lm",
       "title": "博丽灵梦",
       "subtitle": "不可思议的巫女",
-      "key": "reimu",
-      "emotion": "surprise",
+      "key": "woman",
+      "emotion": "normal",
       "position": "left"
     },
     {
@@ -44,7 +44,7 @@
 
     {
       "id": "dz",
-      "emotion": "surprise"
+      "emotion": "shock"
     },
     {
       "id": "wy",
@@ -52,7 +52,7 @@
     },
     {
       "id": "lm",
-      "emotion": "surprise",
+      "emotion": "normal",
       "text": "？我是不是进错片场了"
     },
 
@@ -67,24 +67,24 @@
 
     {
       "id": "lm",
-      "emotion": "surprise",
+      "emotion": "normal",
       "title": "颜艺灵梦",
-      "text": "emotion: surprise"
+      "text": "emotion: normal"
     },
     {
       "id": "lm",
-      "emotion": "angry",
-      "text": "emotion: angry"
+      "emotion": "normal",
+      "text": "emotion: normal"
     },
     {
       "id": "lm",
-      "emotion": "smile",
-      "text": "emotion: smile"
+      "emotion": "normal",
+      "text": "emotion: normal"
     },
     {
       "id": "lm",
-      "emotion": "sweat",
-      "text": "emotion: sweat"
+      "emotion": "normal",
+      "text": "emotion: normal"
     },
 
     {
@@ -209,7 +209,7 @@
     },
     {
       "id": "dz",
-      "emotion": "sad",
+      "emotion": "confused",
       "text": "你干嘛嘿嘿诶呦"
     }
   ]
