@@ -151,7 +151,7 @@ class Asset {
   async #loadImage(url) {
     return new Promise((res, rej) => {
       const img = new Image()
-      img.onload = () => res(url)
+      img.onload = () => res(img)
       img.onprogress = ({ loaded, total }) => {
         if (!total) return
         this.onProgress?.({ type: 'progress', count: loaded, total })

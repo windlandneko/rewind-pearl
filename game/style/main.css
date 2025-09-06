@@ -65,7 +65,6 @@ main {
 
 #game-canvas.hidden {
   opacity: 0;
-  pointer-events: none;
 }
 
 #game2d-background {
@@ -85,6 +84,7 @@ main {
   object-position: center;
 
   transition: opacity 0.5s ease-in-out;
+  pointer-events: none;
 }
 
 #game2d-background.hidden {

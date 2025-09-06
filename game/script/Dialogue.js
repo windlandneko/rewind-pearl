@@ -340,10 +340,10 @@ class Dialogue {
     const key = character.key ?? 'gunmu'
     let image = `character/${key}/${emotion}`
     if (Asset.has(image)) {
-      image = Asset.get(image)
+      image = Asset.get(image).src
     } else {
       console.warn('[Dialogue] (updateCharacterEmotion) 立绘图片不存在:', character, emotion)
-      image = Asset.get('character/gunmu')
+      image = Asset.get('character/gunmu').src
     }
 
     character.$el.src = image

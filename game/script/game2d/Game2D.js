@@ -12,7 +12,7 @@ import {
   LevelChanger,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
-import GameConfig from './GameConfig.js'
+import * as GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
 
 let removeEscKeyListener = null
@@ -290,10 +290,8 @@ export class Game {
    */
   #saveSnapshot() {
     // todo: fix memory leak
-    // this.#gameStateHistory.set(this.tick, this.exportGameObjects())
-    this.#gameStateHistory.delete(
-      this.tick - GameConfig.MAX_TIME_TRAVEL_DISTANCE
-    )
+    this.#gameStateHistory.set(this.tick, this.exportGameObjects())
+    this.#gameStateHistory.delete(this.tick - GameConfig.MAX_SNAPSHOTS_COUNT)
   }
 
   /**
@@ -326,12 +324,20 @@ export class Game {
     const ghost = new GhostPlayer()
     ghost.state = state
     ghost.stateHistory = this.player.stateHistory
+    ghost.inputHistory = this.player.inputHistory
+
+    ghost.lifetimeBegin = this.player.lifetimeBegin
+    ghost.lifetimeEnd = this.tick
+
     this.ghostPlayers.push(ghost)
 
     this.player = new Player()
     this.player.state = state
+    this.camera.target = this.player
 
-    this.tick = Math.max(1, this.tick - 5 * 100)
+    this.tick = Math.max(0, this.tick - 5 * 100)
+    this.player.lifetimeBegin = this.tick
+
     const targetState = this.#gameStateHistory.get(this.tick)
     this.importGameObjects(targetState)
     this.ghostPlayers.forEach(ghost => {
@@ -359,6 +365,7 @@ export class Game {
       if (this.isPaused) return
       this.render(this.ctx)
       this.renderTimeTravelPreview(this.ctx, this.ctx2)
+      this.#renderTimeline(this.ctx)
     }
     renderLoop()
 
@@ -538,26 +545,26 @@ export class Game {
     if (this.isPaused || this.isTransitioning) return
     if (this.timeTravelState === 'pending') {
       const holdTime = performance.now() - this.timeTravelStartTime
-
-      if (holdTime >= 1000) {
-        this.timeTravelState = 'success'
-        this.executeTimeTravel()
+      if (holdTime >= GameConfig.TIME_TRAVEL_CHARGE_TIME) {
+        this.timeTravelState =
+          this.tick < GameConfig.TIME_TRAVEL_DISTANCE ? null : 'success'
       } else {
         this.timeTravelCircleRadius =
-          (16 + holdTime / 100) * 0.1 + this.timeTravelCircleRadius * 0.9
+          (12 + holdTime / 200) * 0.1 + this.timeTravelCircleRadius * 0.9
       }
     } else if (this.timeTravelState === 'success') {
-      const k = 0.005
-      this.timeTravelCircleRadius =
-        (this.timeTravelMaxRadius - this.timeTravelCircleRadius * k) / (1 - k)
+      this.timeTravelCircleRadius +=
+        dt * Math.min(800, this.timeTravelCircleRadius ** 2 / 10)
       if (this.timeTravelCircleRadius + 1 > this.timeTravelMaxRadius) {
         this.timeTravelState = null
         this.timeTravelCircleRadius = 0
+
+        this.executeTimeTravel()
       }
     } else {
       this.timeTravelCircleRadius = Math.max(
         0,
-        this.timeTravelCircleRadius - dt * 50
+        this.timeTravelCircleRadius - dt * 100
       )
     }
 
@@ -626,8 +633,8 @@ export class Game {
 
     // 更新游戏对象与玩家的互动（碰撞检测等）
     this.gameObjects.forEach(obj => {
-      obj.interactWithPlayer(this.player, this)
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
     })
 
     // 更新摄像机
@@ -638,6 +645,8 @@ export class Game {
 
   /**
    * 渲染时间回溯预览画面
+   * @param {CanvasRenderingContext2D} ctx 主画布上下文
+   * @param {CanvasRenderingContext2D} tmpctx 临时画布上下文
    */
   renderTimeTravelPreview(ctx, tmpctx) {
     const tick = Math.max(1, this.tick - 500)
@@ -657,7 +666,7 @@ export class Game {
     tmpctx.translate(-this.camera.position.x, -this.camera.position.y)
 
     // 绘制背景网格
-    this.#renderBackgroundGrid(tmpctx)
+    // this.#renderBackgroundGrid(tmpctx)
 
     // 按优先级渲染游戏对象
     this.renderGroups.platforms.forEach(entity =>
@@ -674,11 +683,19 @@ export class Game {
     )
 
     // 渲染玩家
-    this.ghostPlayers.forEach(ghost => ghost.render(tmpctx, this.scale))
-    const ghost = new GhostPlayer()
-    ghost.state = this.player.state
-    ghost.render(tmpctx, this.scale)
-
+    this.ghostPlayers.forEach(ghost => {
+      if (!ghost.stateHistory.has(tick)) return
+      const fakeGhost = new GhostPlayer()
+      fakeGhost.state = ghost.stateHistory.get(tick)
+      fakeGhost.removed = false
+      fakeGhost.render(tmpctx, this)
+    })
+    if (this.player.stateHistory.has(tick)) {
+      const ghost = new GhostPlayer()
+      ghost.state = this.player.stateHistory.get(tick)
+      ghost.render(tmpctx, this)
+    }
+    this.player.render(tmpctx, this.scale)
     tmpctx.restore()
 
     this.importGameObjects(state)
@@ -690,8 +707,50 @@ export class Game {
       (this.player.r.y + this.player.height / 2 - this.camera.position.y) *
       this.scale
 
-    // 绘制预览画面
+    const gradient = tmpctx.createRadialGradient(
+      playerScreenX,
+      playerScreenY,
+      Math.max(0, (this.timeTravelCircleRadius - 100) * this.scale),
+      playerScreenX,
+      playerScreenY,
+      this.timeTravelCircleRadius * this.scale
+    )
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)')
+    gradient.addColorStop(
+      1,
+      this.timeTravelState === 'success'
+        ? 'rgba(255, 255, 255, 0.5)'
+        : this.tick < GameConfig.TIME_TRAVEL_DISTANCE
+        ? 'rgba(255, 0, 0, 0.5)'
+        : 'rgba(87, 87, 200, 0.5)'
+    )
+    tmpctx.fillStyle = gradient
+    tmpctx.beginPath()
+    tmpctx.arc(
+      playerScreenX,
+      playerScreenY,
+      this.timeTravelCircleRadius * this.scale,
+      0,
+      Math.PI * 2
+    )
+    tmpctx.fill()
+
+    tmpctx.save()
+    tmpctx.globalCompositeOperation = 'destination-in'
+    tmpctx.fillStyle = 'black'
+    tmpctx.beginPath()
+    tmpctx.arc(
+      playerScreenX,
+      playerScreenY,
+      this.timeTravelCircleRadius * this.scale,
+      0,
+      Math.PI * 2
+    )
+    tmpctx.fill()
+    tmpctx.restore()
+
     ctx.save()
+    ctx.globalCompositeOperation = 'destination-out'
     ctx.beginPath()
     ctx.arc(
       playerScreenX,
@@ -700,15 +759,20 @@ export class Game {
       0,
       Math.PI * 2
     )
-    ctx.clip()
-    ctx.drawImage(tmpctx.canvas, 0, 0)
+    ctx.fill()
     ctx.restore()
+
+    ctx.drawImage(tmpctx.canvas, 0, 0)
 
     // 绘制圆圈边框
     ctx.save()
-    ctx.strokeStyle = '#00ffff'
-    ctx.lineWidth = 3
-    ctx.setLineDash([5, 5])
+    ctx.strokeStyle =
+      this.timeTravelState === 'success'
+        ? '#ffffff'
+        : this.tick < GameConfig.TIME_TRAVEL_DISTANCE
+        ? '#ff0000'
+        : '#aaaaaa'
+    ctx.lineWidth = 5
     ctx.beginPath()
     ctx.arc(
       playerScreenX,
@@ -724,21 +788,21 @@ export class Game {
     const holdTime = performance.now() - this.timeTravelStartTime
     ctx.save()
     ctx.fillStyle = '#00ffff'
-    ctx.font = '24px SourceHanSerifCN, serif, sans-serif'
+    ctx.font = '2rem SourceHanSerifCN, serif, sans-serif'
     ctx.textAlign = 'center'
 
     if (holdTime < 1000) {
       const remainingTime = ((1000 - holdTime) / 1000).toFixed(1)
       ctx.fillText(
-        `长按 ${this.timeTravelState}s 激活时间回溯`,
+        `长按 ${remainingTime}s 激活时间回溯`,
         this.displayWidth / 2,
-        this.displayHeight - 100
+        this.displayHeight - 10 / this.scale
       )
     } else {
       ctx.fillText(
         '时间回溯激活中...',
         this.displayWidth / 2,
-        this.displayHeight - 100
+        this.displayHeight - 10 / this.scale
       )
     }
 
@@ -774,12 +838,10 @@ export class Game {
     )
 
     // 渲染玩家
-    this.ghostPlayers.forEach(ghost => ghost.render(ctx, this.scale))
+    this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))
     this.player.render(ctx, this.scale)
 
     ctx.restore()
-
-    this.#renderTimeline(ctx)
 
     // 渲染关卡过渡效果
     if (this.isTransitioning && this.transitionOpacity) {
@@ -1110,13 +1172,8 @@ export class Game {
       if (!ghost.stateHistory) return
 
       // 获取ghost的存活时间范围
-      const ghostTicks = Array.from(ghost.stateHistory.keys()).sort(
-        (a, b) => a - b
-      )
-      if (ghostTicks.length === 0) return
-
-      const startTick = ghostTicks[0]
-      const endTick = ghostTicks[ghostTicks.length - 1]
+      const startTick = ghost.lifetimeBegin
+      const endTick = ghost.lifetimeEnd
 
       const startX = centerX + (startTick - this.tick) * pixelsPerTick
       const endX = centerX + (endTick - this.tick) * pixelsPerTick

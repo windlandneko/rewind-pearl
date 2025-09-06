@@ -1,5 +1,8 @@
 import { BaseObject } from './BaseObject.js'
 import Vec2 from '../Vector.js'
+import AnimationManager from '../Animation.js'
+import SpriteAnimation from '../Sprite.js'
+import Asset from '../../Asset.js'
 
 export class Player extends BaseObject {
   type = 'player'
@@ -34,10 +37,15 @@ export class Player extends BaseObject {
 
   previousOnGround = false
   previousPosition = null
+  previousDirection = 1 // 最后移动的方向，1为右，-1为左
 
   inputQueue = []
   inputHistory = new Map()
   stateHistory = new Map()
+  lifetimeBegin = 0
+  lifetimeEnd = null
+
+  animationManager = new AnimationManager()
 
   constructor(x, y) {
     super(x, y, 10, 16)
@@ -46,6 +54,47 @@ export class Player extends BaseObject {
       r: { x: this.r.x + 1, y: this.r.y + this.height },
       width: this.width - 2,
       height: 1,
+    }
+
+    this.animationManager.addAnimation(
+      'idle_left',
+      new SpriteAnimation(Asset.get('sprite/player/idle_left'), 4, 32, 32)
+    )
+    this.animationManager.addAnimation(
+      'idle_right',
+      new SpriteAnimation(Asset.get('sprite/player/idle_right'), 4, 32, 32)
+    )
+    this.animationManager.addAnimation(
+      'walk_left',
+      new SpriteAnimation(Asset.get('sprite/player/walk_left'), 6, 32, 32)
+    )
+    this.animationManager.addAnimation(
+      'walk_right',
+      new SpriteAnimation(Asset.get('sprite/player/walk_right'), 6, 32, 32)
+    )
+
+    // 默认播放右方向的闲置动画
+    this.animationManager.playAnimation('idle_right')
+  }
+
+  /**
+   * 更新动画状态
+   */
+  updateAnimation() {
+    if (!this.onGround) {
+      // todo: jump animation
+      this.animationManager.playAnimation(
+        this.previousDirection > 0 ? 'walk_right' : 'walk_left'
+      )
+    } else if (Math.abs(this.v.x) > 5) {
+      this.animationManager.playAnimation(
+        this.v.x > 0 ? 'walk_right' : 'walk_left'
+      )
+      this.previousDirection = this.v.x > 0 ? 1 : -1
+    } else {
+      this.animationManager.playAnimation(
+        this.previousDirection > 0 ? 'idle_right' : 'idle_left'
+      )
     }
   }
 
@@ -95,14 +144,20 @@ export class Player extends BaseObject {
     // 重力
     acceleration.y += this.gravity
 
-    // 更新速度
+    // 速度
     this.v.addTo(acceleration.mul(dt))
 
-    // 更新位置
+    // 位移
     this.r.addTo(this.v.mul(dt))
 
-    // 更新无敌时间
+    // 无敌时间
     this.damageTimer = Math.max(0, this.damageTimer - dt)
+
+    // 动画
+    this.updateAnimation()
+    this.animationManager.update(dt)
+
+    if (this.v.y === NaN) debugger
   }
 
   /**
@@ -236,11 +291,28 @@ export class Player extends BaseObject {
 
     // 受伤时闪烁效果
     if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.2) % 2 === 0) {
-      ctx.fillStyle = 'rgba(33, 150, 243, 0.2)'
+      ctx.globalAlpha = 0.5
     } else {
-      ctx.fillStyle = 'rgba(33, 150, 243, 1)'
+      ctx.globalAlpha = 1.0
     }
-    ctx.fillRect(x, y, this.width, this.height)
+
+    const spriteWidth = 32
+    const spriteHeight = 32
+    const spriteX = x + (this.width - spriteWidth) / 2
+    const spriteY = y + this.height - spriteHeight
+
+    this.animationManager.render(
+      ctx,
+      spriteX,
+      spriteY,
+      spriteWidth,
+      spriteHeight
+    )
+    ctx.globalAlpha = 1.0
+
+    return
+
+    // 地面接触指示器
     if (this.onGround) {
       ctx.fillStyle = '#444'
       ctx.fillRect(x + 1, y + this.height - 2, this.width - 2, 1)
@@ -262,7 +334,7 @@ export class Player extends BaseObject {
     // 调试信息
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
     ctx.font = `${24 / scale}px FiraCode, monospace`
-    const debugY = y - 100 / scale
+    const debugY = y - 120 / scale
     ctx.fillText(
       `pos: (${this.r.x.toFixed(1)}, ${this.r.y.toFixed(1)})`,
       x,
@@ -301,6 +373,12 @@ export class Player extends BaseObject {
       ctx.fillStyle = i < this.airJumpsCount ? 'lightblue' : '#222'
       ctx.fillRect(x + i * 10 + 1, y + 1, 1, 1)
     }
+
+    // 可视化碰撞箱边界（调试用）
+    // 可以通过GameConfig控制是否显示
+    ctx.strokeStyle = 'red'
+    ctx.lineWidth = 1 / scale
+    ctx.strokeRect(x, y, this.width, this.height)
   }
 
   get state() {
@@ -311,7 +389,6 @@ export class Player extends BaseObject {
       score: this.score,
       onGround: this.onGround,
       inputQueue: this.inputQueue,
-      inputHistory: Array.from(this.inputHistory.entries()),
 
       // 跳跃相关状态
       jumpKeyPressed: this.jumpKeyPressed,
@@ -327,6 +404,11 @@ export class Player extends BaseObject {
       previousOnGround: this.previousOnGround,
       previousPositionX: this.previousPosition.x,
       previousPositionY: this.previousPosition.y,
+      previousDirection: this.previousDirection,
+
+      // 动画状态
+      currentAnimationName:
+        this.animationManager?.getCurrentAnimationName() || null,
     }
   }
 
@@ -338,7 +420,6 @@ export class Player extends BaseObject {
     this.score = state.score
     this.onGround = state.onGround
     this.inputQueue = state.inputQueue
-    this.inputHistory = new Map(state.inputHistory)
 
     // 跳跃相关状态
     this.jumpKeyPressed = state.jumpKeyPressed
@@ -354,5 +435,11 @@ export class Player extends BaseObject {
     this.previousOnGround = state.previousOnGround
     this.previousPosition.x = state.previousPositionX
     this.previousPosition.y = state.previousPositionY
+    this.previousDirection = state.previousDirection
+
+    // 动画状态
+    if (state.currentAnimationName && this.animationManager) {
+      this.animationManager.playAnimation(state.currentAnimationName)
+    }
   }
 }

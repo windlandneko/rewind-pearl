@@ -7,6 +7,7 @@ import { Player } from './Player.js'
 export class GhostPlayer extends Player {
   type = 'ghost_player'
   color = 'rgba(100, 100, 255, 0.7)' // 半透明蓝色
+  flag = false
 
   update(dt, game) {
     if (!this.stateHistory.has(game.tick)) {
@@ -19,7 +20,10 @@ export class GhostPlayer extends Player {
     super.update(dt, game)
 
     const record = this.stateHistory.get(game.tick)
-    this.validateState(record)
+    if (!this.flag) {
+      this.flag = true
+      this.validateState(record)
+    }
     this.state = record
   }
 
@@ -28,11 +32,7 @@ export class GhostPlayer extends Player {
 
     if (
       !Object.keys(record).every(
-        key =>
-          key === 'inputQueue' ||
-          (typeof record[key] === 'number'
-            ? Math.abs(record[key] - state[key]) <= 1e-3
-            : record[key] === state[key])
+        key => key === 'inputQueue' || record[key] === state[key]
       )
     ) {
       console.log(
@@ -44,37 +44,58 @@ export class GhostPlayer extends Player {
     }
   }
 
-  render(ctx, scale) {
+  render(ctx, { scale, tick }) {
+    const x = Math.round(this.r.x * scale) / scale
+    const y = Math.round(this.r.y * scale) / scale
+
+    if (Math.abs(tick - this.lifetimeBegin) < 25) {
+      ctx.beginPath()
+      ctx.arc(
+        x + this.width / 2,
+        y + this.height / 2,
+        Math.min(12, 25 - Math.abs(tick - this.lifetimeBegin)),
+        0,
+        Math.PI * 2
+      )
+      ctx.fillStyle = 'red'
+      ctx.stroke()
+    }
+    if (Math.abs(tick - this.lifetimeEnd) < 25) {
+      ctx.beginPath()
+      ctx.arc(
+        x + this.width / 2,
+        y + this.height / 2,
+        Math.min(12, 25 - Math.abs(tick - this.lifetimeEnd)),
+        0,
+        Math.PI * 2
+      )
+      ctx.fillStyle = 'blue'
+      ctx.fill()
+    }
+
     if (this.removed) return
 
-    // 绘制半透明的玩家
-    ctx.save()
-    ctx.globalAlpha = 0.7
+    // 受伤时闪烁效果
+    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.2) % 2 === 0) {
+      ctx.globalAlpha = 0.8
+    } else {
+      ctx.globalAlpha = 1.0
+    }
 
-    // 如果状态不一致，用红色高亮显示
-    // if (!this.stateConsistent) {
-    //   ctx.fillStyle = 'rgba(255, 0, 0, 0.8)'
-    // } else {
-    //   ctx.fillStyle = this.color
-    // }
+    ctx.globalAlpha -= 0.4
 
-    ctx.textAlign = 'center'
-    ctx.fillStyle = 'white'
-    ctx.fillText(
-      `HP: ${this.health}`,
-      this.r.x + this.width / 2,
-      this.r.y + this.height / 2
+    const spriteWidth = 32
+    const spriteHeight = 32
+    const spriteX = x + (this.width - spriteWidth) / 2
+    const spriteY = y + this.height - spriteHeight
+
+    this.animationManager.render(
+      ctx,
+      spriteX,
+      spriteY,
+      spriteWidth,
+      spriteHeight
     )
-
-    ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
-
-    // 绘制边框以区分
-    ctx.strokeStyle = this.stateConsistent
-      ? 'rgba(100, 100, 255, 1)'
-      : 'rgba(255, 0, 0, 1)'
-    ctx.lineWidth = 1 / scale
-    ctx.strokeRect(this.r.x, this.r.y, this.width, this.height)
-
-    ctx.restore()
+    ctx.globalAlpha = 1.0
   }
 }

@@ -14,8 +14,8 @@ export class Camera {
   }
   #target
   #worldBounds
-  #viewportWidth
-  #viewportHeight
+  viewportWidth
+  viewportHeight
   #lerpFactor
 
   position = new Vec2(0, 0)
@@ -34,8 +34,8 @@ export class Camera {
    * @param {number} height - 视窗高度
    */
   setViewportSize(width, height) {
-    this.#viewportWidth = width
-    this.#viewportHeight = height
+    this.viewportWidth = width
+    this.viewportHeight = height
   }
 
   /**
@@ -96,17 +96,17 @@ export class Camera {
     if (targetX < this.#padding.left) {
       // 目标在左边距外，摄像机需要向左移动
       deltaX = targetX - this.#padding.left
-    } else if (targetX > this.#viewportWidth - this.#padding.right) {
+    } else if (targetX > this.viewportWidth - this.#padding.right) {
       // 目标在右边距外，摄像机需要向右移动
-      deltaX = targetX - (this.#viewportWidth - this.#padding.right)
+      deltaX = targetX - (this.viewportWidth - this.#padding.right)
     }
 
     if (targetY < this.#padding.top) {
       // 目标在上边距外，摄像机需要向上移动
       deltaY = targetY - this.#padding.top
-    } else if (targetY > this.#viewportHeight - this.#padding.bottom) {
+    } else if (targetY > this.viewportHeight - this.#padding.bottom) {
       // 目标在下边距外，摄像机需要向下移动
-      deltaY = targetY - (this.#viewportHeight - this.#padding.bottom)
+      deltaY = targetY - (this.viewportHeight - this.#padding.bottom)
     }
 
     // 新的摄像机位置
@@ -117,11 +117,11 @@ export class Camera {
     if (this.#worldBounds) {
       newX = Math.max(
         this.#worldBounds.minX,
-        Math.min(newX, this.#worldBounds.maxX - this.#viewportWidth)
+        Math.min(newX, this.#worldBounds.maxX - this.viewportWidth)
       )
       newY = Math.max(
         this.#worldBounds.minY,
-        Math.min(newY, this.#worldBounds.maxY - this.#viewportHeight)
+        Math.min(newY, this.#worldBounds.maxY - this.viewportHeight)
       )
     }
 
@@ -147,11 +147,11 @@ export class Camera {
     if (this.#worldBounds) {
       this.position.x = Math.max(
         this.#worldBounds.minX,
-        Math.min(this.position.x, this.#worldBounds.maxX - this.#viewportWidth)
+        Math.min(this.position.x, this.#worldBounds.maxX - this.viewportWidth)
       )
       this.position.y = Math.max(
         this.#worldBounds.minY,
-        Math.min(this.position.y, this.#worldBounds.maxY - this.#viewportHeight)
+        Math.min(this.position.y, this.#worldBounds.maxY - this.viewportHeight)
       )
     }
   }
@@ -162,8 +162,8 @@ export class Camera {
   centerOnTarget() {
     if (!this.#target) return
 
-    const centerX = this.#target.r.x - this.#viewportWidth / 2
-    const centerY = this.#target.r.y - this.#viewportHeight / 2
+    const centerX = this.#target.r.x - this.viewportWidth / 2
+    const centerY = this.#target.r.y - this.viewportHeight / 2
     this.setPosition(centerX, centerY)
   }
 
@@ -175,8 +175,8 @@ export class Camera {
     return {
       x: this.position.x,
       y: this.position.y,
-      width: this.#viewportWidth,
-      height: this.#viewportHeight,
+      width: this.viewportWidth,
+      height: this.viewportHeight,
     }
   }
 
