@@ -12,7 +12,7 @@ export class LevelChanger extends BaseObject {
 
   interactWithPlayer(player, game) {
     if (this.force && player.checkCollision(this) && this.targetLevel) {
-      game.transitionToLevel(this.targetLevel)
+      game.changeLevel(this.targetLevel)
     }
   }
 
@@ -20,7 +20,7 @@ export class LevelChanger extends BaseObject {
     if (!player.checkCollision(this) || !this.targetLevel) return false
 
     // 开始关卡切换过渡动画
-    await game.transitionToLevel(this.targetLevel)
+    await game.changeLevel(this.targetLevel)
     return true
   }
 

@@ -42,7 +42,7 @@ async function init(skipAssetLoading = false) {
 }
 
 function startNewGame() {
-  Game2D.loadLevel(LevelManager.Level1)
+  Game2D.loadLevel(LevelManager.PrologueLevel)
   Game2D.start()
 }
 
