@@ -56,6 +56,8 @@ main {
   image-rendering: crisp-edges;
 
   transition: opacity 1s;
+
+  background: url('../../background.png') no-repeat center / cover fixed black;
 }
 #game-canvas.hidden {
   opacity: 0;

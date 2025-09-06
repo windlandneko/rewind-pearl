@@ -3,6 +3,7 @@ import Asset from './Asset.js'
 import Loading from './Loading.js'
 import Game2D from './game2d/Game2D.js'
 import { $, wait } from './utils.js'
+import { Level1 } from './game2d/Level.js'
 
 async function init(skipAssetLoading = false) {
   try {
@@ -21,8 +22,8 @@ async function init(skipAssetLoading = false) {
   // await Dialogue.play('prologue')
   // await Dialogue.play('test_scene')
   // await wait(1000)
-  Game2D.loadLevel()
-  Game2D.startLevel()
+  Game2D.loadLevel(Level1)
+  Game2D.start()
 }
 
 $('#loading-retry').addEventListener('click', () => init())

@@ -284,7 +284,7 @@ class Dialogue {
                 this.dialogueData.auto_next_delay
               )
           }
-        }, 500 / text.length + 15)
+        }, 500 / text.length + 10)
         this.textDisplaying = true
       } else if (skip) {
         this.$modernText.textContent = text

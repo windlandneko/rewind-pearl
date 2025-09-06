@@ -1,56 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>再见丁真</title>
-    <link rel="stylesheet" type="text/css" href="style/main.css" />
 
-    <script type="module" src="script/main.js" defer></script>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>再见丁真</title>
+  <link rel="stylesheet" type="text/css" href="style/main.css" />
 
-  <body>
-    <main>
-      <div class="loading-container">
-        <h2 class="loading-title">少女祈祷中</h2>
-        <div class="loading-progress-container">
-          <div class="loading-progress-bar">
-            <div class="loading-progress-fill"></div>
-          </div>
-        </div>
-        <div class="loading-status">准备加载资源...</div>
-        <div class="loading-action hidden">
-          <button id="loading-retry">重试</button>
-          <button id="loading-skip">跳过</button>
-        </div>
-        <div class="loading-error hidden"></div>
-      </div>
+  <script type="module" src="script/main.js" defer></script>
+</head>
 
-      <canvas id="game-canvas"></canvas>
-
-      <div class="dialogue-container">
-        <div class="modern-style-text">
-          <div style="width: min-content">
-            <div class="subtitle"></div>
-            <div class="title"></div>
-          </div>
-          <div class="text"></div>
-        </div>
-        <div class="touhou-style-text text">
-          <svg width="40" height="40" viewBox="-10 -50 90 100">
-            <path
-              d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11 Z"
-              fill="#ffeca7"
-            />
-            <path
-              d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11"
-              fill="none"
-              stroke="#000"
-              stroke-width="5.3"
-            />
-          </svg>
+<body>
+  <main>
+    <div class="loading-container">
+      <h2 class="loading-title">少女祈祷中</h2>
+      <div class="loading-progress-container">
+        <div class="loading-progress-bar">
+          <div class="loading-progress-fill"></div>
         </div>
       </div>
-    </main>
-  </body>
+      <div class="loading-status">准备加载资源...</div>
+      <div class="loading-action hidden">
+        <button id="loading-retry">重试</button>
+        <button id="loading-skip">跳过</button>
+      </div>
+      <div class="loading-error hidden"></div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <div class="dialogue-container">
+      <div class="modern-style-text">
+        <div style="width: min-content">
+          <div class="subtitle"></div>
+          <div class="title"></div>
+        </div>
+        <div class="text"></div>
+      </div>
+      <div class="touhou-style-text text">
+        <svg width="40" height="40" viewBox="-10 -50 90 100">
+          <path d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11 Z" fill="#ffeca7" />
+          <path d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11" fill="none" stroke="#000" stroke-width="5.3" />
+        </svg>
+      </div>
+    </div>
+  </main>
+</body>
+
 </html>

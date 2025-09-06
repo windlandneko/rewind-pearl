@@ -68,6 +68,7 @@ export class Interactable extends BaseObject {
       bobOffset: this.bobOffset,
       isHighlighted: this.isHighlighted,
       highlightColor: this.highlightColor,
+      dialogueId: this.dialogueId,
       hint: this.hint,
     }
   }
@@ -77,6 +78,7 @@ export class Interactable extends BaseObject {
     this.bobOffset = state.bobOffset
     this.isHighlighted = state.isHighlighted
     this.highlightColor = state.highlightColor
+    this.dialogueId = state.dialogueId
     this.hint = state.hint
   }
 }
