@@ -3,50 +3,53 @@
     "test": "audio/獣の知性 - [TH19] 東方獣王園.mp3"
   },
 
-  "level": {
-    "test_level": "level/test_level.json"
-  },
-
   "character": {
     "gunmu": "character/gunmu/normal.png",
     "dingzhen": {
       "angry": "character/dingzhen/angry.png",
+      "confused": "character/dingzhen/confused.png",
+      "defeat": "character/dingzhen/defeat.png",
+      "eyes_closed": "character/dingzhen/eyes_closed.png",
+      "looking_up": "character/dingzhen/looking_up.png",
       "normal": "character/dingzhen/normal.png",
+      "proud": "character/dingzhen/proud.png",
+      "question": "character/dingzhen/question.png",
+      "shock": "character/dingzhen/shock.png",
       "smile": "character/dingzhen/smile.png",
-      "surprise": "character/dingzhen/surprise.png",
-      "sweat": "character/dingzhen/sweat.png",
-      "sad": "character/dingzhen/sad.png"
-    },
-    "reimu": {
-      "angry": "character/reimu/angry.png",
-      "normal": "character/reimu/normal.png",
-      "smile": "character/reimu/smile.png",
-      "surprise": "character/reimu/surprise.png",
-      "sweat": "character/reimu/sweat.png"
+      "smoke_sick": "character/dingzhen/smoke_sick.png",
+      "smoke": "character/dingzhen/smoke.png",
+      "thinking": "character/dingzhen/thinking.png"
     },
     "wangyuan": {
       "angry": "character/wangyuan/angry.png",
       "normal": "character/wangyuan/normal.png",
       "smile": "character/wangyuan/smile.png",
       "surprise": "character/wangyuan/surprise.png",
-      "sweat": "character/wangyuan/sweat.png"
+      "sweat": "character/wangyuan/sweat.png",
+      "yuanshen_full": "character/wangyuan/yuanshen_full.png",
+      "yuanshen": "character/wangyuan/yuanshen.png"
     },
-    "qie": {
-      "angry": "character/qie/angry.png",
-      "normal": "character/qie/normal.png"
+    "zhishiqie": {
+      "angry": "character/zhishiqie/angry.png",
+      "normal": "character/zhishiqie/normal.png",
+      "happy": "character/zhishiqie/happy.png",
+      "unhappy": "character/zhishiqie/unhappy.png"
     },
-    "furongwangyuan": {
-      "normal": "character/furongwangyuan/normal.png"
+    "man": {
+      "normal": "character/man.png"
     },
-    "diangun": {
-      "normal": "character/diangun/normal.png",
-      "cry": "character/diangun/cry.png"
+    "woman": {
+      "normal": "character/woman.png"
     },
-    "xiaozhangyu": {
-      "normal": "character/xiaozhangyu/normal.png"
+    "zhangyu": {
+      "normal": "character/zhangyu.png"
     },
     "hajimi": {
-      "normal": "character/hajimi/normal.png"
+      "normal": "character/hajimi.png"
+    },
+    "otto": {
+      "happy": "character/otto/happy.png",
+      "sad": "character/otto/sad.png"
     }
   },
 
@@ -73,6 +76,12 @@
   },
 
   "background": {
-    "test_bg": "background/title_bg.png"
+    "cave": "background/cave.png",
+    "factory": "background/factory.png",
+    "intro": "background/intro.jpg",
+    "litang": "background/litang.png",
+    "magic": "background/magic.jpg",
+    "test": "background/test.png",
+    "underground": "background/underground.png"
   }
 }
