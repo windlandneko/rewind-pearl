@@ -6,7 +6,6 @@ import { Player } from './Player.js'
  */
 export class GhostPlayer extends Player {
   type = 'ghost_player'
-  color = 'rgba(100, 100, 255, 0.7)' // 半透明蓝色
   flag = false
 
   update(dt, game) {
@@ -42,6 +41,10 @@ export class GhostPlayer extends Player {
           .map(key => `${key}: ${record[key]} -> ${state[key]}`)
       )
     }
+  }
+
+  processInputEvents(dt, game) {
+    super.processInputEvents(dt, game, true)
   }
 
   render(ctx, { scale, tick }) {

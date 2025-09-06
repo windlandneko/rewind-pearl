@@ -1,6 +1,7 @@
 import Keyboard from '../Keyboard.js'
 import SaveManager from '../SaveManager.js'
 import { EventListener, throttle } from '../utils.js'
+import pauseManager from '../PauseManager.js'
 import {
   Player,
   Platform,
@@ -14,12 +15,6 @@ import {
 import { Camera } from './Camera.js'
 import * as GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
-
-let removeEscKeyListener = null
-const rebindEscKey = fn => {
-  removeEscKeyListener?.()
-  if (fn) removeEscKeyListener = Keyboard.onKeydown('Esc', fn)
-}
 
 export class Game {
   listener = new EventListener()
@@ -42,7 +37,6 @@ export class Game {
 
   // 游戏状态
   isRunning = false
-  isPaused = false
   camera = new Camera()
   scale
 
@@ -65,12 +59,6 @@ export class Game {
   pendingLevel = null
 
   #keyboardListeners = []
-
-  // UI元素
-  $pauseOverlay = null
-  $saveManagerModal = null
-  $helpModal = null
-  $backgroundImage = null
 
   constructor() {
     const main = document.querySelector('main')
@@ -127,72 +115,8 @@ export class Game {
 
     this.$backgroundImage = document.getElementById('game2d-background')
 
-    // 初始化UI元素
-    this.#initPauseMenu()
-  }
-
-  #initPauseMenu() {
-    this.$pauseOverlay = document.getElementById('pause-overlay')
-    this.$saveManagerModal = document.getElementById('save-manager-modal')
-    this.$helpModal = document.getElementById('help-modal')
-
-    // 暂停界面按钮事件
-    document
-      .getElementById('resume-btn')
-      .addEventListener('click', () => this.resume())
-
-    document.getElementById('save-btn').addEventListener('click', () => {
-      SaveManager.showSavePrompt(saveName => this.saveGame(saveName))
-    })
-
-    document.getElementById('load-btn').addEventListener('click', () => {
-      const saveList = document.getElementById('save-list')
-      this.$saveManagerModal.classList.add('show')
-
-      rebindEscKey(() => this.hideSaveManagerModal())
-
-      SaveManager.loadSaveList(saveList, saveData => {
-        // 加载存档
-        localStorage.setItem('rewind-pearl-load-save', JSON.stringify(saveData))
-        location.reload()
-      })
-    })
-
-    document.getElementById('help-btn').addEventListener('click', () => {
-      this.$helpModal.classList.add('show')
-      rebindEscKey(() => this.hideHelpModal())
-    })
-
-    document.getElementById('title-btn').addEventListener('click', () => {
-      if (confirm('确定要返回标题页面吗？未保存的进度将会丢失。')) {
-        window.location.href = '../index.html'
-      }
-    })
-
-    // 存档管理界面事件
-    document
-      .getElementById('save-manager-close')
-      .addEventListener('click', () => {
-        this.hideSaveManagerModal()
-      })
-
-    // 帮助界面事件
-    document.getElementById('help-close').addEventListener('click', () => {
-      this.hideHelpModal()
-    })
-
-    // 点击遮罩关闭模态框
-    this.$saveManagerModal.addEventListener('click', e => {
-      if (e.target === this.$saveManagerModal) {
-        this.hideSaveManagerModal()
-      }
-    })
-
-    this.$helpModal.addEventListener('click', e => {
-      if (e.target === this.$helpModal) {
-        this.hideHelpModal()
-      }
-    })
+    // 初始化暂停管理器
+    pauseManager.setGame(this)
   }
 
   #addKeyboardListeners() {
@@ -201,11 +125,7 @@ export class Game {
         this.player.inputQueue.push('keydown:interact')
       }),
       Keyboard.onKeydown(['Esc'], () => {
-        if (this.isPaused) {
-          this.resume()
-        } else {
-          this.pause()
-        }
+        pauseManager.toggle()
       }),
       Keyboard.onKeydown('Space', () => {
         this.player.inputQueue.push('keydown:jump')
@@ -351,7 +271,6 @@ export class Game {
     this.canvas.classList.remove('hidden')
 
     this.isRunning = true
-    this.isPaused = false
     this.#addKeyboardListeners()
 
     // Update Loop
@@ -362,7 +281,7 @@ export class Game {
     // Render Loop
     const renderLoop = () => {
       this.animationFrameHandler = requestAnimationFrame(renderLoop)
-      if (this.isPaused) return
+      if (pauseManager.isPaused) return
       this.render(this.ctx)
       this.renderTimeTravelPreview(this.ctx, this.ctx2)
       this.#renderTimeline(this.ctx)
@@ -373,24 +292,21 @@ export class Game {
     this.#updateRenderGroups()
   }
 
-  pause() {
-    if (this.isPaused) return
-    this.isPaused = true
+  /**
+   * 暂停回调 - 当游戏被暂停时调用
+   */
+  onPause() {
     this.isRunning = false
-    this.$pauseOverlay.classList.add('show')
-
-    // 移除游戏键盘监听器，但保留暂停键
+    // 移除游戏键盘监听器
     this.#removeKeyboardListeners()
-    rebindEscKey(() => this.resume())
   }
 
-  resume() {
-    if (!this.isPaused) return
-    this.isPaused = false
+  /**
+   * 恢复回调 - 当游戏恢复时调用
+   */
+  onResume() {
     this.isRunning = true
-    this.$pauseOverlay.classList.remove('show')
-
-    rebindEscKey(null)
+    // 延迟添加键盘监听器，避免与暂停键冲突
     setTimeout(() => this.#addKeyboardListeners(), 0)
   }
 
@@ -430,16 +346,6 @@ export class Game {
       }
       checkTransition()
     })
-  }
-
-  hideSaveManagerModal() {
-    this.$saveManagerModal.classList.remove('show')
-    rebindEscKey(() => this.resume())
-  }
-
-  hideHelpModal() {
-    this.$helpModal.classList.remove('show')
-    rebindEscKey(() => this.resume())
   }
 
   loadGame({ levelData, gameObjects, player, tick, maxTick }) {
@@ -532,7 +438,6 @@ export class Game {
 
   stop() {
     this.isRunning = false
-    this.isPaused = false
     this.#removeKeyboardListeners()
     clearInterval(this.updateIntervalHandler)
     cancelAnimationFrame(this.animationFrameHandler)
@@ -542,7 +447,21 @@ export class Game {
    * 更新游戏逻辑
    */
   async update(dt) {
-    if (this.isPaused || this.isTransitioning) return
+    if (pauseManager.isPaused) return
+
+    // 外部输入事件
+    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
+    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
+    if (keyLeft && !keyRight) {
+      this.player.inputQueue.push('walk:left')
+    } else if (keyRight && !keyLeft) {
+      this.player.inputQueue.push('walk:right')
+    } else {
+      this.player.inputQueue.push('walk:stop')
+    }
+    if (this.player.inputQueue.length)
+      this.player.inputHistory.set(this.tick, [...this.player.inputQueue])
+
     if (this.timeTravelState === 'pending') {
       const holdTime = performance.now() - this.timeTravelStartTime
       if (holdTime >= GameConfig.TIME_TRAVEL_CHARGE_TIME) {
@@ -579,17 +498,6 @@ export class Game {
     if (objectsToRemove.length > 0) {
       this.gameObjects = this.gameObjects.filter(obj => !obj.removed)
       this.#updateRenderGroups()
-    }
-
-    // 外部输入事件
-    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
-    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
-    if (keyLeft && !keyRight) {
-      this.player.inputQueue.push('walk:left')
-    } else if (keyRight && !keyLeft) {
-      this.player.inputQueue.push('walk:right')
-    } else {
-      this.player.inputQueue.push('walk:stop')
     }
 
     // 更新玩家
@@ -844,7 +752,7 @@ export class Game {
     ctx.restore()
 
     // 渲染关卡过渡效果
-    if (this.isTransitioning && this.transitionOpacity) {
+    if (this.transitionOpacity) {
       ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
       ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
     }

@@ -98,14 +98,12 @@ export class Player extends BaseObject {
     }
   }
 
-  async processInputEvents(dt, game) {
-    if (this.inputQueue.length)
-      this.inputHistory.set(game.tick, [...this.inputQueue])
-
+  async processInputEvents(dt, game, ghost = false) {
     while (this.inputQueue.length) {
       const event = this.inputQueue.shift()
       switch (event) {
         case 'keydown:interact':
+          if (ghost) break
           for (const entity of game.renderGroups.interactables) {
             if (await entity.handleKeyInteraction?.(this, game)) break
           }
@@ -156,8 +154,6 @@ export class Player extends BaseObject {
     // 动画
     this.updateAnimation()
     this.animationManager.update(dt)
-
-    if (this.v.y === NaN) debugger
   }
 
   /**

@@ -33,10 +33,10 @@ export function Level1(game) {
 
   // 平台
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height), // 右墙
+    new Platform(width - 8, 0, 8, height - 40), // 右墙
 
     // 平台
     new Platform(80, 152, 120, 16),
@@ -53,7 +53,9 @@ export function Level1(game) {
   )
 
   // 关卡传送门
-  game.gameObjects.push(new LevelChanger(width - 50, 150, 32, 32, 'Level2'))
+  game.gameObjects.push(
+    new LevelChanger(width - 8, 150, 32, 32, 'Level2', true)
+  )
 
   // 收集品（暂时用不到）
   game.gameObjects.push(
@@ -88,10 +90,10 @@ export function PrologueLevel(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 剧情对话点
@@ -99,7 +101,7 @@ export function PrologueLevel(game) {
 
   // 进入异世界的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'Chapter1Level')
+    new LevelChanger(width - 8, 150, 32, 32, 'Chapter1Level', true)
   )
 }
 
@@ -124,10 +126,10 @@ export function Chapter1Level(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 剧情对话点
@@ -139,7 +141,7 @@ export function Chapter1Level(game) {
 
   // 前往工厂的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'Chapter2Level')
+    new LevelChanger(width - 8, 150, 32, 32, 'Chapter2Level', true)
   )
 }
 
@@ -164,10 +166,10 @@ export function Chapter2Level(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 剧情对话点
@@ -179,7 +181,7 @@ export function Chapter2Level(game) {
 
   // 前往山峰的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'Chapter3Level')
+    new LevelChanger(width - 8, 150, 32, 32, 'Chapter3Level', true)
   )
 }
 
@@ -204,10 +206,10 @@ export function Chapter3Level(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 剧情对话点
@@ -221,7 +223,7 @@ export function Chapter3Level(game) {
 
   // 前往最终战的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'Chapter4Level')
+    new LevelChanger(width - 8, 150, 32, 32, 'Chapter4Level', true)
   )
 }
 
@@ -246,10 +248,10 @@ export function Chapter4Level(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 剧情对话点
@@ -260,7 +262,7 @@ export function Chapter4Level(game) {
 
   // 前往结局的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'Chapter5Level')
+    new LevelChanger(width - 8, 150, 32, 32, 'Chapter5Level', true)
   )
 }
 
@@ -285,10 +287,10 @@ export function Chapter5Level(game) {
 
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, height - 20, width, 20), // 地面
     new Platform(0, 0, width, 8), // 天花板
     new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height) // 右墙
+    new Platform(width - 8, 0, 8, height - 40) // 右墙
   )
 
   // 结局对话点
@@ -299,6 +301,6 @@ export function Chapter5Level(game) {
 
   // 回到开始的传送门（游戏重置）
   game.gameObjects.push(
-    new LevelChanger(width - 50, 150, 32, 32, 'PrologueLevel')
+    new LevelChanger(width - 8, 150, 32, 32, 'PrologueLevel', true)
   )
 }

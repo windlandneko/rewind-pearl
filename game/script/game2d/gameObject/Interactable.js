@@ -35,6 +35,7 @@ export class Interactable extends BaseObject {
    */
   async handleKeyInteraction(player, game) {
     if (!player.checkCollision(this) || !this.dialogueId) return false
+
     game.stop()
     await Dialogue.play(this.dialogueId)
     game.start()
