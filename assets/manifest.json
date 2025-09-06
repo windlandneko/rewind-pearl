@@ -2,6 +2,11 @@
   "audio": {
     "test": "audio/獣の知性 - [TH19] 東方獣王園.mp3"
   },
+
+  "level": {
+    "test_level": "level/test_level.json"
+  },
+
   "character": {
     "gunmu": "character/gunmu/normal.png",
     "dingzhen": {
@@ -44,6 +49,7 @@
       "normal": "character/hajimi/normal.png"
     }
   },
+
   "dialogue": {
     "prologue": "dialogue/prologue.json",
     "chapter1_end": "dialogue/chapter1_end.json",
@@ -65,6 +71,7 @@
     "level1_end": "dialogue/level1_end.json",
     "level1_npc": "dialogue/level1_npc.json"
   },
+
   "background": {
     "test_bg": "background/title_bg.png"
   }
