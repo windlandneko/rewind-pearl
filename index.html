@@ -5,46 +5,73 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>再见丁真</title>
-  <link rel="stylesheet" type="text/css" href="style/main.css" />
-
-  <script type="module" src="script/main.js" defer></script>
+  <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
 
 <body>
-  <main>
-    <div class="loading-container">
-      <h2 class="loading-title">少女祈祷中</h2>
-      <div class="loading-progress-container">
-        <div class="loading-progress-bar">
-          <div class="loading-progress-fill"></div>
-        </div>
-      </div>
-      <div class="loading-status">准备加载资源...</div>
-      <div class="loading-action hidden">
-        <button id="loading-retry">重试</button>
-        <button id="loading-skip">跳过</button>
-      </div>
-      <div class="loading-error hidden"></div>
+  <div class="container">
+    <div class="menu-section">
+      <img src="logo.png" alt="再见丁真" class="game-title" />
+      <!-- <img src="dingzhen.png" alt="丁真" class="dingzhen" /> -->
+      <!-- <img src="wangyuan.png" alt="王源" class="wangyuan" /> -->
+      <ul class="menu-list">
+        <li class="menu-item">
+          <a href="game/index.html" class="menu-button">开始新游戏</a>
+        </li>
+        <li class="menu-item">
+          <button class="menu-button" onclick="loadGame()">加载存档</button>
+        </li>
+        <li class="menu-item">
+          <a href="achievements/index.html" class="menu-button">成就</a>
+        </li>
+        <li class="menu-item">
+          <a href="about/index.html" class="menu-button">关于</a>
+        </li>
+        <li class="menu-item">
+          <a href="settings/index.html" class="menu-button">设置</a>
+        </li>
+        <li class="menu-item">
+          <button class="menu-button" onclick="exitGame()">退出</button>
+        </li>
+      </ul>
     </div>
+  </div>
 
-    <canvas id="game-canvas"></canvas>
+  <!-- 关于页面弹出层 -->
+  <div id="aboutModal" class="modal-overlay">
+    <iframe src="about/index.html" frameborder="0"></iframe>
+  </div>
 
-    <div class="dialogue-container">
-      <div class="modern-style-text">
-        <div style="width: min-content">
-          <div class="subtitle"></div>
-          <div class="title"></div>
-        </div>
-        <div class="text"></div>
-      </div>
-      <div class="touhou-style-text text">
-        <svg width="40" height="40" viewBox="-10 -50 90 100">
-          <path d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11 Z" fill="#ffeca7" />
-          <path d="M -10 0 H 0 C 40 0 50 -40 50 -40 C 50 -40 40 0 62 11" fill="none" stroke="#000" stroke-width="5.3" />
-        </svg>
-      </div>
-    </div>
-  </main>
+  <script>
+    function showAbout() {
+      const modal = document.getElementById('aboutModal')
+      modal.style.display = 'flex'
+      setTimeout(() => {
+        modal.classList.add('show')
+      }, 10)
+    }
+
+    function hideAbout() {
+      const modal = document.getElementById('aboutModal')
+      modal.classList.remove('show')
+      setTimeout(() => {
+        modal.style.display = 'none'
+      }, 500)
+    }
+
+    function loadGame() {
+      // 加载存档功能待实现
+      alert('加载存档功能正在开发中...')
+    }
+
+    function exitGame() {
+      // 退出功能待实现
+      if (confirm('确定要退出游戏吗？')) {
+        // 可以在这里添加退出逻辑，比如返回登录页面
+        window.location.href = 'login/index.html'
+      }
+    }
+  </script>
 </body>
 
 </html>

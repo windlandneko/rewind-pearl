@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的个人介绍网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: #4a6fa5;
+            color: white;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-left: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            padding: 60px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #4a6fa5;
+            font-size: 2.2rem;
+        }
+
+        .intro {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 30px;
+            border: 5px solid #4a6fa5;
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .skill {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 250px;
+            text-align: center;
+        }
+
+        .skill i {
+            font-size: 2.5rem;
+            color: #4a6fa5;
+            margin-bottom: 15px;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            height: 150px;
+        }
+
+        button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #3a5a80;
+        }
+
+        footer {
+            background: #4a6fa5;
+            color: white;
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .skills {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">我的个人网站</div>
+                <ul class="nav-links">
+                    <li><a href="../index.html">返回</a></li>
+                    <li><a href="#about">关于我</a></li>
+                    <li><a href="#skills">我的技能</a></li>
+                    <li><a href="#contact">联系我</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="intro">
+        <div class="container">
+            <h2 class="section-title">个人介绍</h2>
+            <div class="intro">
+                <img src="avatar.jpg" alt="个人照片" class="profile-img">
+
+                <div style="background: #f0f5ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3 style="color: #4a6fa5; margin-bottom: 15px;">吴楠的个人介绍</h3>
+                    <p>大家好啊，我是《再见珍珠》的编剧兼UI设计和美工吴楠，来自avemujica组，大家也可以称呼我为睦子米（大雾）。</p>
+                    <p>智吧有一句很出名的话："世界是个大象，我们都在盲人摸象，抽象是对世界的鞭挞。"故事的主题其实是严肃的，作为八年的老二次元和冲浪达人，我在写这个抽象故事的时候会加进去很多梗和包袱，用欢乐来消解解构的抽象和严肃。一些梗就算现实中没有接触到也不妨碍了解剧情和笑点，希望大家在游玩《再见珍珠》时可以喜欢这个故事呀。
+                    </p>
+                    <p>除此我还想感谢我的队友们，许多有意思的或者抽象的点子都是他们给予我的灵感，也是因为强大的队友们，剧情中一些天马行空的剧情才能落地，与游戏玩法完美结合，不会因为技术难关而腰斩，感谢技术组的队友（合十）。
+                    </p>
+                    <p>最后，还请多多支持avemujica，多多支持我们《再见珍珠》喵</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" style="background: #eef2f7;">
+        <div class="container">
+            <h2 class="section-title">关于我</h2>
+            <div class="intro">
+                <div style="background: #f0f5ff; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #4a6fa5; margin-bottom: 15px;">我的爱好</h3>
+                    <p>电子游戏爱好者，资深二次元，当然，更喜欢画画。最近喜欢上了观鸟和桌游。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills">
+        <div class="container">
+            <h2 class="section-title">我的技能</h2>
+            <div class="skills">
+                <div class="skill">
+                    <i>🎨</i>
+                    <h3>设计</h3>
+                    <p>还在努力学习板绘</p>
+                </div>
+                <div class="skill">
+                    <i>📚</i>
+                    <h3>文案</h3>
+                    <p>平时喜欢写随笔和小脑洞</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" style="background: #eef2f7;">
+        <div class="container">
+            <h2 class="section-title">联系我</h2>
+            <div class="contact-form">
+                <div style="padding: 20px; background: #f0f5ff; border-radius: 8px;">
+                    <h3 style="color: #4a6fa5; margin-bottom: 15px;">我的联系方式</h3>
+                    <p>电话：13792753761</p>
+                    <p>邮箱：2318147513@qq.com</p>
+                    <p>QQ：2318147513</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2023 我的个人网站. 保留所有权利.</p>
+            <p>感谢访问我的个人网站！</p>
+        </div>
+    </footer>
+</body>
+
+</html>

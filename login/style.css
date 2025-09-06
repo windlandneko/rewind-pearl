@@ -1,0 +1,308 @@
+@import url('../game/style/font.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  font-family: 'HarmonyOS Sans SC', sans-serif;
+  background-color: #f8f8f8;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+h1 {
+  margin: 0.2rem;
+  font-size: 2rem;
+  color: #333;
+}
+
+p {
+  font-size: 1.25rem;
+  line-height: 2rem;
+  font-weight: 300;
+  margin: 1.2rem 0;
+  letter-spacing: 0.1rem;
+}
+
+a {
+  color: #333;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.container {
+  position: relative;
+  background-color: #fff;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: all 0.6s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container form {
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 0 8vw;
+  height: 100%;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-container input {
+  width: 100%;
+  height: 50px;
+  padding: 0 1rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 12px;
+  outline: none;
+  margin-top: 2rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.form-container input:focus {
+  border-color: #417dff;
+  background-color: transparent;
+}
+
+.form-container input.error {
+  border-color: #e74c3c;
+  background-color: transparent;
+}
+
+.form-container input.success {
+  border-color: #27ae60;
+  background-color: transparent;
+}
+
+.password-container {
+  width: 100%;
+  position: relative;
+}
+
+.password-strength {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strength-bar {
+  height: 6px;
+  border-radius: 3px;
+  background-color: #e1e5e9;
+  flex: 1;
+  transition: all 0.3s ease;
+}
+
+.strength-bar.weak {
+  background-color: #e74c3c;
+}
+
+.strength-bar.medium {
+  background-color: #f39c12;
+}
+
+.strength-bar.strong {
+  background-color: #27ae60;
+}
+
+.strength-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  min-width: 30px;
+  text-align: right;
+  color: #666;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  text-align: center;
+  min-height: 2rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.error-message.show {
+  opacity: 1;
+}
+
+.form-container button {
+  padding: 0.4rem 1rem;
+  background-color: #417dff;
+  color: white;
+  border: 1px solid #fff;
+  outline: none;
+  cursor: pointer;
+  width: 6rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin: 1rem 0;
+  padding: 0.6rem 0;
+  font-size: 1rem;
+}
+
+.form-container button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(65, 125, 255, 0.3);
+}
+
+.form-container button:active {
+  transform: scale(0.95, 0.95);
+}
+
+.form-container button:disabled {
+  background: #e1e5e9;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+button.ghost {
+  background: transparent;
+  border: 2px solid #fff;
+  color: white;
+  cursor: pointer;
+  width: 8rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin: 0.6rem 0;
+  padding: 0.8rem 0;
+  font-size: 1.2rem;
+}
+
+button.ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+button.ghost:active {
+  transform: scale(0.95, 0.95);
+}
+
+.sign-in-container {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+}
+
+.sign-up-container {
+  left: 50%;
+  width: 50%;
+  z-index: 1;
+}
+
+.overlay {
+  background-color: #417dff;
+  width: 200%;
+  height: 100%;
+  position: relative;
+  left: -100%;
+  transition: all 0.6s ease-in-out;
+  color: white;
+}
+
+.overlay-container {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: all 0.6s ease-in-out;
+  z-index: 99;
+}
+
+.overlay-panel {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  height: 100%;
+  padding: 0 2.2rem;
+  text-align: center;
+}
+
+.overlay-panel h1 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.overlay-right {
+  right: 0;
+}
+
+.container.right-panel-active .overlay-container {
+  transform: translateX(-100%);
+}
+
+.container.right-panel-active .overlay {
+  transform: translateX(50%);
+}
+
+.container.right-panel-active .overlay-left {
+  transform: translateX(0);
+  transition: all 0.6s ease-in-out;
+}
+
+.container.right-panel-active .overlay-right {
+  transform: translateX(20%);
+  transition: all 0.6s ease-in-out;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .form-container form {
+    padding: 1.5rem;
+  }
+
+  .overlay-panel {
+    padding: 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+  }
+}

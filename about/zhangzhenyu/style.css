@@ -1,0 +1,398 @@
+@import url('https://fontsapi.zeoseven.com/285/main/result.css');
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  font-family: 'Noto Serif CJK';
+  font-weight: 300;
+  font-style: normal;
+
+  color: #000;
+  background: #fff;
+
+  -webkit-font-smoothing: antialiased;
+}
+
+h1 {
+  font-size: 4.4rem;
+  letter-spacing: 0.05em;
+}
+
+h3 {
+  font-size: 3.4rem;
+}
+
+p {
+  font-size: 1.8rem;
+}
+a,
+a:hover,
+a:focus {
+  cursor: pointer;
+  transition: all 300ms ease;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #111;
+}
+
+@media (max-width: 600px) {
+  html {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 500px) {
+  html {
+    font-size: 7px;
+  }
+}
+
+.preloader {
+  position: fixed;
+  z-index: 100000;
+  bottom: 0;
+  left: 0;
+
+  overflow: hidden;
+
+  width: 100%;
+  height: 100%;
+
+  background: #fff;
+}
+
+.fulfilling-square-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 50px;
+  width: 50px;
+  margin-top: -25px;
+  margin-left: -25px;
+
+  position: relative;
+  border: 4px solid #008aff;
+  animation: fulfilling-square-spinner-animation 4s infinite ease;
+}
+
+.fulfilling-square-spinner .spinner-inner {
+  vertical-align: top;
+  display: inline-block;
+  background-color: #008aff;
+  width: 100%;
+  opacity: 1;
+  animation: fulfilling-square-spinner-inner-animation 4s infinite ease-in;
+}
+
+@keyframes fulfilling-square-spinner-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(180deg);
+  }
+  50% {
+    transform: rotate(180deg);
+  }
+  75% {
+    transform: rotate(360deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fulfilling-square-spinner-inner-animation {
+  0% {
+    height: 0%;
+  }
+  25% {
+    height: 0%;
+  }
+  50% {
+    height: 100%;
+  }
+  75% {
+    height: 100%;
+  }
+  100% {
+    height: 0%;
+  }
+}
+
+.preloader.hide-preloader {
+  height: 0;
+  transition: 0.7s ease 0.3s;
+}
+
+.image-container {
+  position: fixed;
+  z-index: 10;
+  top: 0;
+  left: 0;
+
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.image-container .neko {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+  scale: 1.1;
+
+  transition: opacity 1s ease;
+
+  background: url(neko.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.image-container .background {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+  scale: 1.05;
+
+  transition: opacity 1s ease;
+
+  background: url(background.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.content-area {
+  position: relative;
+  left: 0;
+
+  width: 100%;
+}
+
+.content-area .content-area-inner {
+  position: relative;
+  left: 50%;
+
+  width: 50%;
+  padding: 0 40px;
+  overflow-x: hidden;
+}
+
+.content-area .content-area-inner section {
+  max-width: 520px;
+  margin: 0 auto 10vh auto;
+}
+
+.content-area .content-area-inner section:last-child {
+  margin-bottom: 10vh;
+}
+
+.content-area .content-area-inner section h3.headline {
+  margin-bottom: 1.2em;
+}
+
+#intro {
+  position: relative;
+
+  height: 100vh;
+  margin-bottom: 0;
+}
+
+#intro .container-mid {
+  position: absolute;
+  top: 50%;
+
+  width: 100%;
+
+  transform: translateY(-50%);
+}
+
+#intro .container-mid p.subline {
+  font-size: 2.2rem;
+  line-height: 1.8em;
+
+  margin-top: 1.6em;
+  margin-bottom: 1.8em;
+}
+
+#intro .container-mid a {
+  font-size: 2rem;
+  line-height: 2.5em;
+
+  color: #fff;
+  background-color: transparent;
+}
+
+#intro .container-mid a:before {
+  background: #111;
+}
+
+#intro .container-mid a:after {
+  background: #008aff;
+}
+
+#intro .animation-container {
+  transition: 0.5s ease;
+}
+
+#intro .animation-container.animation-fade-up {
+  transform: translateY(10vh);
+  opacity: 0;
+}
+
+#intro .animation-container.animation-fade-down {
+  transform: translateY(-10vh);
+  opacity: 0;
+}
+
+#intro .animation-container.animation-fade-left {
+  transform: translateX(10vh);
+  opacity: 0;
+}
+
+#intro .animation-container.run-animation {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+#about p {
+  line-height: 1.5em;
+  margin-bottom: 1.6em;
+  text-indent: 2em;
+}
+
+#about p:last-child {
+  margin-bottom: 0;
+}
+
+#contact li {
+  list-style: none;
+  font-size: 1.8rem;
+  line-height: 2em;
+}
+
+span.heimu {
+  background-color: #252525;
+  color: #252525;
+  transition: color 0.13s linear;
+  text-shadow: none;
+}
+span.heimu:hover,
+span.heimu:active {
+  color: white;
+}
+
+.btn {
+  font-size: 1.6rem;
+  line-height: 2.5em;
+
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+
+  padding: 0 2.5em;
+
+  transition: 0.3s ease;
+
+  color: #333;
+  border: 1px solid #e0e0e0;
+  border-radius: 100px;
+  background: none;
+  text-decoration: none;
+  user-select: none;
+}
+
+.btn:before {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
+  content: '';
+
+  border-radius: 100px;
+  background: transparent;
+}
+
+.btn:after {
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 0;
+
+  width: 0;
+  height: 100%;
+
+  content: '';
+  transition: 0.3s ease;
+
+  background: #f5f5f5;
+}
+
+.btn:hover {
+  color: #111;
+  border-color: #ccc;
+}
+
+.btn:active {
+  background-color: #eee;
+}
+
+.btn:hover:after {
+  width: 100%;
+}
+
+@media (max-width: 1000px) {
+  .image-container {
+    position: relative;
+    z-index: 10;
+    top: 0;
+    left: 0;
+
+    width: 100%;
+    height: 100vh;
+  }
+
+  .content-area .content-area-inner {
+    left: 0;
+
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  #intro {
+    height: auto;
+  }
+
+  #intro .container-mid {
+    position: relative;
+    top: 0;
+
+    margin: 15vh 0;
+
+    transform: translate(0);
+  }
+}

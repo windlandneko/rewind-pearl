@@ -1,0 +1,68 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+/* header, section, footer {
+    background-color: #d6ccc2;
+    border: 5px #9d8189 solid;
+    padding: 30px;
+    margin: 40px;
+} */
+header {
+  background-color: #231c1a;
+  height: 80px;
+  width: 100%;
+}
+h1 {
+  color: white;
+  position: absolute;
+  left: 60px;
+  top: 0;
+  line-height: 80px;
+}
+header ul {
+  position: absolute;
+  right: 2vw;
+  top: 0;
+  line-height: 80px;
+}
+header li {
+  display: inline;
+  margin-right: 3vw;
+}
+header a {
+  color: white;
+  text-decoration: none;
+}
+header a:hover {
+  text-decoration: underline;
+}
+.self-intro {
+  background-color: antiquewhite;
+  /* color:white; */
+  height: 60vh;
+  /* 插入一张内部照片作底 */
+  /* background-image: ;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center; */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.self-intro h2 {
+  font-size: 40px;
+}
+.self-intro p {
+  font-size: 20px;
+  margin: 20px 0;
+}
+footer {
+  background-color: #000000;
+  color: #b7b7b7;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}

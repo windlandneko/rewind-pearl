@@ -1,0 +1,225 @@
+@import url('../game/style/font.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'HarmonyOS Sans SC', sans-serif;
+  min-height: 100vh;
+  background: url('../background.png') no-repeat center / cover fixed black;
+  color: white;
+}
+
+/* 页面容器 */
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+/* 头部样式 */
+header {
+  text-align: center;
+  margin-bottom: 3rem;
+  animation: blur-in 2s cubic-bezier(0.075, 0.82, 0.165, 1) forwards;
+}
+
+@keyframes blur-in {
+  0% {
+    filter: blur(16px);
+  }
+  100% {
+    filter: blur(0);
+  }
+}
+
+header h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+header p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+/* 成就容器 */
+.achievements-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 成就网格布局 */
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10vh);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 成就卡片样式 */
+.achievement-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.achievement-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: white;
+  transform-origin: bottom;
+}
+
+.achievement-card:hover::before {
+  transform: scaleY(1);
+}
+
+.achievement-card:hover {
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* 成就详细描述覆盖层 */
+.achievement-card::after {
+  content: attr(data-description);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-radius: 15px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  font-size: 1rem;
+  line-height: 1.4;
+  z-index: 10;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+.achievement-card:hover::after {
+  opacity: 1;
+}
+
+/* 成就图标 */
+.achievement-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: white;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.achievement-card:hover .achievement-icon {
+  text-shadow: 0 0 20px rgba(255, 255, 255, 1);
+}
+
+/* 成就标题 */
+.achievement-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+/* 未解锁状态 */
+.achievement-card.locked {
+  filter: grayscale(100%) brightness(0.5);
+  opacity: 0.6;
+}
+
+.achievement-card.locked:hover {
+  filter: grayscale(80%) brightness(0.7);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  header h1 {
+    font-size: 2rem;
+  }
+
+  header p {
+    font-size: 1rem;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .achievement-card {
+    padding: 1.5rem;
+    min-height: 160px;
+  }
+
+  .achievement-icon {
+    font-size: 2.5rem;
+  }
+
+  .achievement-title {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .achievement-card {
+    padding: 1rem;
+    min-height: 140px;
+  }
+
+  .achievement-icon {
+    font-size: 2rem;
+  }
+
+  .achievement-title {
+    font-size: 0.9rem;
+  }
+}

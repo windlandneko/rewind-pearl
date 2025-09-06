@@ -1,0 +1,859 @@
+/* 背景 start */
+@keyframes header {
+    0% {
+        /* transform 兼容 */
+        -moz-transform: scale(1.7);
+        -webkit-transform: scale(1.7);
+        -o-transform: scale(1.7);
+        transform: scale(1.7);
+    }
+
+    100% {
+        /* transform 兼容 */
+        -moz-transform: scale(1);
+        -webkit-transform: scale(1);
+        -o-transform: scale(1);
+        transform: scale(1);
+    }
+}
+
+.topBgFu {
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.topBgFu header {
+    width: 100%;
+    height: 100vh;
+    background: url("../../images/bgTop.jpg") fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    z-index: -10;
+
+    /* animation 兼容 */
+    -webkit-animation: header 0.4s 1;
+    -o-animation: header 0.4s 1;
+    -moz-animation: header 0.4s 1;
+    animation: header 0.4s 1;
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: 0px 0px 800px #575757 inset;
+    -moz-box-shadow: 0px 0px 800px #575757 inset;
+    -o-box-shadow: 0px 0px 800px #575757 inset;
+    box-shadow: 0px 0px 800px #575757 inset;
+}
+
+/* 背景 end */
+
+/* 背景字 start */
+@keyframes expand {
+    0% {
+        background-size: 50%;
+        background-position: 0 0;
+    }
+
+    20% {
+        background-size: 55%;
+        background-position: 0 1em;
+    }
+
+    100% {
+        background-size: 350%;
+        background-position: -15em -4em;
+    }
+}
+
+@keyframes expand-rev {
+    0% {
+        background-size: 350%;
+        background-position: -15em -4em;
+    }
+
+    20% {
+        background-size: 55%;
+        background-position: 0 1em;
+    }
+
+    100% {
+        background-size: 50%;
+        background-position: 0 0;
+    }
+}
+
+.topTitle {
+    z-index: 20;
+    position: absolute;
+    text-align: center;
+    top: 35%;
+    width: 100%;
+    color: white;
+}
+
+.topTitle h1 {
+    font-weight: 500;
+    font-size: 76px;
+    display: inline;
+}
+
+.navLogoMain {
+    color: transparent;
+    background: conic-gradient(#D9D7F1 20%,
+            #E7FBBE 12%, #ebffc5 30%,
+            #d1bef0 12%, #bdb3d4 33%,
+            #FFCBCB 55%, #FFCBCB 70%,
+            #B5DEFF 70%, #B5DEFF 87%,
+            #F7D1BA 87%);
+    /* background-size: %; */
+
+    /* background-clip 兼容 */
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    /* animation 兼容 */
+    -webkit-animation: expand-rev 0.5s ease forwards;
+    -o-animation: expand-rev 0.5s ease forwards;
+    -moz-animation: expand-rev 0.5s ease forwards;
+    animation: expand-rev 0.5s ease forwards;
+}
+
+.navLogoMain:hover {
+    /* animation 兼容 */
+    -webkit-animation: expand 0.5s ease forwards;
+    -o-animation: expand 0.5s ease forwards;
+    -moz-animation: expand 0.5s ease forwards;
+    animation: expand 0.5s ease forwards;
+}
+
+.topTitle h2 {
+    margin-top: 70px;
+    font-weight: 400;
+    font-size: 15px;
+}
+
+.underline1 {
+    position: absolute;
+    left: calc(50% - 35px);
+    bottom: 60px;
+    width: 70px;
+    height: 4px;
+    background-color: #70C000;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+}
+
+/* 背景字 end */
+
+/* 下一页箭头 start */
+@keyframes nextBind {
+    0% {
+        bottom: 60px;
+    }
+
+    50% {
+        bottom: 45px;
+    }
+
+    100% {
+        bottom: 60px;
+    }
+}
+
+.nextBind {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    left: calc(50% - 12.5px);
+    border: 4px solid #70C000;
+    border-top: none;
+    border-right: none;
+
+    /* animation 兼容 */
+    -webkit-animation: nextBind 3s infinite linear;
+    -o-animation: nextBind 3s infinite linear;
+    -moz-animation: nextBind 3s infinite linear;
+    animation: nextBind 3s infinite linear;
+
+    /* transform 兼容 */
+    -webkit-transform: rotate(-45deg);
+    -moz-transform: rotate(-45deg);
+    -o-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+/* 下一页箭头 ebd */
+
+/* 电脑端导航栏 start */
+.navBarBlur {
+    background-color: var(--navbar-bg-color);
+    color: var(--navbar-text-color) !important;
+    position: fixed !important;
+
+    /* backdrop-filter 兼容 */
+    backdrop-filter: blur(30px) saturate(100%);
+    -webkit-backdrop-filter: blur(30px) saturate(100%);
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -moz-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -o-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+}
+
+.navBar {
+    position: absolute;
+    width: 100%;
+    height: 70px;
+    top: 0;
+    color: #fff;
+    z-index: 50;
+}
+
+.navBar span {
+    position: absolute;
+    left: 15%;
+    top: 10px;
+    background-image: url("../../images/header.jpg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: left center;
+    width: 50px;
+    height: 50px;
+    box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -moz-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -o-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+}
+
+.navLinkBox {
+    position: absolute;
+    white-space: nowrap;
+    right: 10%;
+    top: 25px;
+}
+
+.navLink {
+    position: relative;
+    margin: 0 30px;
+    padding: 10px 20px;
+    font-size: 15px;
+    font-weight: 550;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -o-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.navLink:hover {
+    background-color: var(--navlink-hover-color);
+
+    /* backdrop-filter 兼容 */
+    backdrop-filter: blur(30px) saturate(100%);
+    -webkit-backdrop-filter: blur(30px) saturate(100%);
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -moz-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -o-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+
+    /* transition 兼容 */
+    -moz-transition: 0.5s;
+    -webkit-transition: 0.5s;
+    -o-transition: 0.5s;
+    transition: 0.5s;
+}
+
+.navLink:before {
+    content: "";
+    position: absolute;
+    width: 60%;
+    height: 3px;
+    bottom: 10%;
+    left: 20%;
+    background-color: #70C000;
+    visibility: hidden;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+
+    /* transform 兼容 */
+    -moz-transform: scale(0);
+    -webkit-transform: scale(0);
+    -o-transform: scale(0);
+    transform: scale(0);
+
+    /* transition 兼容 */
+    -moz-transition: all 0.3s ease-in-out 0s;
+    -webkit-transition: all 0.3s ease-in-out 0ss;
+    -o-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.3s ease-in-out 0s;
+}
+
+.navLink:hover:before {
+    visibility: visible;
+
+    /* transform 兼容 */
+    -moz-transform: scale(1);
+    -webkit-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+}
+
+/* 电脑端导航栏 end */
+
+/* 蒙版 start */
+.shown {
+    z-index: 30 !important;
+    background-color: rgba(0, 0, 0, .3) !important;
+}
+
+.mask {
+    position: fixed;
+    z-index: -99;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+
+    /* transition 兼容 */
+    -moz-transition: background-color 0.5s;
+    -webkit-transition: background-color 0.5s;
+    -o-transition: background-color 0.5s;
+    transition: background-color 0.5s;
+}
+
+/* 蒙版 end */
+
+/* 手机端导航栏 strat */
+
+.checkBoxs {
+    position: fixed;
+    top: 3%;
+    right: 5%;
+    z-index: 50;
+    cursor: pointer;
+}
+
+.checkBoxs:hover .checkBox {
+    background: rgba(112, 192, 0, .5) !important;
+}
+
+.checkBox {
+    position: relative;
+    display: block;
+    background: var(--checkBox-bg-color);
+    height: 4px;
+    margin-top: 5px;
+    width: 30px;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+}
+
+.checkBox1,
+.checkBox2 {
+    width: 20px !important;
+    left: 10px;
+}
+
+.checkBoxBlackColor {
+    background: rgba(0, 0, 0, .7) !important;
+}
+
+.checkBoxBlack {
+    background: var(--checkBoxBlackNo-color);
+}
+
+.mobNavBar {
+    position: fixed;
+    right: -100%;
+    top: 0;
+    width: 55%;
+    min-width: 50px;
+    height: 100vh;
+    background: var(--mobNavBar-bg-color);
+
+    text-align: center;
+    line-height: 60px;
+    z-index: 50;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px 0 0 20px;
+    -moz-border-radius: 20px 0 0 20px;
+    -o-border-radius: 20px 0 0 20px;
+    border-radius: 20px 0 0 20px;
+
+    /* backdrop-filter 兼容 */
+    backdrop-filter: blur(30px) saturate(100%);
+    -webkit-backdrop-filter: blur(30px) saturate(100%);
+
+    /* transition 兼容 */
+    -moz-transition: 0.5s;
+    -webkit-transition: 0.5s;
+    -o-transition: 0.5s;
+    transition: 0.5s;
+}
+
+.mobNavBar .navImg {
+    /* position: relative; */
+    display: inline-block;
+    background-image: url("../../images/header.jpg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: left center;
+    margin-top: 45px;
+    width: 50px;
+    height: 50px;
+    margin-bottom: 20px;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+}
+
+.mobNavLink {
+    margin: auto;
+    width: 80%;
+    height: 40px;
+    line-height: 40px;
+    font-size: 15px;
+    font-weight: 550;
+    margin-bottom: 30px;
+    color: var(--mobNavLink-text-color);
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    -o-border-radius: 15px;
+    border-radius: 15px;
+}
+
+.mobNavLink:active {
+    background-color: var(--mobNavLink-active-color);
+
+    /* backdrop-filter 兼容 */
+    backdrop-filter: blur(30px) saturate(100%);
+    -webkit-backdrop-filter: blur(30px) saturate(100%);
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -moz-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    -o-box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+    box-shadow: rgb(0 0 0 / 10%) 0 5px 20px;
+
+    /* transition 兼容 */
+    -moz-transition: .25s;
+    -webkit-transition: .25s;
+    -o-transition: .25s;
+    transition: .25s;
+}
+
+/* 手机端导航栏 end */
+
+h3 {
+    font-size: 30px;
+    color: black;
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+}
+
+/* 正文相关 start */
+.about,
+.work {
+    width: 100%;
+    padding-top: 65px;
+    padding-bottom: 65px;
+    text-align: center;
+    background: var(--about-work-background);
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+}
+
+.underline2 {
+    display: inline-block;
+    margin-top: 20px;
+    width: 50px;
+    height: 3px;
+    background-color: #70C000;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+}
+
+/* 正文相关 end */
+
+/* 关于我 start */
+/* 关于我-选择 start */
+.aboutContent span {
+    position: relative;
+    margin-top: 20px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding: 10px 25px;
+    display: inline-block;
+    font-weight: 500;
+    background: var(--aboutContent-span-bg-color);
+    color: var(--aboutContent-span-text-color);
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    -moz-box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    -o-box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+    box-shadow: inset 2px 2px 2px 0px rgba(255, 255, 255, .5),
+        7px 7px 20px 0px rgba(0, 0, 0, .1),
+        4px 4px 5px 0px rgba(0, 0, 0, .1);
+
+    /* transition 兼容 */
+    -moz-transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.aboutContent span:after {
+    position: absolute;
+    content: "";
+    width: 0;
+    height: 100%;
+    top: 0;
+    left: 0;
+    direction: rtl;
+
+    /* transition 兼容 */
+    -moz-transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: -6px -6px 20px 0px #fff9,
+        -4px -4px 5px 0px #fff9,
+        6px 6px 20px 0px #0002,
+        4px 4px 5px 0px #0001;
+    -moz-box-shadow: -6px -6px 20px 0px #fff9,
+        -4px -4px 5px 0px #fff9,
+        6px 6px 20px 0px #0002,
+        4px 4px 5px 0px #0001;
+    -o-box-shadow: -6px -6px 20px 0px #fff9,
+        -4px -4px 5px 0px #fff9,
+        6px 6px 20px 0px #0002,
+        4px 4px 5px 0px #0001;
+    box-shadow: -6px -6px 20px 0px #fff9,
+        -4px -4px 5px 0px #fff9,
+        6px 6px 20px 0px #0002,
+        4px 4px 5px 0px #0001;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.aboutContent span:hover {
+    color: var(--aboutContent-span-hovertext-color);
+}
+
+.aboutContent span:hover:after {
+    left: auto;
+    right: 0;
+    width: 100%;
+}
+
+/* 关于我-选择 end */
+
+.aboutText {
+    margin-top: 20px;
+    padding: 5% 20% 5% 20%;
+    color: var(--aboutText-text-color);
+    font-size: 14px;
+    display: inline-block;
+    position: relative;
+    background: var(--aboutText-bg-color);
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -o-border-radius: 20px;
+    border-radius: 20px;
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: 0 0 3rem 0.5rem hsl(0deg 0% 0% / 15%);
+    -moz-box-shadow: 0 0 3rem 0.5rem hsl(0deg 0% 0% / 15%);
+    -o-box-shadow: 0 0 3rem 0.5rem hsl(0deg 0% 0% / 15%);
+    box-shadow: 0 0 3rem 0.5rem hsl(0deg 0% 0% / 15%);
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+}
+
+.aboutText p {
+    padding: 5% 0 5% 0;
+}
+
+.aboutText::before,
+.aboutText::after {
+    content: "";
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid #70C000;
+    position: absolute;
+    z-index: 20;
+    opacity: .3;
+
+    /* transition 兼容 */
+    -moz-transition: .25s;
+    -webkit-transition: .25s;
+    -o-transition: .25s;
+    transition: .25s;
+}
+
+.aboutText::before {
+    top: 5%;
+    right: 5%;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
+
+.aboutText::after {
+    bottom: 5%;
+    left: 5%;
+    border-top-width: 0;
+    border-right-width: 0;
+}
+
+.aboutText:hover:before,
+.aboutText:hover:after {
+    width: calc(89.5%);
+    height: calc(89.5%);
+}
+
+/* 关于我 end */
+
+/* 作品 start */
+.work {
+    background: var(--work-bg-color);
+}
+
+.workList {
+    display: flex;
+    position: relative;
+    margin-top: 50px;
+    justify-content: center;
+    align-items: center;
+
+    /* flex-wrap 兼容 */
+    -webkit-flex-wrap: wrap;
+    -moz-flex-wrap: wrap;
+    -ms-flex-wrap: wrap;
+    -o-flex-wrap: wrap;
+    flex-wrap: wrap;
+}
+
+.workList a {
+    width: 300px;
+    height: 250px;
+    margin: 0 15px 30px 15px;
+    background-color: var(--workList-textbg-color);
+    text-align: left;
+    overflow: hidden;
+    transform-style: preserve-3d;
+
+    /* border-radius 兼容 */
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -o-border-radius: 10px;
+    border-radius: 10px;
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: rgb(0 0 0 / 3%) 0 5px 10px;
+    -moz-box-shadow: rgb(0 0 0 / 3%) 0 5px 10px;
+    -o-box-shadow: rgb(0 0 0 / 3%) 0 5px 10px;
+    box-shadow: rgb(0 0 0 / 3%) 0 5px 10px;
+}
+
+.workList a:hover {
+    /* box-shadow 兼容 */
+    -webkit-box-shadow: 0px 0px 25px 3px rgb(199, 199, 199);
+    -moz-box-shadow: 0px 0px 25px 3px rgb(199, 199, 199);
+    -o-box-shadow: 0px 0px 25px 3px rgb(199, 199, 199);
+    box-shadow: 0px 0px 25px 3px rgb(199, 199, 199);
+}
+
+
+.workImg{
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 155px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    overflow: hidden;
+}
+
+.workImg img{
+    position: absolute;
+    top: -20%;
+    width: 100%;
+}
+
+.workText .workTextTitle {
+    color: var(--workList-title-color);
+    margin: 15px 20px 0px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.workText .workTextInfo {
+    color: var(--workList-info-color);
+    margin: 5px 20px 0px;
+    font-size: small;
+}
+
+.workText .workTextLittle {
+    color: var(--workList-titleLittle-color);
+    margin: 10px 20px 0px;
+    font-size: small;
+}
+
+/* 作品 end */
+
+/* 脚部 开始 */
+.footer {
+    width: 100%;
+    padding-top: 20px;
+    text-align: center;
+    background: var(--footer-bg-color);
+
+    /* transition 兼容 */
+    -moz-transition: 0.25s;
+    -webkit-transition: 0.25s;
+    -o-transition: 0.25s;
+    transition: 0.25s;
+}
+
+.footer-nav li {
+    display: inline;
+}
+
+.footer-nav a {
+    color: var(--footer-nav-color);
+    margin: 0 10px 0 10px;
+}
+
+.link p a {
+    color: var(--footer-nav-color);
+}
+
+.link p {
+    padding: 1em 0 1em 0;
+}
+
+
+/* 脚部 结束 */
+
+/* 手机端 电脑端切换 start */
+.mob {
+    display: none;
+}
+
+@media screen and (max-width: 760px) {
+    .navBar {
+        display: none;
+    }
+
+    .mob {
+        display: block;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    h1 {
+        font-size: 60px !important;
+    }
+
+    h2 {
+        font-size: 14px !important;
+    }
+
+    h3 {
+        font-size: 25px !important;
+    }
+
+    .link p,
+    .footer-nav li {
+        font-size: 12px;
+    }
+}
+
+@media screen and (max-width: 368px) {
+    h1 {
+        font-size: 50px !important;
+    }
+}
+
+/* 手机端 电脑端切换 end */
