@@ -60,14 +60,35 @@ main {
 
   transition: opacity 1s;
 
-  background: url('../../background.png') no-repeat center / cover fixed black;
-
   transition: filter 0.1s ease-in-out;
 }
 
 #game-canvas.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+#game2d-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 120%;
+  width: 120%;
+  z-index: -1;
+
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+
+  object-fit: cover;
+  object-position: center;
+
+  transition: opacity 0.5s ease-in-out;
+}
+
+#game2d-background.hidden {
+  opacity: 0;
 }
 
 /* 保存提示样式 */

@@ -67,58 +67,10 @@ export function Level1(game) {
   game.gameObjects.push(new Enemy(100, 150), new Enemy(200, 150))
 }
 
-// 第二关
-export function Level2(game) {
-  const height = SCREEN_HEIGHT
-  const width = SCREEN_WIDTH
-
-  game.levelData = {
-    name: 'Level2',
-    height,
-    width,
-    worldBorder: true,
-    spawnpoint: new Vec2(32, 150),
-    background: 'test.png', // 测试背景
-  }
-
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
-
-  // 平台设计 - 更有挑战性的布局
-  game.gameObjects.push(
-    new Platform(0, height - 8, width, 8), // 地面
-    new Platform(0, 0, width, 8), // 天花板
-    new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height), // 右墙
-
-    // 更复杂的平台布局
-    new Platform(80, 152, 100, 16),
-    new Platform(220, 130, 80, 16),
-    new Platform(180, 80, 100, 16)
-  )
-
-  // 可交互对话
-  game.gameObjects.push(
-    new Interactable(50, 160, 'level1_start', '欢迎来到第二关'),
-    new Interactable(width - 60, 160, 'level1_end', '第二关完成！')
-  )
-
-  // 返回第一关的传送门
-  game.gameObjects.push(new LevelChanger(width - 50, 150, 32, 32, 'Level1'))
-
-  // 收集品
-  game.gameObjects.push(new Collectible(200, 108), new Collectible(250, 58))
-
-  // 敌人
-  game.gameObjects.push(new Enemy(200, 125), new Enemy(120, 150))
-}
-
 // 序章 - 片场
 export function PrologueLevel(game) {
   const height = SCREEN_HEIGHT
-  const width = SCREEN_WIDTH
+  const width = SCREEN_WIDTH * 2
 
   game.levelData = {
     name: 'PrologueLevel',
@@ -143,10 +95,7 @@ export function PrologueLevel(game) {
   )
 
   // 剧情对话点
-  game.gameObjects.push(
-    new Interactable(80, 160, 'prologue', '听到路人对话'),
-    new Interactable(200, 160, 'prologue', '遇见王源')
-  )
+  game.gameObjects.push(new Interactable(200, 160, 'prologue', '遇见王源'))
 
   // 进入异世界的传送门
   game.gameObjects.push(

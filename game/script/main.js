@@ -41,7 +41,8 @@ async function init(skipAssetLoading = false) {
   }
 }
 
-function startNewGame() {
+async function startNewGame() {
+  await Dialogue.play('prologue')
   Game2D.loadLevel(LevelManager.PrologueLevel)
   Game2D.start()
 }

@@ -284,7 +284,7 @@ class Dialogue {
                 this.dialogueData.auto_next_delay
               )
           }
-        }, 500 / text.length + 10)
+        }, 40)
         this.textDisplaying = true
       } else if (skip) {
         this.$modernText.textContent = text
@@ -342,7 +342,7 @@ class Dialogue {
     if (Asset.has(image)) {
       image = Asset.get(image)
     } else {
-      console.warn('[Dialogue] (updateCharacterEmotion) 立绘图片不存在:', image)
+      console.warn('[Dialogue] (updateCharacterEmotion) 立绘图片不存在:', character, emotion)
       image = Asset.get('character/gunmu')
     }
 

@@ -70,6 +70,7 @@ export class Game {
   $pauseOverlay = null
   $saveManagerModal = null
   $helpModal = null
+  $backgroundImage = null
 
   constructor() {
     const main = document.querySelector('main')
@@ -123,6 +124,8 @@ export class Game {
     addEventListener('resize', throttle(resizeCanvas, 16))
 
     this.canvas.classList.add('hidden')
+
+    this.$backgroundImage = document.getElementById('game2d-background')
 
     // 初始化UI元素
     this.#initPauseMenu()
@@ -240,6 +243,8 @@ export class Game {
 
     // 设置摄像机
     this.#setupCamera()
+
+    this.#setupBackground()
   }
 
   importGameObjects(state) {
@@ -744,6 +749,8 @@ export class Game {
    * 渲染游戏画面
    */
   render(ctx) {
+    this.#updateBackground()
+
     ctx.clearRect(0, 0, this.displayWidth, this.displayHeight)
     ctx.save()
 
@@ -834,6 +841,55 @@ export class Game {
     this.camera.centerOnTarget()
 
     this.scale = this.displayHeight / this.levelData.height
+  }
+
+  /**
+   * 设置视差背景
+   */
+  #setupBackground() {
+    if (!this.levelData.background || !this.$backgroundImage) return
+
+    // 设置背景图片源
+    this.$backgroundImage.src = `assets/background/${this.levelData.background}`
+
+    // 显示背景图片
+    this.$backgroundImage.classList.remove('hidden')
+
+    // 监听图片加载错误
+    this.$backgroundImage.onerror = () => {
+      console.warn(`[Game2D] 背景图片加载失败: ${this.levelData.background}`)
+      this.$backgroundImage.classList.add('hidden')
+    }
+  }
+
+  /**
+   * 更新背景位置
+   */
+  #updateBackground() {
+    if (
+      !this.levelData.background ||
+      !this.$backgroundImage ||
+      this.$backgroundImage.classList.contains('hidden')
+    )
+      return
+
+    // 计算视差位移量（背景移动速度比摄像机慢）
+    const parallaxFactor = 3 // 视差系数，值越小背景移动越慢
+    const offsetX = -this.camera.position.x * parallaxFactor
+    const offsetY = -this.camera.position.y * parallaxFactor
+
+    // 限制位移范围，防止边缘露出
+    const maxOffsetX = this.levelData.width * 5 // 最大偏移为关卡宽度的5%
+    const maxOffsetY = this.levelData.height * 5 // 最大偏移为关卡高度的5%
+
+    const clampedOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX))
+    const clampedOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
+
+    // 应用变换（基础偏移-10% + 视差偏移）
+    const totalOffsetX = (clampedOffsetX / this.levelData.width) * 5 // 转换为百分比
+    const totalOffsetY = (clampedOffsetY / this.levelData.height) * 5 // 转换为百分比
+
+    this.$backgroundImage.style.transform = `translate(${totalOffsetX}%, ${totalOffsetY}%)`
   }
 
   /**
