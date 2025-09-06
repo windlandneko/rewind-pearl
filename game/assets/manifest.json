@@ -86,9 +86,7 @@
       "idle_left": "sprite/idle_left.png",
       "idle_right": "sprite/idle_right.png",
       "walk_left": "sprite/walk_left.png",
-      "walk_right": "sprite/walk_right.png",
-      "jump_left": "sprite/left（jump）.png",
-      "jump_right": "sprite/right（jump）.png"
+      "walk_right": "sprite/walk_right.png"
     },
     "linggangu": "sprite/linggangu.png",
     "linggangu_stone": "sprite/linggangu_stone.png"
