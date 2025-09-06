@@ -1,4 +1,5 @@
 import Keyboard from '../Keyboard.js'
+import SaveManager from '../SaveManager.js'
 import { EventListener, throttle } from '../utils.js'
 import {
   Player,
@@ -12,6 +13,12 @@ import {
 import { Camera } from './Camera.js'
 import GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
+
+let removeEscKeyListener = null
+const rebindEscKey = fn => {
+  removeEscKeyListener?.()
+  if (fn) removeEscKeyListener = Keyboard.onKeydown('Esc', fn)
+}
 
 export class Game {
   listener = new EventListener()
@@ -34,6 +41,7 @@ export class Game {
 
   // 游戏状态
   isRunning = false
+  isPaused = false
   camera = new Camera()
   scale
 
@@ -49,6 +57,11 @@ export class Game {
   timeTravelMaxRadius = 0
 
   #keyboardListeners = []
+
+  // UI元素
+  $pauseOverlay = null
+  $saveManagerModal = null
+  $helpModal = null
 
   constructor() {
     const main = document.querySelector('main')
@@ -102,6 +115,80 @@ export class Game {
     addEventListener('resize', throttle(resizeCanvas, 16))
 
     this.canvas.classList.add('hidden')
+
+    // 初始化UI元素
+    this.#initPauseMenu()
+  }
+
+  #initPauseMenu() {
+    this.$pauseOverlay = document.getElementById('pause-overlay')
+    this.$saveManagerModal = document.getElementById('save-manager-modal')
+    this.$helpModal = document.getElementById('help-modal')
+
+    // 暂停界面按钮事件
+    document
+      .getElementById('resume-btn')
+      .addEventListener('click', () => this.resume())
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      SaveManager.showSavePrompt(saveName => this.saveGame(saveName))
+    })
+
+    document.getElementById('load-btn').addEventListener('click', () => {
+      const saveList = document.getElementById('save-list')
+      this.$saveManagerModal.classList.add('show')
+
+      rebindEscKey(() => this.hideSaveManagerModal())
+
+      SaveManager.loadSaveList(
+        saveList,
+        saveData => {
+          // 加载存档
+          localStorage.setItem('rewind-pearl-load-save', JSON.stringify(saveData))
+          location.reload()
+        },
+        saveName => {
+          // 存档删除后的回调
+          console.log(`存档 "${saveName}" 已删除`)
+        }
+      )
+    })
+
+    document.getElementById('help-btn').addEventListener('click', () => {
+      this.$helpModal.classList.add('show')
+      rebindEscKey(() => this.hideHelpModal())
+    })
+
+    document.getElementById('title-btn').addEventListener('click', () => {
+      if (confirm('确定要返回标题页面吗？未保存的进度将会丢失。')) {
+        window.location.href = '../index.html'
+      }
+    })
+
+    // 存档管理界面事件
+    document
+      .getElementById('save-manager-close')
+      .addEventListener('click', () => {
+        this.hideSaveManagerModal()
+      })
+
+    // 帮助界面事件
+    document.getElementById('help-close').addEventListener('click', () => {
+      this.hideHelpModal()
+    })
+
+    // 点击遮罩关闭模态框
+    this.$saveManagerModal.addEventListener('click', e => {
+      if (e.target === this.$saveManagerModal) {
+        this.hideSaveManagerModal()
+      }
+    })
+
+    this.$helpModal.addEventListener('click', e => {
+      if (e.target === this.$helpModal) {
+        this.hideHelpModal()
+      }
+    })
   }
 
   #addKeyboardListeners() {
@@ -110,10 +197,15 @@ export class Game {
         this.player.inputQueue.push('keydown:interact')
       }),
       Keyboard.onKeydown(['Esc'], () => {
-        this.pause()
+        if (this.isPaused) {
+          this.resume()
+        } else {
+          this.pause()
+        }
       }),
       Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
         this.player.inputQueue.push('keydown:jump')
+        console.log('key jump')
       }),
       Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
         this.player.inputQueue.push('keyup:jump')
@@ -244,6 +336,7 @@ export class Game {
     this.canvas.classList.remove('hidden')
 
     this.isRunning = true
+    this.isPaused = false
     this.#addKeyboardListeners()
 
     // Update Loop
@@ -253,9 +346,10 @@ export class Game {
 
     // Render Loop
     const renderLoop = () => {
+      this.animationFrameHandler = requestAnimationFrame(renderLoop)
+      if (this.isPaused) return
       this.render(this.ctx)
       this.renderTimeTravelPreview(this.ctx, this.ctx2)
-      this.animationFrameHandler = requestAnimationFrame(renderLoop)
     }
     renderLoop()
 
@@ -264,26 +358,40 @@ export class Game {
   }
 
   pause() {
-    this.isRunning = !this.isRunning
+    if (this.isPaused) return
+    this.isPaused = true
+    this.isRunning = false
+    this.$pauseOverlay.classList.add('show')
+
+    // 移除游戏键盘监听器，但保留暂停键
+    this.#removeKeyboardListeners()
+    rebindEscKey(() => this.resume())
   }
 
-  loadGame({
-    levelData,
-    gameObjects,
-    player,
-    ghostPlayers,
-    tick,
-    maxTick,
-    gameStateHistory,
-  }) {
-    console.log('加载存档:', {
-      levelData,
-      gameObjects,
-      player,
-      tick,
-      maxTick,
-      ghostPlayers,
-    })
+  resume() {
+    if (!this.isPaused) return
+    this.isPaused = false
+    this.isRunning = true
+    this.$pauseOverlay.classList.remove('show')
+
+    console.log(this)
+
+    // 恢复所有键盘监听器
+    rebindEscKey(null)
+    setTimeout(() => this.#addKeyboardListeners(), 0)
+  }
+
+  hideSaveManagerModal() {
+    this.$saveManagerModal.classList.remove('show')
+    rebindEscKey(() => this.resume())
+  }
+
+  hideHelpModal() {
+    this.$helpModal.classList.remove('show')
+    rebindEscKey(() => this.resume())
+  }
+
+  loadGame({ levelData, gameObjects, player, tick, maxTick }) {
     this.stop()
 
     const levelName = levelData.name || 'Level1'
@@ -295,15 +403,6 @@ export class Game {
     this.tick = tick
     this.maxTick = maxTick
     this.importGameObjects(gameObjects)
-
-    this.ghostPlayers = ghostPlayers.map(state => {
-      const ghost = new GhostPlayer()
-      ghost.state = state
-      ghost.stateHistory = state.stateHistory
-      return ghost
-    })
-
-    this.#gameStateHistory = new Map(gameStateHistory)
 
     this.start()
   }
@@ -322,12 +421,7 @@ export class Game {
       maxTick: this.maxTick,
       player: this.player?.state || {},
       gameObjects: this.exportGameObjects(),
-      ghostPlayers: this.ghostPlayers.map(ghost => ({
-        ...ghost.state,
-        stateHistory: ghost.stateHistory,
-      })),
       levelData: this.levelData,
-      gameStateHistory: Array.from(this.#gameStateHistory.entries()),
     }
 
     const savingsData = localStorage.getItem('rewind-pearl-savings')
@@ -352,7 +446,7 @@ export class Game {
       savings[currentUser][existingIndex] = saveData
     } else {
       // 添加新存档
-      savings[currentUser].push(saveData)
+      savings[currentUser].unshift(saveData)
     }
 
     localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
@@ -388,6 +482,7 @@ export class Game {
 
   stop() {
     this.isRunning = false
+    this.isPaused = false
     this.#removeKeyboardListeners()
     clearInterval(this.updateIntervalHandler)
     cancelAnimationFrame(this.animationFrameHandler)
@@ -397,6 +492,7 @@ export class Game {
    * 更新游戏逻辑
    */
   async update(dt) {
+    if (this.isPaused) return
     if (this.timeTravelState === 'pending') {
       const holdTime = performance.now() - this.timeTravelStartTime
 

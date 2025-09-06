@@ -1,6 +1,7 @@
 @import url('dialogue.css');
 @import url('loading.css');
 @import url('font.css');
+@import url('pause.css');
 
 :root {
   /* todo */
@@ -24,6 +25,8 @@ body {
   place-items: center;
 
   background-color: #000;
+
+  font-family: 'HarmonyOS Sans SC', sans-serif;
 }
 
 main {
@@ -78,7 +81,7 @@ main {
   align-items: center;
   gap: 10px;
   font-size: 16px;
-  z-index: 1000;
+  z-index: 2000;
   transform: translateX(200%);
   transition: transform 0.3s ease-in-out;
 }

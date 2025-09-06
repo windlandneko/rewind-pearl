@@ -19,7 +19,7 @@
           <a href="game/index.html" class="menu-button">开始新游戏</a>
         </li>
         <li class="menu-item">
-          <button class="menu-button" onclick="loadGame()">加载存档</button>
+          <button class="menu-button" onclick="showSaveModal()">加载存档</button>
         </li>
         <li class="menu-item">
           <a href="achievements/index.html" class="menu-button">成就</a>
@@ -31,7 +31,10 @@
           <a href="settings/index.html" class="menu-button">设置</a>
         </li>
         <li class="menu-item">
-          <button class="menu-button" onclick="exitGame()">退出</button>
+          <button class="menu-button" onclick="logout()" style="display: grid">
+            <span>退出登录</span>
+            <div id="current-user"></div>
+          </button>
         </li>
       </ul>
     </div>
@@ -42,33 +45,123 @@
     <iframe src="about/index.html" frameborder="0"></iframe>
   </div>
 
+  <!-- 存档列表弹出层 -->
+  <div id="saveModal" class="modal-overlay">
+    <div class="save-modal-content">
+      <div class="save-modal-header">
+        <h2>选择存档</h2>
+        <button class="close-btn" onclick="hideSaveModal()">&times;</button>
+      </div>
+      <div class="save-list-container">
+        <div id="saveList" class="save-list">
+          <!-- 存档列表将在这里动态生成 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function showAbout() {
-      const modal = document.getElementById('aboutModal')
-      modal.style.display = 'flex'
-      setTimeout(() => {
-        modal.classList.add('show')
-      }, 10)
+    const currentUser = localStorage.getItem('rewind-pearl-username')
+    if (!currentUser)
+      window.location.href = 'login/index.html'
+
+    const userElement = document.getElementById('current-user')
+    if (currentUser && userElement) {
+      userElement.textContent = `当前玩家: ${currentUser}`
     }
 
-    function hideAbout() {
-      const modal = document.getElementById('aboutModal')
+    function logout() {
+      if (!confirm('确定要注销吗？')) return
+      localStorage.removeItem('rewind-pearl-username')
+      window.location.href = 'login/index.html'
+    }
+
+    function showSaveModal() {
+      const modal = document.getElementById('saveModal')
+      loadSaveList()
+      modal.style.display = 'flex'
+      setTimeout(() => modal.classList.add('show'), 0)
+    }
+
+    function hideSaveModal() {
+      const modal = document.getElementById('saveModal')
       modal.classList.remove('show')
       setTimeout(() => {
         modal.style.display = 'none'
-      }, 500)
+      }, 300)
     }
 
-    function loadGame() {
-      // 加载存档功能待实现
-      alert('加载存档功能正在开发中...')
+    function loadSaveList() {
+      const saveList = document.getElementById('saveList')
+      const currentUser = localStorage.getItem('rewind-pearl-username')
+
+      if (!currentUser) {
+        saveList.innerHTML = '<div class="no-saves">请先登录账户</div>'
+        return
+      }
+
+      const savingsData = localStorage.getItem('rewind-pearl-savings')
+      const savings = savingsData ? JSON.parse(savingsData) : {}
+      const userSaves = savings[currentUser] || []
+
+      if (userSaves.length === 0) {
+        saveList.innerHTML = '<div class="no-saves">暂无存档</div>'
+        return
+      }
+
+      saveList.innerHTML = userSaves.map((save, index) => `
+        <div class="save-item" onclick="loadSelectedSave('${currentUser}', ${index})">
+          <div class="save-content">
+            <div class="save-name">${save.name}</div>
+            <div class="save-info">
+              <span class="save-time">${formatTime(save.data?.timestamp)}</span>
+              <span class="save-level">${save.data?.levelData?.name || '未知关卡'}</span>
+            </div>
+          </div>
+          <button class="delete-save-btn" onclick="event.stopPropagation(); deleteSave('${currentUser}', ${index})"">
+            删除
+          </button>
+        </div>
+      `).join('')
     }
 
-    function exitGame() {
-      // 退出功能待实现
-      if (confirm('确定要退出游戏吗？')) {
-        // 可以在这里添加退出逻辑，比如返回登录页面
-        window.location.href = 'login/index.html'
+    function formatTime(timestamp) {
+      if (!timestamp) return '未知时间'
+      const date = new Date(timestamp)
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+    }
+
+    function loadSelectedSave(username, saveIndex) {
+      const savingsData = localStorage.getItem('rewind-pearl-savings')
+      const savings = savingsData ? JSON.parse(savingsData) : {}
+      const userSaves = savings[username] || []
+
+      if (saveIndex >= 0 && saveIndex < userSaves.length) {
+        const selectedSave = userSaves[saveIndex]
+        localStorage.setItem('rewind-pearl-load-save', JSON.stringify(selectedSave.data))
+        window.location.href = 'game/index.html'
+      }
+    }
+
+    function deleteSave(username, saveIndex) {
+      if (!confirm('确定要删除这个存档吗？')) return
+
+      const savingsData = localStorage.getItem('rewind-pearl-savings')
+      const savings = savingsData ? JSON.parse(savingsData) : {}
+      const userSaves = savings[username] || []
+
+      if (saveIndex >= 0 && saveIndex < userSaves.length) {
+        userSaves.splice(saveIndex, 1)
+        savings[username] = userSaves
+        localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
+        loadSaveList()
       }
     }
   </script>

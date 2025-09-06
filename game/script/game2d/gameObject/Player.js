@@ -311,7 +311,7 @@ export class Player extends BaseObject {
       score: this.score,
       onGround: this.onGround,
       inputQueue: this.inputQueue,
-      inputHistory: this.inputHistory,
+      inputHistory: Array.from(this.inputHistory.entries()),
 
       // 跳跃相关状态
       jumpKeyPressed: this.jumpKeyPressed,
@@ -338,7 +338,7 @@ export class Player extends BaseObject {
     this.score = state.score
     this.onGround = state.onGround
     this.inputQueue = state.inputQueue
-    this.inputHistory = state.inputHistory
+    this.inputHistory = new Map(state.inputHistory)
 
     // 跳跃相关状态
     this.jumpKeyPressed = state.jumpKeyPressed

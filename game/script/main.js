@@ -30,7 +30,7 @@ async function init(skipAssetLoading = false) {
 
     try {
       const saveData = JSON.parse(loadSaveData)
-      await loadGameFromSave(saveData)
+      Game2D.loadGame(saveData)
     } catch (error) {
       console.error('加载存档失败:', error)
       // 如果加载失败，启动新游戏

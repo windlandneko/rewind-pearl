@@ -17,9 +17,32 @@ body {
   width: 100%;
   height: 100vh;
   display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
   padding-right: 10vw;
+  position: relative;
+}
+
+#current-user {
+  color: #bbb;
+  font-size: 14px;
+}
+
+.logout-btn {
+  background: rgba(74, 158, 255, 0.1);
+  border: 1px solid #4a9eff;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 12px;
+}
+
+.logout-btn:hover {
+  background: rgba(74, 158, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 .menu-section {
@@ -120,7 +143,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.7);
   display: none;
   justify-content: center;
   align-items: center;
@@ -150,7 +173,7 @@ body {
   transform: translateY(0);
 }
 
-/* 响应式设计 */
+/* 响应式 */
 @media (max-width: 480px) {
   .container {
     padding-right: 20px;
@@ -179,4 +202,156 @@ body {
   .menu-button {
     padding: 5px 20px;
   }
+}
+
+/* 存档弹窗样式 */
+.save-modal-content {
+  border: 2px solid #4a9eff;
+  border-radius: 12px;
+  padding: 0;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.save-modal-header {
+  background: linear-gradient(135deg, #4a9eff, #3e9fff);
+  padding: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(74, 158, 255, 0.3);
+}
+
+.save-modal-header h2 {
+  color: white;
+  font-size: 1.3rem;
+  margin-left: 1rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 28px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+.close-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.save-list-container {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.save-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.save-item {
+  background: rgba(74, 158, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.save-item:hover {
+  background: rgba(74, 158, 255, 0.2);
+}
+
+.save-item:active {
+  transform: translateY(0);
+}
+
+.save-content {
+  flex: 1;
+}
+
+.save-name {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.save-info {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.save-time,
+.save-level {
+  padding: 4px 8px;
+  background: rgba(74, 158, 255, 0.2);
+  border-radius: 4px;
+}
+
+.delete-save-btn {
+  background: rgba(255, 74, 74, 0.1);
+  border: 1px solid rgba(255, 74, 74, 0.3);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.delete-save-btn:hover {
+  background: rgba(255, 74, 74, 0.2);
+  border-color: #ff4a4a;
+}
+
+.no-saves {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 18px;
+  padding: 40px;
+  background: rgba(74, 158, 255, 0.05);
+  border-radius: 8px;
+  border: 2px dashed rgba(74, 158, 255, 0.3);
+}
+
+/* 滚动条样式 */
+.save-list-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.save-list-container::-webkit-scrollbar-track {
+  background: rgba(74, 158, 255, 0.1);
+  border-radius: 4px;
+}
+
+.save-list-container::-webkit-scrollbar-thumb {
+  background: rgba(74, 158, 255, 0.5);
+  border-radius: 4px;
+}
+
+.save-list-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(74, 158, 255, 0.7);
 }
