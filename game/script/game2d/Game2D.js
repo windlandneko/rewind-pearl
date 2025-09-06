@@ -9,6 +9,7 @@ import {
   Collectible,
   BaseObject,
   GhostPlayer,
+  LevelChanger,
 } from './gameObject/index.js'
 import { Camera } from './Camera.js'
 import GameConfig from './GameConfig.js'
@@ -55,6 +56,13 @@ export class Game {
   timeTravelCircleRadius = 0
   timeTravelStartTime = 0
   timeTravelMaxRadius = 0
+
+  // 关卡过渡效果
+  isTransitioning = false
+  transitionOpacity = 0
+  transitionDuration = 1000 // 过渡持续时间（毫秒）
+  transitionStartTime = 0
+  pendingLevel = null
 
   #keyboardListeners = []
 
@@ -140,18 +148,11 @@ export class Game {
 
       rebindEscKey(() => this.hideSaveManagerModal())
 
-      SaveManager.loadSaveList(
-        saveList,
-        saveData => {
-          // 加载存档
-          localStorage.setItem('rewind-pearl-load-save', JSON.stringify(saveData))
-          location.reload()
-        },
-        saveName => {
-          // 存档删除后的回调
-          console.log(`存档 "${saveName}" 已删除`)
-        }
-      )
+      SaveManager.loadSaveList(saveList, saveData => {
+        // 加载存档
+        localStorage.setItem('rewind-pearl-load-save', JSON.stringify(saveData))
+        location.reload()
+      })
     })
 
     document.getElementById('help-btn').addEventListener('click', () => {
@@ -203,11 +204,10 @@ export class Game {
           this.pause()
         }
       }),
-      Keyboard.onKeydown(['W', 'Up', 'Space'], () => {
+      Keyboard.onKeydown('Space', () => {
         this.player.inputQueue.push('keydown:jump')
-        console.log('key jump')
       }),
-      Keyboard.onKeyup(['W', 'Up', 'Space'], () => {
+      Keyboard.onKeyup('Space', () => {
         this.player.inputQueue.push('keyup:jump')
       }),
 
@@ -261,6 +261,9 @@ export class Game {
         case 'interactable':
           entity = new Interactable()
           break
+        case 'level-transition':
+          entity = new LevelChanger()
+          break
         default:
           entity = new BaseObject()
           console.warn(`[Game2D] 未处理的对象类型: ${state.type}`, state)
@@ -269,7 +272,7 @@ export class Game {
       return entity
     })
 
-    // 更新渲染组以反映新状态
+    // 更新渲染组
     this.#updateRenderGroups()
   }
 
@@ -281,7 +284,8 @@ export class Game {
    * 保存游戏状态快照到历史记录
    */
   #saveSnapshot() {
-    this.#gameStateHistory.set(this.tick, this.exportGameObjects())
+    // todo: fix memory leak
+    // this.#gameStateHistory.set(this.tick, this.exportGameObjects())
     this.#gameStateHistory.delete(
       this.tick - GameConfig.MAX_TIME_TRAVEL_DISTANCE
     )
@@ -374,11 +378,46 @@ export class Game {
     this.isRunning = true
     this.$pauseOverlay.classList.remove('show')
 
-    console.log(this)
-
-    // 恢复所有键盘监听器
     rebindEscKey(null)
     setTimeout(() => this.#addKeyboardListeners(), 0)
+  }
+
+  async changeLevel(targetLevel) {
+    if (this.isTransitioning) return
+
+    this.isTransitioning = true
+    this.transitionStartTime = performance.now()
+    this.pendingLevel = targetLevel
+
+    await this.waitForTransition('fade-out')
+
+    this.stop()
+    this.loadLevel(LevelManager[targetLevel])
+    this.start()
+    this.pendingLevel = null
+
+    await this.waitForTransition('fade-in')
+
+    this.isTransitioning = false
+  }
+
+  waitForTransition(type) {
+    return new Promise(resolve => {
+      const checkTransition = () => {
+        const k = 0.2 // 0.1 fade-in, 0.8 black, 0.1 fade-out
+        const elapsed =
+          (2 * (performance.now() - this.transitionStartTime)) /
+          this.transitionDuration
+        const progress = Math.min(1 - (Math.abs(elapsed - 1) - k) / (1 - k), 1)
+
+        this.transitionOpacity = progress
+
+        if (type === 'fade-out' && elapsed >= 1) resolve()
+        if (type === 'fade-in' && elapsed >= 2) resolve()
+        else requestAnimationFrame(checkTransition)
+      }
+      checkTransition()
+    })
   }
 
   hideSaveManagerModal() {
@@ -450,7 +489,6 @@ export class Game {
     }
 
     localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
-    console.log(`游戏已保存: ${saveName}`)
 
     this.showNotification('游戏已保存', true)
     return true
@@ -492,7 +530,7 @@ export class Game {
    * 更新游戏逻辑
    */
   async update(dt) {
-    if (this.isPaused) return
+    if (this.isPaused || this.isTransitioning) return
     if (this.timeTravelState === 'pending') {
       const holdTime = performance.now() - this.timeTravelStartTime
 
@@ -736,6 +774,12 @@ export class Game {
 
     this.#renderTimeline(ctx)
 
+    // 渲染关卡过渡效果
+    if (this.isTransitioning && this.transitionOpacity) {
+      ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
+      ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
+    }
+
     // 调试数据
     // this.#renderDebugUI(ctx)
   }
@@ -754,7 +798,7 @@ export class Game {
       obj => obj.type === 'enemy'
     )
     this.renderGroups.interactables = this.gameObjects.filter(
-      obj => obj.type === 'interactable'
+      obj => obj.type === 'interactable' || obj.type === 'level-transition'
     )
   }
 

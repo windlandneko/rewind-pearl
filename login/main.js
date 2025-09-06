@@ -60,6 +60,7 @@ function checkPasswordStrength(password) {
 
   // 长度加分
   if (password.length > 10) strength++
+  if (password.length > 20) strength++
 
   // 复杂度加分
   if (
@@ -69,8 +70,8 @@ function checkPasswordStrength(password) {
   )
     strength++
   if (
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
+    /[A-Za-z]/.test(password) &&
+    /[0-9]/.test(password) &&
     /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)
   )
     strength++
@@ -265,6 +266,7 @@ signInForm.addEventListener('submit', e => {
   } else {
     // 登录失败
     showError(signInError, '用户名或密码错误')
+    signInUsername.classList.add('error')
     signInPassword.classList.add('error')
     signInError.style.color = '#e74c3c'
   }
@@ -272,6 +274,12 @@ signInForm.addEventListener('submit', e => {
 
 // 清除登录密码框错误状态
 signInPassword.addEventListener('input', () => {
+  signInUsername.classList.remove('error')
+  signInPassword.classList.remove('error')
+  hideError(signInError)
+})
+signInUsername.addEventListener('input', () => {
+  signInUsername.classList.remove('error')
   signInPassword.classList.remove('error')
   hideError(signInError)
 })

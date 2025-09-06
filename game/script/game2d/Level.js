@@ -4,6 +4,7 @@ import {
   Enemy,
   Interactable,
   Collectible,
+  LevelTransition,
 } from './gameObject/index.js'
 import Vec2 from './Vector.js'
 
@@ -54,6 +55,11 @@ export function Level1(game) {
     new Interactable(width - 60, 75, 'level1_end', '恭喜通关！')
   )
 
+  // 关卡传送门
+  game.gameObjects.push(
+    new LevelTransition(100, 150, 32, 32, 'Level2', '按E进入第二关')
+  )
+
   // 收集品（暂时用不到）
   game.gameObjects.push(
     new Collectible(120, 130),
@@ -80,5 +86,77 @@ export function Level1(game) {
     new Enemy(500, 115),
     new Enemy(570, 85),
     new Enemy(width - 180, 75)
+  )
+}
+
+// 第二关
+export function Level2(game) {
+  const height = 8 * 24
+  const width = 8 * 100
+
+  game.levelData = {
+    name: 'Level2',
+    height,
+    width,
+    worldBorder: true,
+    spawnpoint: new Vec2(32, 150),
+  }
+
+  game.player = new Player(
+    game.levelData.spawnpoint.x,
+    game.levelData.spawnpoint.y
+  )
+
+  // 平台设计 - 更有挑战性的布局
+  game.gameObjects.push(
+    new Platform(0, height - 8, width, 8), // 地面
+    new Platform(0, 0, width, 8), // 天花板
+    new Platform(0, 0, 8, height), // 左墙
+    new Platform(width - 8, 0, 8, height), // 右墙
+
+    // 更复杂的平台布局
+    new Platform(80, 152, 100, 16),
+    new Platform(220, 130, 80, 16),
+    new Platform(350, 108, 60, 16),
+    new Platform(450, 86, 80, 16),
+    new Platform(180, 80, 100, 16),
+    new Platform(320, 60, 120, 16),
+    new Platform(500, 140, 60, 16),
+    new Platform(600, 120, 80, 16),
+    new Platform(700, 100, 60, 16),
+    new Platform(width - 150, 80, 100, 16)
+  )
+
+  // 可交互对话
+  game.gameObjects.push(
+    new Interactable(14, 160, 'level1_start', '欢迎来到第二关'),
+    new Interactable(width - 60, 55, 'level1_end', '第二关完成！')
+  )
+
+  // 返回第一关的传送门
+  game.gameObjects.push(
+    new LevelTransition(width - 100, 50, 32, 32, 'Level1', '按E返回第一关')
+  )
+
+  // 收集品
+  game.gameObjects.push(
+    new Collectible(200, 108),
+    new Collectible(300, 108),
+    new Collectible(400, 64),
+    new Collectible(250, 58),
+    new Collectible(380, 38),
+    new Collectible(530, 118),
+    new Collectible(630, 98),
+    new Collectible(720, 78),
+    new Collectible(width - 120, 58)
+  )
+
+  // 敌人
+  game.gameObjects.push(
+    new Enemy(200, 125),
+    new Enemy(350, 80),
+    new Enemy(480, 60),
+    new Enemy(620, 95),
+    new Enemy(740, 75)
   )
 }

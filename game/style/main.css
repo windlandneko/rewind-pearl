@@ -61,7 +61,10 @@ main {
   transition: opacity 1s;
 
   background: url('../../background.png') no-repeat center / cover fixed black;
+
+  transition: filter 0.1s ease-in-out;
 }
+
 #game-canvas.hidden {
   opacity: 0;
   pointer-events: none;

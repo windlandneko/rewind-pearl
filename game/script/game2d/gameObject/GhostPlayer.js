@@ -44,7 +44,7 @@ export class GhostPlayer extends Player {
     }
   }
 
-  render(ctx, cameraScale) {
+  render(ctx, scale) {
     if (this.removed) return
 
     // 绘制半透明的玩家
@@ -72,7 +72,7 @@ export class GhostPlayer extends Player {
     ctx.strokeStyle = this.stateConsistent
       ? 'rgba(100, 100, 255, 1)'
       : 'rgba(255, 0, 0, 1)'
-    ctx.lineWidth = 1 / cameraScale
+    ctx.lineWidth = 1 / scale
     ctx.strokeRect(this.r.x, this.r.y, this.width, this.height)
 
     ctx.restore()
