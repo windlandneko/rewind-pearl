@@ -7,7 +7,7 @@ import * as LevelManager from './game2d/Level.js'
 
 // 检查用户登录
 if (!localStorage.getItem('rewind-pearl-username')) {
-  window.location.href = '../login/index.html'
+  location.assign('../login/index.html')
 }
 
 async function init(skipAssetLoading = false) {
@@ -42,7 +42,7 @@ async function init(skipAssetLoading = false) {
 }
 
 async function startNewGame() {
-  await Dialogue.play('prologue')
+  // await Dialogue.play('prologue')
   Game2D.loadLevel(LevelManager.PrologueLevel)
   Game2D.start()
 }

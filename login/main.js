@@ -261,7 +261,7 @@ signInForm.addEventListener('submit', e => {
     signInError.style.color = '#27ae60'
 
     setTimeout(() => {
-      window.location.href = '../index.html'
+      location.assign('../index.html')
     }, 1000)
   } else {
     // 登录失败

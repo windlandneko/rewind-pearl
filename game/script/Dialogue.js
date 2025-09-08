@@ -1,5 +1,6 @@
 import Asset from './Asset.js'
 import keyboard from './Keyboard.js'
+import PauseManager from './PauseManager.js'
 
 /**
  * Dialogue Manager
@@ -26,6 +27,15 @@ class Dialogue {
 
   #keyboardListeners = []
 
+  constructor() {
+    PauseManager.on('pause', () => {
+      this.#removeKeyboardListeners()
+    })
+    PauseManager.on('resume', () => {
+      setTimeout(() => this.#addKeyboardListeners(), 0)
+    })
+  }
+
   #triggerSkip(key, delayTime) {
     const k = 0.6
     delayTime = k * delayTime + (1 - k) * 30
@@ -37,12 +47,19 @@ class Dialogue {
   }
 
   #addKeyboardListeners() {
+    ;['LCtrl', 'RCtrl'].forEach(key => {
+      if (keyboard.isActive(key)) this.#triggerSkip(key, 200)
+    })
+
     this.#keyboardListeners.push(
       keyboard.onKeydown(['Enter', 'Space'], () => {
         this.next()
       }),
       keyboard.onKeydown(['LCtrl', 'RCtrl'], key => {
         this.#triggerSkip(key, 200)
+      }),
+      keyboard.onKeydown('Esc', () => {
+        PauseManager.pause()
       })
     )
   }
@@ -75,9 +92,6 @@ class Dialogue {
 
     // 注册键盘监听器
     this.#addKeyboardListeners()
-    ;['LCtrl', 'RCtrl'].forEach(key => {
-      if (keyboard.isActive(key)) this.#triggerSkip(key, 200)
-    })
 
     const promise = new Promise(res => {
       this.onEnd = res
@@ -342,7 +356,11 @@ class Dialogue {
     if (Asset.has(image)) {
       image = Asset.get(image).src
     } else {
-      console.warn('[Dialogue] (updateCharacterEmotion) 立绘图片不存在:', character, emotion)
+      console.warn(
+        '[Dialogue] (updateCharacterEmotion) 立绘图片不存在:',
+        character,
+        emotion
+      )
       image = Asset.get('character/gunmu').src
     }
 

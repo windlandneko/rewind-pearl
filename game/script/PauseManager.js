@@ -1,102 +1,54 @@
 import SaveManager from './SaveManager.js'
 import Keyboard from './Keyboard.js'
+import { $, EventListener } from './utils.js'
 
 /**
  * 暂停管理器 - 负责游戏暂停状态的控制和界面管理
  */
 export class PauseManager {
+  #listener = new EventListener()
+
   constructor() {
     this.isPaused = false
     this.game = null
     this.escKeyHandler = null
 
-    // DOM 元素
-    this.$pauseOverlay = null
-    this.$saveManagerModal = null
-    this.$helpModal = null
+    this.$pauseOverlay = $('#pause-overlay')
+    this.$saveManagerModal = $('#save-manager-modal')
+    this.$helpModal = $('#help-modal')
 
-    this.init()
+    $('#resume-btn')?.addEventListener('click', () => this.resume())
+    $('#save-btn')?.addEventListener('click', () => this.#onSaveGame())
+    $('#load-btn')?.addEventListener('click', () => this.#onLoadGame())
+    $('#help-btn')?.addEventListener('click', () => this.#onShowHelp())
+    $('#title-btn')?.addEventListener('click', () => this.#onReturnToTitle())
+    $('#help-close')?.addEventListener('click', () => this.#hideHelpModal())
+    $('save-manager-close')?.addEventListener('click', () => {
+      this.#hideSaveManagerModal()
+    })
+    this.$saveManagerModal?.addEventListener('click', event => {
+      if (event.target === this.$saveManagerModal) this.#hideSaveManagerModal()
+    })
+    this.$helpModal?.addEventListener('click', event => {
+      if (event.target === this.$helpModal) this.#hideHelpModal()
+    })
   }
 
-  /**
-   * 初始化暂停管理器
-   */
-  init() {
-    this.#initDOMElements()
-    this.#bindEvents()
-  }
-
-  /**
-   * 初始化DOM元素
-   */
-  #initDOMElements() {
-    this.$pauseOverlay = document.getElementById('pause-overlay')
-    this.$saveManagerModal = document.getElementById('save-manager-modal')
-    this.$helpModal = document.getElementById('help-modal')
-  }
-
-  /**
-   * 绑定事件监听器
-   */
-  #bindEvents() {
-    // 暂停界面按钮事件
-    document
-      .getElementById('resume-btn')
-      ?.addEventListener('click', () => this.resume())
-
-    document.getElementById('save-btn')?.addEventListener('click', () => {
-      this.#handleSaveGame()
-    })
-
-    document.getElementById('load-btn')?.addEventListener('click', () => {
-      this.#handleLoadGame()
-    })
-
-    document.getElementById('help-btn')?.addEventListener('click', () => {
-      this.#handleShowHelp()
-    })
-
-    document.getElementById('title-btn')?.addEventListener('click', () => {
-      this.#handleReturnToTitle()
-    })
-
-    // 存档管理界面事件
-    document
-      .getElementById('save-manager-close')
-      ?.addEventListener('click', () => {
-        this.#hideSaveManagerModal()
-      })
-
-    // 帮助界面事件
-    document.getElementById('help-close')?.addEventListener('click', () => {
-      this.#hideHelpModal()
-    })
-
-    // 点击遮罩关闭模态框
-    this.$saveManagerModal?.addEventListener('click', e => {
-      if (e.target === this.$saveManagerModal) {
-        this.#hideSaveManagerModal()
-      }
-    })
-
-    this.$helpModal?.addEventListener('click', e => {
-      if (e.target === this.$helpModal) {
-        this.#hideHelpModal()
-      }
-    })
+  on(event, listener) {
+    this.#listener.on(event, listener)
   }
 
   /**
    * 暂停游戏
    */
   pause() {
-    if (this.isPaused || !this.game) return
+    if (this.isPaused) return
 
     this.isPaused = true
-    this.$pauseOverlay?.classList.add('show')
+    this.$pauseOverlay.classList.add('show')
 
     // 通知游戏暂停
-    this.game.onPause?.()
+    this.#listener.emit('pause')
 
     // 设置ESC键监听器
     this.#setEscKeyHandler(() => this.resume())
@@ -106,13 +58,13 @@ export class PauseManager {
    * 恢复游戏
    */
   resume() {
-    if (!this.isPaused || !this.game) return
+    if (!this.isPaused) return
 
     this.isPaused = false
-    this.$pauseOverlay?.classList.remove('show')
+    this.$pauseOverlay.classList.remove('show')
 
     // 通知游戏恢复
-    this.game.onResume?.()
+    this.#listener.emit('resume')
 
     // 清除ESC键监听器
     this.#clearEscKeyHandler()
@@ -122,17 +74,14 @@ export class PauseManager {
    * 切换暂停状态
    */
   toggle() {
-    if (this.isPaused) {
-      this.resume()
-    } else {
-      this.pause()
-    }
+    if (this.isPaused) this.resume()
+    else this.pause()
   }
 
   /**
    * 处理保存游戏
    */
-  #handleSaveGame() {
+  #onSaveGame() {
     if (!this.game?.saveGame) {
       console.warn('游戏实例没有提供保存功能')
       return
@@ -146,13 +95,13 @@ export class PauseManager {
   /**
    * 处理加载游戏
    */
-  #handleLoadGame() {
+  #onLoadGame() {
     if (!this.game?.loadGame) {
       console.warn('游戏实例没有提供加载功能')
       return
     }
 
-    const saveList = document.getElementById('save-list')
+    const saveList = $('#save-list')
     this.$saveManagerModal?.classList.add('show')
 
     this.#setEscKeyHandler(() => this.#hideSaveManagerModal())
@@ -167,7 +116,7 @@ export class PauseManager {
   /**
    * 处理显示帮助
    */
-  #handleShowHelp() {
+  #onShowHelp() {
     this.$helpModal?.classList.add('show')
     this.#setEscKeyHandler(() => this.#hideHelpModal())
   }
@@ -175,9 +124,9 @@ export class PauseManager {
   /**
    * 处理返回标题
    */
-  #handleReturnToTitle() {
+  #onReturnToTitle() {
     if (confirm('确定要返回标题页面吗？未保存的进度将会丢失。')) {
-      window.location.href = '../index.html'
+      location.assign('../index.html')
     }
   }
 
@@ -216,14 +165,6 @@ export class PauseManager {
       this.escKeyHandler()
       this.escKeyHandler = null
     }
-  }
-
-  /**
-   * 销毁暂停管理器
-   */
-  destroy() {
-    this.#clearEscKeyHandler()
-    this.game = null
   }
 }
 

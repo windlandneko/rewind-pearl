@@ -1,6 +1,6 @@
 import Keyboard from '../Keyboard.js'
 import { EventListener, throttle } from '../utils.js'
-import pauseManager from '../PauseManager.js'
+import PauseManager from '../PauseManager.js'
 import {
   Player,
   Platform,
@@ -109,7 +109,15 @@ export class Game {
 
     this.$backgroundImage = document.getElementById('game2d-background')
 
-    pauseManager.game = this
+    PauseManager.game = this
+    PauseManager.on('pause', () => {
+      this.isRunning = false
+      this.#removeKeyboardListeners()
+    })
+    PauseManager.on('resume', () => {
+      this.isRunning = true
+      setTimeout(() => this.#addKeyboardListeners(), 0)
+    })
     timeTravel.game = this
   }
 
@@ -119,7 +127,7 @@ export class Game {
         this.player.inputQueue.push('keydown:interact')
       }),
       Keyboard.onKeydown(['Esc'], () => {
-        pauseManager.toggle()
+        PauseManager.pause()
       }),
       Keyboard.onKeydown('Space', () => {
         this.player.inputQueue.push('keydown:jump')
@@ -245,7 +253,7 @@ export class Game {
     // Render Loop
     const renderLoop = () => {
       this.animationFrameHandler = requestAnimationFrame(renderLoop)
-      if (pauseManager.isPaused) return
+      if (PauseManager.isPaused) return
       this.render(this.ctx)
       timeTravel.render(this)
       this.#renderTimeline(this.ctx)
@@ -261,24 +269,6 @@ export class Game {
     this.#removeKeyboardListeners()
     clearInterval(this.updateIntervalHandler)
     cancelAnimationFrame(this.animationFrameHandler)
-  }
-
-  /**
-   * 暂停回调 - 当游戏被暂停时调用
-   */
-  onPause() {
-    this.isRunning = false
-    // 移除游戏键盘监听器
-    this.#removeKeyboardListeners()
-  }
-
-  /**
-   * 恢复回调 - 当游戏恢复时调用
-   */
-  onResume() {
-    this.isRunning = true
-    // 延迟添加键盘监听器，避免与暂停键冲突
-    setTimeout(() => this.#addKeyboardListeners(), 0)
   }
 
   async changeLevel(targetLevel) {
@@ -411,7 +401,7 @@ export class Game {
    * 更新游戏逻辑
    */
   async update(dt) {
-    if (pauseManager.isPaused) return
+    if (PauseManager.isPaused) return
 
     // 外部输入事件
     const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
