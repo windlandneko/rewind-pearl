@@ -57,12 +57,12 @@ export class Player extends BaseObject {
     }
 
     this.animationManager.addAnimation(
-      'idle_left',
-      new SpriteAnimation(Asset.get('sprite/player/idle_left'), 4, 32, 32)
+      'jump_left',
+      new SpriteAnimation(Asset.get('sprite/player/jump_left'), 4, 32, 32)
     )
     this.animationManager.addAnimation(
-      'idle_right',
-      new SpriteAnimation(Asset.get('sprite/player/idle_right'), 4, 32, 32)
+      'jump_right',
+      new SpriteAnimation(Asset.get('sprite/player/jump_right'), 4, 32, 32)
     )
     this.animationManager.addAnimation(
       'walk_left',
@@ -72,28 +72,26 @@ export class Player extends BaseObject {
       'walk_right',
       new SpriteAnimation(Asset.get('sprite/player/walk_right'), 6, 32, 32)
     )
-
-    // 默认播放右方向的闲置动画
-    this.animationManager.playAnimation('idle_right')
   }
 
   /**
    * 更新动画状态
    */
   updateAnimation() {
+    const direction = this.v.x > 0 ? 1 : -1
     if (!this.onGround) {
       // todo: jump animation
       this.animationManager.playAnimation(
-        this.previousDirection > 0 ? 'walk_right' : 'walk_left'
+        direction > 0 ? 'jump_right' : 'jump_left'
       )
     } else if (Math.abs(this.v.x) > 5) {
       this.animationManager.playAnimation(
         this.v.x > 0 ? 'walk_right' : 'walk_left'
       )
-      this.previousDirection = this.v.x > 0 ? 1 : -1
     } else {
       this.animationManager.playAnimation(
-        this.previousDirection > 0 ? 'idle_right' : 'idle_left'
+        direction > 0 ? 'walk_right' : 'walk_left',
+        true
       )
     }
   }
@@ -268,25 +266,12 @@ export class Player extends BaseObject {
     }
   }
 
-  checkGroundContact(platforms) {
-    const groundCheckBox = {
-      r: { x: this.r.x + 1, y: this.r.y + this.height },
-      width: this.width - 2,
-      height: 1,
-    }
-
-    for (const platform of platforms) {
-      if (platform.checkCollision(groundCheckBox)) return true
-    }
-    return false
-  }
-
   render(ctx, scale) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 
     // 受伤时闪烁效果
-    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.2) % 2 === 0) {
+    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.1) % 2 === 0) {
       ctx.globalAlpha = 0.5
     } else {
       ctx.globalAlpha = 1.0
@@ -305,76 +290,6 @@ export class Player extends BaseObject {
       spriteHeight
     )
     ctx.globalAlpha = 1.0
-
-    return
-
-    // 地面接触指示器
-    if (this.onGround) {
-      ctx.fillStyle = '#444'
-      ctx.fillRect(x + 1, y + this.height - 2, this.width - 2, 1)
-    }
-
-    // 显示速度向量（调试用）
-    if (this.v.len() > 0) {
-      ctx.strokeStyle = 'yellow'
-      ctx.lineWidth = 2 / scale
-      ctx.beginPath()
-      ctx.moveTo(x + this.width / 2, y + this.height / 2)
-      ctx.lineTo(
-        x + this.width / 2 + this.v.x * 0.04,
-        y + this.height / 2 + this.v.y * 0.04
-      )
-      ctx.stroke()
-    }
-
-    // 调试信息
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'
-    ctx.font = `${24 / scale}px FiraCode, monospace`
-    const debugY = y - 120 / scale
-    ctx.fillText(
-      `pos: (${this.r.x.toFixed(1)}, ${this.r.y.toFixed(1)})`,
-      x,
-      debugY
-    )
-    ctx.fillText(
-      `vel: (${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)})`,
-      x,
-      debugY + 25 / scale
-    )
-    ctx.fillText(`speed: ${this.v.len().toFixed(1)}`, x, debugY + 50 / scale)
-    ctx.fillText(
-      `jumpBuffer: ${this.jumpBufferTimer.toFixed(2)}s`,
-      x,
-      debugY + 75 / scale
-    )
-
-    // 可视化土狼时间
-    if (this.coyoteTimer > 0 && !this.onGround) {
-      ctx.fillStyle = 'orange'
-      const coyoteHeight = 1
-      const coyoteWidth = (this.coyoteTimer / this.coyote) * this.width
-      ctx.fillRect(x, y - 1, coyoteWidth, coyoteHeight)
-    }
-
-    // 可视化跳跃缓冲
-    if (this.jumpBufferTimer > 0) {
-      ctx.fillStyle = 'cyan'
-      const bufferHeight = 1
-      const bufferWidth = (this.jumpBufferTimer / this.jumpBuffer) * this.width
-      ctx.fillRect(x, y - 2, bufferWidth, bufferHeight)
-    }
-
-    // 可视化空中跳跃次数
-    for (let i = 0; i < this.maxAirJumps; i++) {
-      ctx.fillStyle = i < this.airJumpsCount ? 'lightblue' : '#222'
-      ctx.fillRect(x + i * 10 + 1, y + 1, 1, 1)
-    }
-
-    // 可视化碰撞箱边界（调试用）
-    // 可以通过GameConfig控制是否显示
-    ctx.strokeStyle = 'red'
-    ctx.lineWidth = 1 / scale
-    ctx.strokeRect(x, y, this.width, this.height)
   }
 
   get state() {
@@ -400,7 +315,6 @@ export class Player extends BaseObject {
       previousOnGround: this.previousOnGround,
       previousPositionX: this.previousPosition.x,
       previousPositionY: this.previousPosition.y,
-      previousDirection: this.previousDirection,
 
       // 动画状态
       currentAnimationName:
@@ -431,7 +345,6 @@ export class Player extends BaseObject {
     this.previousOnGround = state.previousOnGround
     this.previousPosition.x = state.previousPositionX
     this.previousPosition.y = state.previousPositionY
-    this.previousDirection = state.previousDirection
 
     // 动画状态
     if (state.currentAnimationName && this.animationManager) {

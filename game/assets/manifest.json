@@ -83,8 +83,8 @@
 
   "sprite": {
     "player": {
-      "idle_left": "sprite/idle_left.png",
-      "idle_right": "sprite/idle_right.png",
+      "jump_left": "sprite/jump_left.png",
+      "jump_right": "sprite/jump_right.png",
       "walk_left": "sprite/walk_left.png",
       "walk_right": "sprite/walk_right.png"
     },
