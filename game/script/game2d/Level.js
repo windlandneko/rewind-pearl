@@ -1,10 +1,10 @@
 import {
-  Player,
-  Platform,
   Enemy,
   Interactable,
   Collectible,
   LevelChanger,
+  Platform,
+  MovingPlatform,
 } from './gameObject/index.js'
 import Vec2 from './Vector.js'
 
@@ -12,98 +12,62 @@ import Vec2 from './Vector.js'
 const SCREEN_HEIGHT = 8 * 24 // 192像素
 const SCREEN_WIDTH = 8 * 40 // 320像素
 
-// 新增的关卡像这样写，每个关卡都是一个函数
-export function Level1(game) {
-  const height = SCREEN_HEIGHT
-  const width = SCREEN_WIDTH
-
-  game.levelData = {
-    name: 'Level1', // 这里与关卡的函数名要保持一致
-    introDialogue: 'prologue',
-    height,
-    width,
-    worldBorder: true, // 是否启用世界边界，玩家走不出去
-    spawnpoint: new Vec2(32, 150), // 玩家出生点，注意y轴是反的，原点在左上角
-    background: 'test', // 测试背景
-  }
-
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
-
-  // 平台
-  game.gameObjects.push(
-    new Platform(0, height - 20, width, 20), // 地面
-    new Platform(0, 0, width, 8), // 天花板
-    new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height - 40), // 右墙
-
-    // 平台
-    new Platform(80, 152, 120, 16),
-    new Platform(150, 120, 80, 16),
-    new Platform(240, 100, 80, 16)
-  )
-
-  // 可交互对话
-  // new Interactable(x, y, 对话ID, 提示文本)
-  game.gameObjects.push(
-    new Interactable(50, 160, 'level1_start', '按E交互'),
-    new Interactable(160, 160, 'level1_npc', '妈妈生的'),
-    new Interactable(width - 60, 160, 'level1_end', '恭喜通关！')
-  )
-
-  // 关卡传送门
-  game.gameObjects.push(
-    new LevelChanger(width - 8, 150, 32, 32, 'Level2', true)
-  )
-
-  // 收集品（暂时用不到）
-  game.gameObjects.push(
-    new Collectible(120, 130),
-    new Collectible(200, 130),
-    new Collectible(180, 98),
-    new Collectible(260, 78)
-  )
-
-  // 敌人（暂时用不到）
-  game.gameObjects.push(new Enemy(100, 150), new Enemy(200, 150))
-}
-
 // 序章 - 片场
 export function PrologueLevel(game) {
   const height = SCREEN_HEIGHT
-  const width = SCREEN_WIDTH * 2
+  const width = SCREEN_WIDTH * 2.5
 
   game.levelData = {
     name: 'PrologueLevel',
     introDialogue: 'prologue',
     height,
     width,
-    worldBorder: true,
+    worldBorder: false,
     spawnpoint: new Vec2(32, 150),
     background: 'intro', // 片场背景
   }
 
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
-
   // 基础墙壁
   game.gameObjects.push(
-    new Platform(0, height - 20, width, 20), // 地面
+    new Platform(0, height - 32, 100, 32), // 地面
+    new Platform(width - 100, height - 32, 120, 32), // 地面
     new Platform(0, 0, width, 8), // 天花板
-    new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height - 40) // 右墙
+    new Platform(0, 0, 8, height) // 左墙
+  )
+
+  // 移动平台
+  game.gameObjects.push(
+    new MovingPlatform(
+      new Vec2(100, height - 32),
+      new Vec2(width / 2 - 16, height - 32),
+      32,
+      4,
+      10
+    ),
+    new MovingPlatform(
+      new Vec2(width / 2 - 16, height - 32),
+      new Vec2(width - 100 - 16, height - 32),
+      32,
+      4,
+      10
+    )
   )
 
   // 剧情对话点
-  game.gameObjects.push(new Interactable(200, 160, 'prologue', '遇见王源'))
+  game.gameObjects.push(
+    new Interactable(
+      200,
+      160,
+      'prologue',
+      'character/hajimi/normal',
+      '测试',
+      true
+    )
+  )
 
   // 进入异世界的传送门
   game.gameObjects.push(
-    new LevelChanger(width - 8, 150, 32, 32, 'Chapter1Level', true)
+    new LevelChanger(width, 0, 32, height, 'Chapter1Level', true)
   )
 }
 
@@ -114,17 +78,12 @@ export function Chapter1Level(game) {
 
   game.levelData = {
     name: 'Chapter1Level',
+    background: 'magic', // 异世界魔法背景
     height,
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'magic', // 异世界魔法背景
   }
-
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
 
   // 基础墙壁
   game.gameObjects.push(
@@ -161,11 +120,6 @@ export function Chapter2Level(game) {
     background: 'factory', // 工厂背景
   }
 
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
-
   // 基础墙壁
   game.gameObjects.push(
     new Platform(0, height - 20, width, 20), // 地面
@@ -200,11 +154,6 @@ export function Chapter3Level(game) {
     spawnpoint: new Vec2(32, 150),
     background: 'litang', // 理塘山峰背景
   }
-
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
 
   // 基础墙壁
   game.gameObjects.push(
@@ -243,11 +192,6 @@ export function Chapter4Level(game) {
     background: 'cave', // 山洞背景
   }
 
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
-
   // 基础墙壁
   game.gameObjects.push(
     new Platform(0, height - 20, width, 20), // 地面
@@ -281,11 +225,6 @@ export function Chapter5Level(game) {
     spawnpoint: new Vec2(32, 150),
     background: 'underground', // 地下祭坛背景
   }
-
-  game.player = new Player(
-    game.levelData.spawnpoint.x,
-    game.levelData.spawnpoint.y
-  )
 
   // 基础墙壁
   game.gameObjects.push(

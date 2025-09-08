@@ -5,7 +5,6 @@ import SpriteAnimation from '../Sprite.js'
 import Asset from '../../Asset.js'
 
 export class Player extends BaseObject {
-  type = 'player'
   color = 'blue'
 
   gravity = 500 // 重力加速度
@@ -145,6 +144,10 @@ export class Player extends BaseObject {
 
     // 位移
     this.r.addTo(this.v.mul(dt))
+
+    // 更新地面检测框位置
+    this.groundCheckBox.r.x = this.r.x + 1
+    this.groundCheckBox.r.y = this.r.y + this.height
 
     // 无敌时间
     this.damageTimer = Math.max(0, this.damageTimer - dt)

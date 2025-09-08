@@ -1,12 +1,11 @@
 import { BaseObject } from './BaseObject.js'
 
 export class Collectible extends BaseObject {
-  type = 'collectible'
   color = '#FFC107'
   bonus = 10
   bobOffset = 0
 
-  constructor(x, y) {
+  constructor(x, y, spriteId) {
     super(x, y, 8, 8)
   }
 

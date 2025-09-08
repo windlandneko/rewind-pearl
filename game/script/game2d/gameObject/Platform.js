@@ -1,7 +1,6 @@
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
-  type = 'platform'
   color = '#333'
   shadowColor = '#3338'
 

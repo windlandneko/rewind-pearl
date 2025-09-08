@@ -15,9 +15,11 @@ export default class Vec2 {
    * @overload
    * @param {number} x
    * @param {number} y
+   * @returns {Vec2}
    *
    * @overload
    * @param {Vec2} vector
+   * @returns {Vec2}
    */
   add(x, y) {
     return x instanceof Vec2
@@ -44,12 +46,15 @@ export default class Vec2 {
   /**
    * Returns a new vector subtracting another vector or coordinates together.
    *
+   *
    * @overload
    * @param {number} x
    * @param {number} y
+   * @returns {Vec2}
    *
    * @overload
    * @param {Vec2} vector
+   * @returns {Vec2}
    */
   sub(x, y) {
     return x instanceof Vec2
@@ -62,7 +67,7 @@ export default class Vec2 {
    *
    * @overload
    * @param {number} x
-   * @param {number} y
+   * @param {number} endY
    *
    * @overload
    * @param {Vec2} vector

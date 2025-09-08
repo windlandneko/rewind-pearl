@@ -1,17 +1,8 @@
-import Keyboard from '../Keyboard.js'
 import { EventListener, throttle } from '../utils.js'
-import PauseManager from '../PauseManager.js'
-import {
-  Player,
-  Platform,
-  Enemy,
-  Interactable,
-  Collectible,
-  BaseObject,
-  GhostPlayer,
-  LevelChanger,
-} from './gameObject/index.js'
 import { Camera } from './Camera.js'
+import Keyboard from '../Keyboard.js'
+import PauseManager from '../PauseManager.js'
+import * as GameObject from './gameObject/index.js'
 import * as GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
 import TimeTravel from './TimeTravel.js'
@@ -22,11 +13,11 @@ export class Game {
   listener = new EventListener()
 
   // 游戏对象
-  /** @type {Player} */
+  /** @type {GameObject.Player} */
   player = null
-  /** @type {GhostPlayer[]} */
+  /** @type {GameObject.GhostPlayer[]} */
   ghostPlayers = []
-  /** @type {BaseObject[]} */
+  /** @type {GameObject.BaseObject[]} */
   gameObjects = []
 
   // 渲染缓存（避免每帧重复过滤）
@@ -156,30 +147,7 @@ export class Game {
 
   importGameObjects(state) {
     this.gameObjects = state.map(state => {
-      let entity
-      switch (state.type) {
-        case 'default':
-          entity = new BaseObject()
-          break
-        case 'platform':
-          entity = new Platform()
-          break
-        case 'enemy':
-          entity = new Enemy()
-          break
-        case 'collectible':
-          entity = new Collectible()
-          break
-        case 'interactable':
-          entity = new Interactable()
-          break
-        case 'level-transition':
-          entity = new LevelChanger()
-          break
-        default:
-          entity = new BaseObject()
-          console.warn(`[Game2D] 未处理的对象类型: ${state.type}`, state)
-      }
+      const entity = new GameObject[state.type]()
       entity.state = state
       return entity
     })
@@ -198,7 +166,7 @@ export class Game {
   executeTimeTravel() {
     const state = this.player.state
 
-    const ghost = new GhostPlayer()
+    const ghost = new GameObject.GhostPlayer()
     ghost.state = state
     ghost.stateHistory = this.player.stateHistory
     ghost.inputHistory = this.player.inputHistory
@@ -210,11 +178,11 @@ export class Game {
 
     this.ghostPlayers.push(ghost)
 
-    this.player = new Player()
+    this.player = new GameObject.Player()
     this.player.state = state
     this.camera.target = this.player
 
-    this.tick = Math.max(0, this.tick - 5 * 100)
+    this.tick = Math.max(1, this.tick - 5 * 100)
     this.player.lifetimeBegin = this.tick
     this.player.spawnX = this.player.r.x
     this.player.spawnY = this.player.r.y
@@ -239,6 +207,10 @@ export class Game {
     this.ghostPlayers = []
 
     setupFunction(this)
+    this.player = new GameObject.Player(
+      this.levelData.spawnpoint.x,
+      this.levelData.spawnpoint.y
+    )
     this.#setupCamera()
 
     if (this.levelData.background) {
@@ -449,7 +421,7 @@ export class Game {
 
     TimeTravel.update(dt)
 
-    if (!this.isRunning) return
+    if (!this.isRunning || TimeTravel.state !== null) return
 
     this.tick++
     this.maxTick = Math.max(this.maxTick, this.tick)
@@ -485,12 +457,12 @@ export class Game {
         this.player.r.y = 0
         this.player.v.y = 0
       }
-      // 下
-      if (this.player.r.y > this.levelData.height) {
-        this.player.r.x = this.levelData.spawnpoint.x
-        this.player.r.y = this.levelData.spawnpoint.y
-        // todo
-      }
+    }
+    // 下
+    if (this.player.r.y > this.levelData.height) {
+      this.player.r.x = this.levelData.spawnpoint.x
+      this.player.r.y = this.levelData.spawnpoint.y
+      this.player.onDamage()
     }
 
     // 更新游戏对象本身
@@ -557,16 +529,16 @@ export class Game {
    */
   #updateRenderGroups() {
     this.renderGroups.platforms = this.gameObjects.filter(
-      obj => obj.type === 'platform'
+      obj => obj.type === 'Platform' || obj.type === 'MovingPlatform'
     )
     this.renderGroups.collectibles = this.gameObjects.filter(
-      obj => obj.type === 'collectible'
+      obj => obj.type === 'Collectible'
     )
     this.renderGroups.enemies = this.gameObjects.filter(
-      obj => obj.type === 'enemy'
+      obj => obj.type === 'Enemy'
     )
     this.renderGroups.interactables = this.gameObjects.filter(
-      obj => obj.type === 'interactable' || obj.type === 'level-transition'
+      obj => obj.type === 'Interactable' || obj.type === 'LevelChanger'
     )
   }
 
@@ -782,7 +754,7 @@ export class Game {
 
     // 绘制tick刻度
     for (
-      let tick = Math.max(0, this.tick - 200);
+      let tick = Math.max(1, this.tick - 200);
       tick <= Math.min(this.tick + 200, this.maxTick);
       tick++
     ) {

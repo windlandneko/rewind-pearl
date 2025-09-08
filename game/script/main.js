@@ -11,7 +11,7 @@ const currentUser = localStorage.getItem('rewind-pearl-username')
 
 async function startNewGame() {
   Game2D.loadLevel(LevelManager.PrologueLevel)
-  Game2D.start()
+  Game2D.start(true)
 }
 
 Loading.on('complete', () => {

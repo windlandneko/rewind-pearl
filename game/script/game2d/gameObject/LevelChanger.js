@@ -1,7 +1,6 @@
 import { BaseObject } from './BaseObject.js'
 
 export class LevelChanger extends BaseObject {
-  type = 'level-transition'
   color = '#00FF00'
 
   constructor(x, y, width, height, targetLevel, force = false) {
@@ -25,8 +24,8 @@ export class LevelChanger extends BaseObject {
   }
 
   render(ctx) {
-    ctx.fillStyle = this.color
-    ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
+    // ctx.fillStyle = this.color
+    // ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
   }
 
   get state() {

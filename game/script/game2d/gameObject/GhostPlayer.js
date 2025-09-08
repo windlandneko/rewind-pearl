@@ -6,7 +6,6 @@ import { Player } from './Player.js'
  * 会按照录制的输入数据进行移动，并验证状态一致性
  */
 export class GhostPlayer extends Player {
-  type = 'ghost_player'
   unstableRate = 0
 
   update(dt, game) {
@@ -46,29 +45,29 @@ export class GhostPlayer extends Player {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 
-    if (Math.abs(tick - this.lifetimeBegin) < 25) {
+    if (Math.abs(tick - this.lifetimeBegin - 16) < 32) {
       ctx.beginPath()
       ctx.arc(
         this.spawnX + this.width / 2,
         this.spawnY + this.height / 2,
-        Math.min(8, 25 - Math.abs(tick - this.lifetimeBegin)),
+        Math.min(12, 32 - Math.abs(tick - this.lifetimeBegin - 16)),
         0,
         Math.PI * 2
       )
-      ctx.strokeStyle = 'red'
-      ctx.stroke()
+      ctx.fillStyle = '#fffc'
+      ctx.fill()
     }
-    if (Math.abs(tick - this.lifetimeEnd) < 25) {
+    if (Math.abs(tick - this.lifetimeEnd + 16) < 32) {
       ctx.beginPath()
       ctx.arc(
         x + this.width / 2,
         y + this.height / 2,
-        Math.min(8, 25 - Math.abs(tick - this.lifetimeEnd)),
+        Math.min(12, 32 - Math.abs(tick - this.lifetimeEnd + 16)),
         0,
         Math.PI * 2
       )
-      ctx.strokeStyle = 'blue'
-      ctx.stroke()
+      ctx.fillStyle = '#000c'
+      ctx.fill()
     }
 
     if (this.removed) return

@@ -1,7 +1,6 @@
 import Vec2 from '../Vector.js'
 
 export class BaseObject {
-  type = 'default'
   color = 'red'
   removed = false
 
@@ -65,7 +64,7 @@ export class BaseObject {
    */
   get state() {
     return {
-      type: this.type,
+      type: this.constructor.name,
       rx: this.r.x,
       ry: this.r.y,
       vx: this.v.x,
@@ -81,7 +80,6 @@ export class BaseObject {
    * 从状态数据恢复对象
    */
   set state(state) {
-    this.type = state.type
     this.r.x = state.rx
     this.r.y = state.ry
     this.v.x = state.vx
@@ -90,5 +88,9 @@ export class BaseObject {
     this.height = state.height
     this.color = state.color
     this.removed = state.removed
+  }
+
+  get type() {
+    return this.constructor.name
   }
 }
