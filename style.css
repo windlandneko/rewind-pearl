@@ -1,4 +1,5 @@
 @import url('game/style/font.css');
+@import url('game/style/loading.css');
 
 * {
   margin: 0;
@@ -10,10 +11,10 @@ body {
   font-family: 'HarmonyOS Sans SC', sans-serif;
   height: 100vh;
   overflow: hidden;
-  background: url('background.png') no-repeat center / cover fixed black;
+  background: url('background.webp') no-repeat center / cover fixed black;
 }
 
-.container {
+main {
   width: 100%;
   height: 100vh;
   display: flex;
@@ -175,7 +176,7 @@ body {
 
 /* 响应式 */
 @media (max-width: 480px) {
-  .container {
+  main {
     padding-right: 20px;
   }
 

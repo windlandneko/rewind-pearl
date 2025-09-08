@@ -5,6 +5,7 @@
  */
 class Asset {
   #assets = new Map()
+  basePath = './'
 
   /**
    * 获取已加载的资源
@@ -31,7 +32,8 @@ class Asset {
    */
   async loadFromManifest(manifest, onProgress) {
     if (typeof manifest === 'string') {
-      manifest = await this.#loadJSON(manifest)
+      this.basePath = manifest
+      manifest = await this.#loadJSON(manifest + 'manifest.json')
     }
 
     if (!manifest || typeof manifest !== 'object') {
@@ -124,7 +126,7 @@ class Asset {
    * @returns {Promise}
    */
   async load(url, type) {
-    url = 'assets/' + url
+    url = this.basePath + url
     // 根据文件扩展名或指定类型决定加载方式
     const extension = url.split('.').pop().toLowerCase()
     const assetType = type || this.#getAssetTypeFromExtension(extension)

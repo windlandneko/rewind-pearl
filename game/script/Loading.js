@@ -1,4 +1,5 @@
-import { $, wait } from './utils.js'
+import { $, EventListener, wait } from './utils.js'
+import Asset from './Asset.js'
 
 /**
  * 加载页面管理器
@@ -6,11 +7,22 @@ import { $, wait } from './utils.js'
  * @author windlandneko
  */
 class Loading {
+  #listener = new EventListener()
+
   $container = $('.loading-container')
   $progress = $('.loading-progress-fill')
   $status = $('.loading-status')
   $action = $('.loading-action')
   $error = $('.loading-error')
+
+  constructor() {
+    $('#loading-retry').addEventListener('click', () => this.init())
+    $('#loading-skip').addEventListener('click', () => this.init(true))
+  }
+
+  on(event, callback) {
+    this.#listener.on(event, callback)
+  }
 
   /**
    * 更新加载进度
@@ -46,13 +58,24 @@ class Loading {
     }
   }
 
-  init() {
-    this.$container.classList.remove('hidden')
-    this.$progress.style.width = `0%`
-    this.$status.textContent = ''
-    this.$error.innerHTML = ''
-    this.$action.classList.add('hidden')
-    this.$error.classList.add('hidden')
+  async init(skipAssetLoading = false) {
+    try {
+      this.$container.classList.remove('hidden')
+      this.$progress.style.width = `0%`
+      this.$status.textContent = ''
+      this.$error.innerHTML = ''
+      this.$action.classList.add('hidden')
+      this.$error.classList.add('hidden')
+      if (!skipAssetLoading) {
+        await Asset.loadFromManifest('assets/', data =>
+          this.updateProgress(data)
+        )
+      }
+      await this.hide()
+      this.#listener.emit('complete')
+    } catch (error) {
+      this.$action.classList.remove('hidden')
+    }
   }
 
   /**
