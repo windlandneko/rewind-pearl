@@ -13,6 +13,9 @@ class Asset {
    * @returns {any} 资源对象
    */
   get(key) {
+    if (!this.has(key)) {
+      console.warn(`Asset key not found: ${key}`)
+    }
     return this.#assets.get(key)
   }
 

@@ -157,6 +157,7 @@ class TimeTravelManager {
 
     ctx.save()
     ctx.globalCompositeOperation = 'destination-out'
+    ctx.fillStyle = 'black'
     ctx.beginPath()
     ctx.arc(
       playerScreenX,
@@ -189,35 +190,9 @@ class TimeTravelManager {
     )
     ctx.stroke()
     ctx.restore()
-
-    // 绘制提示文字
-    const holdTime = performance.now() - this.startTime
-    ctx.save()
-    ctx.fillStyle = '#00ffff'
-    ctx.font = '2rem SourceHanSerifCN, serif, sans-serif'
-    ctx.textAlign = 'center'
-
-    if (holdTime < 1000) {
-      const remainingTime = ((1000 - holdTime) / 1000).toFixed(1)
-      ctx.fillText(
-        `长按 ${remainingTime}s 激活时间回溯`,
-        game.displayWidth / 2,
-        game.displayHeight - 10 / game.scale
-      )
-    } else {
-      ctx.fillText(
-        '时间回溯激活中...',
-        game.displayWidth / 2,
-        game.displayHeight - 10 / game.scale
-      )
-    }
-
-    ctx.restore()
   }
 
-  unstablize(ghost) {
-    
-  }
+  unstablize(ghost) {}
 }
 
 export default new TimeTravelManager()

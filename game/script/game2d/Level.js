@@ -19,11 +19,12 @@ export function Level1(game) {
 
   game.levelData = {
     name: 'Level1', // 这里与关卡的函数名要保持一致
+    introDialogue: 'prologue',
     height,
     width,
     worldBorder: true, // 是否启用世界边界，玩家走不出去
     spawnpoint: new Vec2(32, 150), // 玩家出生点，注意y轴是反的，原点在左上角
-    background: 'test.png', // 测试背景
+    background: 'test', // 测试背景
   }
 
   game.player = new Player(
@@ -76,11 +77,12 @@ export function PrologueLevel(game) {
 
   game.levelData = {
     name: 'PrologueLevel',
+    introDialogue: 'prologue',
     height,
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'intro.jpg', // 片场背景
+    background: 'intro', // 片场背景
   }
 
   game.player = new Player(
@@ -116,7 +118,7 @@ export function Chapter1Level(game) {
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'magic.jpg', // 异世界魔法背景
+    background: 'magic', // 异世界魔法背景
   }
 
   game.player = new Player(
@@ -156,7 +158,7 @@ export function Chapter2Level(game) {
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'factory.png', // 工厂背景
+    background: 'factory', // 工厂背景
   }
 
   game.player = new Player(
@@ -196,7 +198,7 @@ export function Chapter3Level(game) {
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'litang.png', // 理塘山峰背景
+    background: 'litang', // 理塘山峰背景
   }
 
   game.player = new Player(
@@ -238,7 +240,7 @@ export function Chapter4Level(game) {
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'cave.png', // 山洞背景
+    background: 'cave', // 山洞背景
   }
 
   game.player = new Player(
@@ -277,7 +279,7 @@ export function Chapter5Level(game) {
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
-    background: 'underground.png', // 地下祭坛背景
+    background: 'underground', // 地下祭坛背景
   }
 
   game.player = new Player(

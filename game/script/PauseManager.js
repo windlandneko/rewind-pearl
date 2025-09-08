@@ -125,9 +125,8 @@ export class PauseManager {
    * 处理返回标题
    */
   #onReturnToTitle() {
-    if (confirm('确定要返回标题页面吗？未保存的进度将会丢失。')) {
-      location.assign('../index.html')
-    }
+    this.game.saveGame('自动保存')
+    location.assign('../index.html')
   }
 
   /**

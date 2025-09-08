@@ -49,13 +49,13 @@ export class GhostPlayer extends Player {
     if (Math.abs(tick - this.lifetimeBegin) < 25) {
       ctx.beginPath()
       ctx.arc(
-        x + this.width / 2,
-        y + this.height / 2,
-        Math.min(12, 25 - Math.abs(tick - this.lifetimeBegin)),
+        this.spawnX + this.width / 2,
+        this.spawnY + this.height / 2,
+        Math.min(8, 25 - Math.abs(tick - this.lifetimeBegin)),
         0,
         Math.PI * 2
       )
-      ctx.fillStyle = 'red'
+      ctx.strokeStyle = 'red'
       ctx.stroke()
     }
     if (Math.abs(tick - this.lifetimeEnd) < 25) {
@@ -63,12 +63,12 @@ export class GhostPlayer extends Player {
       ctx.arc(
         x + this.width / 2,
         y + this.height / 2,
-        Math.min(12, 25 - Math.abs(tick - this.lifetimeEnd)),
+        Math.min(8, 25 - Math.abs(tick - this.lifetimeEnd)),
         0,
         Math.PI * 2
       )
-      ctx.fillStyle = 'blue'
-      ctx.fill()
+      ctx.strokeStyle = 'blue'
+      ctx.stroke()
     }
 
     if (this.removed) return

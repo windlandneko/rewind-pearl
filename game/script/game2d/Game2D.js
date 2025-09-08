@@ -14,7 +14,9 @@ import {
 import { Camera } from './Camera.js'
 import * as GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
-import timeTravel from './TimeTravel.js'
+import TimeTravel from './TimeTravel.js'
+import Dialogue from '../Dialogue.js'
+import Asset from '../Asset.js'
 
 export class Game {
   listener = new EventListener()
@@ -48,9 +50,7 @@ export class Game {
   // 关卡过渡效果
   isTransitioning = false
   transitionOpacity = 0
-  transitionDuration = 1000 // 过渡持续时间（毫秒）
   transitionStartTime = 0
-  pendingLevel = null
 
   #keyboardListeners = []
 
@@ -118,7 +118,12 @@ export class Game {
       this.isRunning = true
       setTimeout(() => this.#addKeyboardListeners(), 0)
     })
-    timeTravel.game = this
+    TimeTravel.game = this
+
+    addEventListener('beforeunload', event => {
+      event.preventDefault()
+      this.saveGame('自动保存')
+    })
   }
 
   #addKeyboardListeners() {
@@ -137,10 +142,10 @@ export class Game {
       }),
 
       Keyboard.onKeydown(['R'], () => {
-        timeTravel.startTimeTravelPreview(this)
+        TimeTravel.startTimeTravelPreview(this)
       }),
       Keyboard.onKeyup(['R'], () => {
-        timeTravel.endTimeTravelPreview(this)
+        TimeTravel.endTimeTravelPreview(this)
       })
     )
   }
@@ -199,6 +204,8 @@ export class Game {
     ghost.stateHistory = this.player.stateHistory
     ghost.inputHistory = this.player.inputHistory
 
+    ghost.spawnX = this.player.spawnX
+    ghost.spawnY = this.player.spawnY
     ghost.lifetimeBegin = this.player.lifetimeBegin
     ghost.lifetimeEnd = this.tick
 
@@ -210,6 +217,8 @@ export class Game {
 
     this.tick = Math.max(0, this.tick - 5 * 100)
     this.player.lifetimeBegin = this.tick
+    this.player.spawnX = this.player.r.x
+    this.player.spawnY = this.player.r.y
 
     const targetState = this.history.get(this.tick)
     this.importGameObjects(targetState)
@@ -228,18 +237,26 @@ export class Game {
     this.maxTick = 0
     this.gameObjects = []
     this.history = new Map()
-
-    setupFunction(this)
-
     this.ghostPlayers = []
 
-    // 设置摄像机
+    setupFunction(this)
     this.#setupCamera()
 
-    this.#setupBackground()
+    if (this.levelData.background) {
+      this.$backgroundImage.src = Asset.get(
+        `background/${this.levelData.background}`
+      ).src
+    }
   }
 
-  start() {
+  async start() {
+    // 进入关卡对话
+    if (this.levelData?.introDialogue) {
+      await Dialogue.play(this.levelData.introDialogue)
+      this.fadeBlack(true)
+      this.levelData.introDialogue = null
+    }
+
     this.canvas.classList.remove('hidden')
 
     this.isRunning = true
@@ -255,8 +272,14 @@ export class Game {
       this.animationFrameHandler = requestAnimationFrame(renderLoop)
       if (PauseManager.isPaused) return
       this.render(this.ctx)
-      timeTravel.render(this)
+      TimeTravel.render(this)
+
       this.#renderTimeline(this.ctx)
+      // 渲染关卡过渡效果
+      if (this.transitionOpacity) {
+        this.ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
+        this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
+      }
     }
     renderLoop()
 
@@ -273,36 +296,32 @@ export class Game {
 
   async changeLevel(targetLevel) {
     if (this.isTransitioning) return
-
     this.isTransitioning = true
-    this.transitionStartTime = performance.now()
-    this.pendingLevel = targetLevel
 
-    await this.waitForTransition('fade-out')
-
+    await this.fadeBlack()
     this.stop()
     this.loadLevel(LevelManager[targetLevel])
-    this.start()
-    this.pendingLevel = null
-
-    await this.waitForTransition('fade-in')
+    await this.start()
+    await this.fadeBlack(true)
 
     this.isTransitioning = false
   }
 
-  waitForTransition(type) {
+  fadeBlack(reverse = false) {
+    this.transitionStartTime = performance.now()
+    if (reverse) this.$backgroundImage.classList.remove('hidden')
+    else this.$backgroundImage.classList.add('hidden')
     return new Promise(resolve => {
       const checkTransition = () => {
-        const k = 0.2 // 0.1 fade-in, 0.8 black, 0.1 fade-out
+        const k = 1
         const elapsed =
-          (2 * (performance.now() - this.transitionStartTime)) /
-          this.transitionDuration
-        const progress = Math.min(1 - (Math.abs(elapsed - 1) - k) / (1 - k), 1)
-
-        this.transitionOpacity = progress
-
-        if (type === 'fade-out' && elapsed >= 1) resolve()
-        if (type === 'fade-in' && elapsed >= 2) resolve()
+          (performance.now() - this.transitionStartTime) /
+          GameConfig.TRANSITION_DURATION
+        this.transitionOpacity = Math.min(
+          (reverse ? 1 - elapsed : elapsed) * k,
+          1
+        )
+        if (elapsed >= 1) resolve()
         else requestAnimationFrame(checkTransition)
       }
       checkTransition()
@@ -325,7 +344,7 @@ export class Game {
     this.start()
   }
 
-  saveGame(saveName = 'autosave') {
+  saveGame(saveName = '未命名存档') {
     const currentUser = localStorage.getItem('rewind-pearl-username')
     if (!currentUser) {
       console.error('没有登录用户，无法保存游戏')
@@ -416,7 +435,7 @@ export class Game {
     if (this.player.inputQueue.length)
       this.player.inputHistory.set(this.tick, [...this.player.inputQueue])
 
-    timeTravel.update(dt)
+    TimeTravel.update(dt)
 
     if (!this.isRunning) return
 
@@ -517,12 +536,6 @@ export class Game {
 
     ctx.restore()
 
-    // 渲染关卡过渡效果
-    if (this.transitionOpacity) {
-      ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
-      ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
-    }
-
     // 调试数据
     // this.#renderDebugUI(ctx)
   }
@@ -580,34 +593,10 @@ export class Game {
   }
 
   /**
-   * 设置视差背景
-   */
-  #setupBackground() {
-    if (!this.levelData.background || !this.$backgroundImage) return
-
-    // 设置背景图片源
-    this.$backgroundImage.src = `assets/background/${this.levelData.background}`
-
-    // 显示背景图片
-    this.$backgroundImage.classList.remove('hidden')
-
-    // 监听图片加载错误
-    this.$backgroundImage.onerror = () => {
-      console.warn(`[Game2D] 背景图片加载失败: ${this.levelData.background}`)
-      this.$backgroundImage.classList.add('hidden')
-    }
-  }
-
-  /**
    * 更新背景位置
    */
   #updateBackground() {
-    if (
-      !this.levelData.background ||
-      !this.$backgroundImage ||
-      this.$backgroundImage.classList.contains('hidden')
-    )
-      return
+    if (!this.levelData.background) return
 
     // 计算视差位移量（背景移动速度比摄像机慢）
     const parallaxFactor = 3 // 视差系数，值越小背景移动越慢
@@ -697,9 +686,9 @@ export class Game {
         340
       )
     }
-    if (timeTravel.state) {
+    if (TimeTravel.state) {
       ctx.fillStyle = '#00ffff'
-      ctx.fillText('时间回溯预览中...' + timeTravel.state, 20, 360)
+      ctx.fillText('时间回溯预览中...' + TimeTravel.state, 20, 360)
     }
 
     // 调试信息：摄像机状态
@@ -769,7 +758,7 @@ export class Game {
 
     // 计算刻度位置 - 当前tick固定在中心
     const centerX = timelineX + timelineWidth / 2
-    const pixelsPerTick = timelineWidth / Math.max(this.maxTick, 100) // 最小显示100个tick的范围
+    const pixelsPerTick = timelineWidth / 500
 
     // 绘制主时间轴
     ctx.strokeStyle = '#888'
@@ -780,7 +769,11 @@ export class Game {
     ctx.stroke()
 
     // 绘制tick刻度
-    for (let tick = 0; tick <= this.maxTick; tick++) {
+    for (
+      let tick = Math.max(0, this.tick - 200);
+      tick <= Math.min(this.tick + 200, this.maxTick);
+      tick++
+    ) {
       const x = centerX + (tick - this.tick) * pixelsPerTick
 
       if (x < timelineX || x > timelineX + timelineWidth) continue
@@ -811,12 +804,12 @@ export class Game {
       if (
         tick === 0 ||
         tick === this.maxTick ||
-        (tick % 50 === 0 && tick > 0)
+        (tick % 100 === 0 && tick > 0)
       ) {
         ctx.fillStyle = tickColor
-        ctx.font = '12px FiraCode, monospace'
+        ctx.font = '1.5rem FiraCode, monospace'
         ctx.textAlign = 'center'
-        ctx.fillText(tick.toString(), x, timelineY + timelineHeight - 5)
+        ctx.fillText(~~(tick / 10) / 10 + 's', x, timelineY + timelineHeight)
       }
     }
 
@@ -899,21 +892,11 @@ export class Game {
 
     // 绘制时间线信息
     ctx.fillStyle = '#fff'
-    ctx.font = '14px FiraCode, monospace'
+    ctx.font = '1.8rem FiraCode, monospace'
     ctx.textAlign = 'left'
     ctx.fillText(
       `当前: ${this.tick}/${this.maxTick}`,
       timelineX + 5,
-      timelineY - 5
-    )
-
-    // 绘制操作提示
-    ctx.fillStyle = '#aaa'
-    ctx.font = '12px FiraCode, monospace'
-    ctx.textAlign = 'right'
-    ctx.fillText(
-      '← → 调整时间  R 退出回溯',
-      timelineX + timelineWidth - 5,
       timelineY - 5
     )
 
