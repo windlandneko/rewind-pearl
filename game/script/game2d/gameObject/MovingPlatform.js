@@ -5,13 +5,6 @@ export class MovingPlatform extends Platform {
   timer = 0
   deltaPosition = null
 
-  /**
-   * @param {Vec2} from
-   * @param {Vec2} to
-   * @param {number} width
-   * @param {number} height
-   * @param {number} interval
-   */
   constructor(from, to, width, height, interval) {
     super(from?.x, from?.y, width, height)
     this.r = this.from = from ?? new Vec2()
@@ -41,7 +34,6 @@ export class MovingPlatform extends Platform {
    * @param {Game} game 游戏实例
    */
   interactWithPlayer(player, game) {
-    // 首先调用父类的碰撞检测逻辑
     super.interactWithPlayer(player, game)
 
     // 如果玩家站在平台上，让玩家跟随平台移动
