@@ -1,4 +1,4 @@
-import { EventListener, throttle } from '../utils.js'
+import { EventListener } from '../utils.js'
 import { Camera } from './Camera.js'
 import Keyboard from '../Keyboard.js'
 import PauseManager from '../PauseManager.js'
@@ -94,7 +94,7 @@ export class Game {
     }
 
     resizeCanvas()
-    addEventListener('resize', throttle(resizeCanvas, 16))
+    addEventListener('resize', resizeCanvas, 16)
 
     this.canvas.classList.add('hidden')
 

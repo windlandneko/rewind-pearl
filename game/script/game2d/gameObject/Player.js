@@ -100,7 +100,6 @@ export class Player extends BaseObject {
       const event = this.inputQueue.shift()
       switch (event) {
         case 'keydown:interact':
-          if (ghost) break
           for (const entity of game.renderGroups.interactables) {
             if (await entity.handleKeyInteraction?.(this, game)) break
           }

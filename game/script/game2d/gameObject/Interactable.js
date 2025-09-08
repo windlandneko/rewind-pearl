@@ -7,7 +7,7 @@ export class Interactable extends BaseObject {
   sprite = null
   spriteId = null
 
-  constructor(x, y, dialogueId, spriteId, hint = '', force = false) {
+  constructor(x, y, dialogueId, spriteId, hint = '', force = null) {
     super(x, y, 12, 12)
     this.dialogueId = dialogueId
     if (Asset.has(spriteId)) {
@@ -28,12 +28,6 @@ export class Interactable extends BaseObject {
    */
   async interactWithPlayer(player, game) {
     this.isHighlighted = player.checkCollision(this)
-    if (this.isHighlighted && this.force) {
-      this.force = false
-      game.stop()
-      await Dialogue.play(this.dialogueId)
-      game.start()
-    }
   }
 
   /**
@@ -43,6 +37,7 @@ export class Interactable extends BaseObject {
    * @returns {boolean} 是否开始了对话
    */
   async handleKeyInteraction(player, game) {
+    if (player.type === 'GhostPlayer') return false
     if (!player.checkCollision(this) || !this.dialogueId) return false
 
     game.stop()
@@ -116,7 +111,6 @@ export class Interactable extends BaseObject {
     this.isHighlighted = state.isHighlighted
     this.dialogueId = state.dialogueId
     this.hint = state.hint
-    this.force = state.force
     this.spriteId = state.spriteId
     if (this.spriteId) this.sprite = Asset.get(this.spriteId)
   }
