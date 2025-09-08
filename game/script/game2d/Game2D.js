@@ -44,7 +44,7 @@ export class Game {
 
   // 时间回溯系统
   tick = 0
-  maxTick
+  maxTick = null
   history = new Map()
 
   // 关卡过渡效果
@@ -121,8 +121,7 @@ export class Game {
     TimeTravel.game = this
 
     addEventListener('beforeunload', event => {
-      event.preventDefault()
-      this.saveGame('自动保存')
+      if (!this.onSavedExit) event.preventDefault()
     })
   }
 
@@ -250,12 +249,17 @@ export class Game {
   }
 
   async start() {
+    // 初始提示
+    if (!localStorage.getItem('rewind-pearl-showhelp')) {
+      PauseManager.showHelp()
+      localStorage.setItem('rewind-pearl-showhelp', 'true')
+    }
     // 进入关卡对话
     if (this.levelData?.introDialogue) {
       await Dialogue.play(this.levelData.introDialogue)
-      this.fadeBlack(true)
       this.levelData.introDialogue = null
     }
+    this.fadeBlack(true)
 
     this.canvas.classList.remove('hidden')
 
@@ -334,6 +338,7 @@ export class Game {
     const levelName = levelData.name || 'Level1'
 
     this.loadLevel(LevelManager[levelName])
+    this.levelData.introDialogue = levelData.introDialogue
 
     this.player.state = player
 
@@ -344,7 +349,7 @@ export class Game {
     this.start()
   }
 
-  saveGame(saveName = '未命名存档') {
+  saveGame(name = '未命名存档', autosave = false) {
     const currentUser = localStorage.getItem('rewind-pearl-username')
     if (!currentUser) {
       console.error('没有登录用户，无法保存游戏')
@@ -361,32 +366,39 @@ export class Game {
       levelData: this.levelData,
     }
 
-    const savingsData = localStorage.getItem('rewind-pearl-savings')
-    const savings = savingsData ? JSON.parse(savingsData) : {}
-
-    if (!savings[currentUser]) {
-      savings[currentUser] = []
-    }
-
-    // 查找是否已存在同名存档
-    const existingIndex = savings[currentUser].findIndex(
-      save => save.name === saveName
-    )
-
-    const saveData = {
-      name: saveName,
-      data: gameState,
-    }
-
-    if (existingIndex >= 0) {
-      // 覆盖现有存档
-      savings[currentUser][existingIndex] = saveData
+    if (autosave) {
+      localStorage.setItem(
+        'rewind-pearl-autosave-' + currentUser,
+        JSON.stringify(gameState)
+      )
     } else {
-      // 添加新存档
-      savings[currentUser].unshift(saveData)
-    }
+      const savingsData = localStorage.getItem('rewind-pearl-savings')
+      const savings = savingsData ? JSON.parse(savingsData) : {}
 
-    localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
+      if (!savings[currentUser]) {
+        savings[currentUser] = []
+      }
+      // 查找是否已存在同名存档
+      const existingIndex = savings[currentUser].findIndex(
+        save => save.name === name
+      )
+
+      const saveData = {
+        name,
+        autosave,
+        data: gameState,
+      }
+
+      if (existingIndex >= 0) {
+        // 覆盖现有存档
+        savings[currentUser][existingIndex] = saveData
+      } else {
+        // 添加新存档
+        savings[currentUser].unshift(saveData)
+      }
+
+      localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
+    }
 
     this.showNotification('游戏已保存', true)
     return true
@@ -499,7 +511,7 @@ export class Game {
     // 更新摄像机
     this.camera.update(dt)
 
-    if (this.tick % 2000 === 0) this.saveGame()
+    if (this.tick % 2000 === 0) this.saveGame('自动保存', true)
   }
 
   /**

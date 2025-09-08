@@ -6,6 +6,15 @@ if (currentUser && userElement) {
   userElement.textContent = `当前玩家: ${currentUser}`
 }
 
+if (localStorage.getItem('rewind-pearl-autosave-' + currentUser)) {
+  document.getElementById('continue-game').style.display = 'block'
+}
+
+function newGame() {
+  localStorage.removeItem('rewind-pearl-autosave-' + currentUser)
+  location.assign('game/index.html')
+}
+
 function logout() {
   if (!confirm('确定要注销吗？')) return
   localStorage.removeItem('rewind-pearl-username')

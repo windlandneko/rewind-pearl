@@ -20,10 +20,10 @@ export class PauseManager {
     $('#resume-btn')?.addEventListener('click', () => this.resume())
     $('#save-btn')?.addEventListener('click', () => this.#onSaveGame())
     $('#load-btn')?.addEventListener('click', () => this.#onLoadGame())
-    $('#help-btn')?.addEventListener('click', () => this.#onShowHelp())
+    $('#help-btn')?.addEventListener('click', () => this.showHelp())
     $('#title-btn')?.addEventListener('click', () => this.#onReturnToTitle())
     $('#help-close')?.addEventListener('click', () => this.#hideHelpModal())
-    $('save-manager-close')?.addEventListener('click', () => {
+    $('#save-manager-close')?.addEventListener('click', () => {
       this.#hideSaveManagerModal()
     })
     this.$saveManagerModal?.addEventListener('click', event => {
@@ -82,11 +82,6 @@ export class PauseManager {
    * 处理保存游戏
    */
   #onSaveGame() {
-    if (!this.game?.saveGame) {
-      console.warn('游戏实例没有提供保存功能')
-      return
-    }
-
     SaveManager.showSavePrompt(saveName => {
       this.game.saveGame(saveName)
     })
@@ -96,19 +91,19 @@ export class PauseManager {
    * 处理加载游戏
    */
   #onLoadGame() {
-    if (!this.game?.loadGame) {
-      console.warn('游戏实例没有提供加载功能')
-      return
-    }
-
     const saveList = $('#save-list')
     this.$saveManagerModal?.classList.add('show')
 
     this.#setEscKeyHandler(() => this.#hideSaveManagerModal())
 
     SaveManager.loadSaveList(saveList, saveData => {
+      const currentUser = localStorage.getItem('rewind-pearl-username')
       // 加载存档
-      localStorage.setItem('rewind-pearl-load-save', JSON.stringify(saveData))
+      localStorage.setItem(
+        'rewind-pearl-autosave-' + currentUser,
+        JSON.stringify(saveData)
+      )
+      this.game.onSavedExit = true
       location.reload()
     })
   }
@@ -116,7 +111,7 @@ export class PauseManager {
   /**
    * 处理显示帮助
    */
-  #onShowHelp() {
+  showHelp() {
     this.$helpModal?.classList.add('show')
     this.#setEscKeyHandler(() => this.#hideHelpModal())
   }
@@ -125,7 +120,8 @@ export class PauseManager {
    * 处理返回标题
    */
   #onReturnToTitle() {
-    this.game.saveGame('自动保存')
+    if (this.game?.maxTick !== null) this.game.saveGame('自动保存', true)
+    this.game.onSavedExit = true
     location.assign('../index.html')
   }
 

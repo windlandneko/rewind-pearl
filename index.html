@@ -14,8 +14,11 @@
     <div class="menu-section">
       <img src="logo.png" alt="再见丁真" class="game-title" />
       <ul class="menu-list">
+        <li class="menu-item" style="display: none" id="continue-game">
+          <a href="game/index.html" class="menu-button">继续游戏</a>
+        </li>
         <li class="menu-item">
-          <a href="game/index.html" class="menu-button">开始新游戏</a>
+          <button class="menu-button" onclick="newGame()">开始新游戏</button>
         </li>
         <li class="menu-item">
           <button class="menu-button" onclick="showSaveModal()">加载存档</button>

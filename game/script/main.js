@@ -7,17 +7,18 @@ if (!localStorage.getItem('rewind-pearl-username')) {
   location.assign('../login/index.html')
 }
 
+const currentUser = localStorage.getItem('rewind-pearl-username')
+
 async function startNewGame() {
-  // await Dialogue.play('prologue')
   Game2D.loadLevel(LevelManager.PrologueLevel)
   Game2D.start()
 }
 
 Loading.on('complete', () => {
-  const loadSaveData = localStorage.getItem('rewind-pearl-load-save')
+  const loadSaveData = localStorage.getItem(
+    'rewind-pearl-autosave-' + currentUser
+  )
   if (loadSaveData) {
-    localStorage.removeItem('rewind-pearl-load-save')
-
     try {
       const saveData = JSON.parse(loadSaveData)
       Game2D.loadGame(saveData)
