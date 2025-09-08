@@ -2,7 +2,8 @@ import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
   type = 'platform'
-  color = '#666'
+  color = '#333'
+  shadowColor = '#3338'
 
   constructor(x, y, width, height) {
     super(x, y, width, height)
@@ -54,6 +55,8 @@ export class Platform extends BaseObject {
   }
 
   render(ctx) {
+    ctx.fillStyle = this.shadowColor
+    ctx.fillRect(this.r.x - 1, this.r.y + 1, this.width, this.height)
     ctx.fillStyle = this.color
     ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
   }

@@ -1,5 +1,4 @@
 import Keyboard from '../Keyboard.js'
-import SaveManager from '../SaveManager.js'
 import { EventListener, throttle } from '../utils.js'
 import pauseManager from '../PauseManager.js'
 import {
@@ -15,6 +14,7 @@ import {
 import { Camera } from './Camera.js'
 import * as GameConfig from './GameConfig.js'
 import * as LevelManager from './Level.js'
+import timeTravel from './TimeTravel.js'
 
 export class Game {
   listener = new EventListener()
@@ -43,13 +43,7 @@ export class Game {
   // 时间回溯系统
   tick = 0
   maxTick
-  #gameStateHistory = new Map()
-
-  // 时间回溯视觉效果
-  timeTravelState = null
-  timeTravelCircleRadius = 0
-  timeTravelStartTime = 0
-  timeTravelMaxRadius = 0
+  history = new Map()
 
   // 关卡过渡效果
   isTransitioning = false
@@ -72,7 +66,7 @@ export class Game {
     /** @type {CanvasRenderingContext2D} */
     this.ctx = this.canvas.getContext('2d')
     /** @type {CanvasRenderingContext2D} */
-    this.ctx2 = this.canvas2.getContext('2d')
+    this.tmpctx = this.canvas2.getContext('2d')
 
     const resizeCanvas = () => {
       const { width, height } = main.getBoundingClientRect()
@@ -81,7 +75,7 @@ export class Game {
 
       // 应用DPR缩放
       this.ctx.scale(DPR, DPR)
-      this.ctx2.scale(DPR, DPR)
+      this.tmpctx.scale(DPR, DPR)
 
       this.canvas.width = this.displayWidth = width * DPR
       this.canvas.height = this.displayHeight = height * DPR
@@ -100,12 +94,12 @@ export class Game {
       this.ctx.textBaseline = 'top'
       this.ctx.textAlign = 'left'
 
-      this.ctx2.imageSmoothingEnabled = false
-      this.ctx2.webkitImageSmoothingEnabled = false
-      this.ctx2.mozImageSmoothingEnabled = false
-      this.ctx2.msImageSmoothingEnabled = false
-      this.ctx2.textBaseline = 'top'
-      this.ctx2.textAlign = 'left'
+      this.tmpctx.imageSmoothingEnabled = false
+      this.tmpctx.webkitImageSmoothingEnabled = false
+      this.tmpctx.mozImageSmoothingEnabled = false
+      this.tmpctx.msImageSmoothingEnabled = false
+      this.tmpctx.textBaseline = 'top'
+      this.tmpctx.textAlign = 'left'
     }
 
     resizeCanvas()
@@ -115,8 +109,8 @@ export class Game {
 
     this.$backgroundImage = document.getElementById('game2d-background')
 
-    // 初始化暂停管理器
-    pauseManager.setGame(this)
+    pauseManager.game = this
+    timeTravel.game = this
   }
 
   #addKeyboardListeners() {
@@ -135,10 +129,10 @@ export class Game {
       }),
 
       Keyboard.onKeydown(['R'], () => {
-        this.startTimeTravelPreview()
+        timeTravel.startTimeTravelPreview(this)
       }),
       Keyboard.onKeyup(['R'], () => {
-        this.endTimeTravelPreview()
+        timeTravel.endTimeTravelPreview(this)
       })
     )
   }
@@ -146,25 +140,6 @@ export class Game {
   #removeKeyboardListeners() {
     this.#keyboardListeners.forEach(removeListener => removeListener())
     this.#keyboardListeners = []
-  }
-
-  /**
-   * 加载关卡数据
-   */
-  loadLevel(setupFunction) {
-    this.tick = 0
-    this.maxTick = 0
-    this.gameObjects = []
-    this.#gameStateHistory = new Map()
-
-    setupFunction(this)
-
-    this.ghostPlayers = []
-
-    // 设置摄像机
-    this.#setupCamera()
-
-    this.#setupBackground()
   }
 
   importGameObjects(state) {
@@ -206,36 +181,6 @@ export class Game {
   }
 
   /**
-   * 保存游戏状态快照到历史记录
-   */
-  #saveSnapshot() {
-    // todo: fix memory leak
-    this.#gameStateHistory.set(this.tick, this.exportGameObjects())
-    this.#gameStateHistory.delete(this.tick - GameConfig.MAX_SNAPSHOTS_COUNT)
-  }
-
-  /**
-   * 开始时间回溯预览
-   */
-  startTimeTravelPreview() {
-    if (this.timeTravelState === 'success') return
-    this.timeTravelState = 'pending'
-    this.timeTravelStartTime = performance.now()
-
-    // 计算最大圆圈半径（对角线的一半）
-    this.timeTravelMaxRadius =
-      Math.hypot(this.displayWidth, this.displayHeight) / this.scale
-  }
-
-  /**
-   * 结束时间回溯预览
-   */
-  endTimeTravelPreview() {
-    if (this.timeTravelState === 'success') return
-    this.timeTravelState = null
-  }
-
-  /**
    * 执行时间回溯
    */
   executeTimeTravel() {
@@ -258,13 +203,32 @@ export class Game {
     this.tick = Math.max(0, this.tick - 5 * 100)
     this.player.lifetimeBegin = this.tick
 
-    const targetState = this.#gameStateHistory.get(this.tick)
+    const targetState = this.history.get(this.tick)
     this.importGameObjects(targetState)
     this.ghostPlayers.forEach(ghost => {
       if (ghost.stateHistory.has(this.tick))
         ghost.state = ghost.stateHistory.get(this.tick)
       else ghost.removed = true
     })
+  }
+
+  /**
+   * 加载关卡数据
+   */
+  loadLevel(setupFunction) {
+    this.tick = 0
+    this.maxTick = 0
+    this.gameObjects = []
+    this.history = new Map()
+
+    setupFunction(this)
+
+    this.ghostPlayers = []
+
+    // 设置摄像机
+    this.#setupCamera()
+
+    this.#setupBackground()
   }
 
   start() {
@@ -283,13 +247,20 @@ export class Game {
       this.animationFrameHandler = requestAnimationFrame(renderLoop)
       if (pauseManager.isPaused) return
       this.render(this.ctx)
-      this.renderTimeTravelPreview(this.ctx, this.ctx2)
+      timeTravel.render(this)
       this.#renderTimeline(this.ctx)
     }
     renderLoop()
 
     // 初始化渲染组
     this.#updateRenderGroups()
+  }
+
+  stop() {
+    this.isRunning = false
+    this.#removeKeyboardListeners()
+    clearInterval(this.updateIntervalHandler)
+    cancelAnimationFrame(this.animationFrameHandler)
   }
 
   /**
@@ -436,13 +407,6 @@ export class Game {
     setTimeout(() => notification.remove(), 4000)
   }
 
-  stop() {
-    this.isRunning = false
-    this.#removeKeyboardListeners()
-    clearInterval(this.updateIntervalHandler)
-    cancelAnimationFrame(this.animationFrameHandler)
-  }
-
   /**
    * 更新游戏逻辑
    */
@@ -462,36 +426,14 @@ export class Game {
     if (this.player.inputQueue.length)
       this.player.inputHistory.set(this.tick, [...this.player.inputQueue])
 
-    if (this.timeTravelState === 'pending') {
-      const holdTime = performance.now() - this.timeTravelStartTime
-      if (holdTime >= GameConfig.TIME_TRAVEL_CHARGE_TIME) {
-        this.timeTravelState =
-          this.tick < GameConfig.TIME_TRAVEL_DISTANCE ? null : 'success'
-      } else {
-        this.timeTravelCircleRadius =
-          (12 + holdTime / 200) * 0.1 + this.timeTravelCircleRadius * 0.9
-      }
-    } else if (this.timeTravelState === 'success') {
-      this.timeTravelCircleRadius +=
-        dt * Math.min(800, this.timeTravelCircleRadius ** 2 / 10)
-      if (this.timeTravelCircleRadius + 1 > this.timeTravelMaxRadius) {
-        this.timeTravelState = null
-        this.timeTravelCircleRadius = 0
-
-        this.executeTimeTravel()
-      }
-    } else {
-      this.timeTravelCircleRadius = Math.max(
-        0,
-        this.timeTravelCircleRadius - dt * 100
-      )
-    }
+    timeTravel.update(dt)
 
     if (!this.isRunning) return
 
     this.tick++
     this.maxTick = Math.max(this.maxTick, this.tick)
-    this.#saveSnapshot()
+    this.history.set(this.tick, this.exportGameObjects())
+    this.history.delete(this.tick - GameConfig.MAX_SNAPSHOTS_COUNT)
 
     // 移除标记为删除的对象
     const objectsToRemove = this.gameObjects.filter(obj => obj.removed)
@@ -549,172 +491,6 @@ export class Game {
     this.camera.update(dt)
 
     if (this.tick % 2000 === 0) this.saveGame()
-  }
-
-  /**
-   * 渲染时间回溯预览画面
-   * @param {CanvasRenderingContext2D} ctx 主画布上下文
-   * @param {CanvasRenderingContext2D} tmpctx 临时画布上下文
-   */
-  renderTimeTravelPreview(ctx, tmpctx) {
-    const tick = Math.max(1, this.tick - 500)
-    if (this.timeTravelCircleRadius === 0 || !this.#gameStateHistory.has(tick))
-      return
-    const targetState = this.#gameStateHistory.get(tick)
-    const state = this.exportGameObjects()
-
-    this.importGameObjects(targetState)
-
-    // 清空预览画布
-    tmpctx.clearRect(0, 0, this.displayWidth, this.displayHeight)
-    tmpctx.save()
-
-    // 应用相机变换
-    tmpctx.scale(this.scale, this.scale)
-    tmpctx.translate(-this.camera.position.x, -this.camera.position.y)
-
-    // 绘制背景网格
-    // this.#renderBackgroundGrid(tmpctx)
-
-    // 按优先级渲染游戏对象
-    this.renderGroups.platforms.forEach(entity =>
-      entity.render(tmpctx, this.scale)
-    )
-    this.renderGroups.collectibles.forEach(entity =>
-      entity.render(tmpctx, this.scale)
-    )
-    this.renderGroups.enemies.forEach(entity =>
-      entity.render(tmpctx, this.scale)
-    )
-    this.renderGroups.interactables.forEach(entity =>
-      entity.render(tmpctx, this.scale)
-    )
-
-    // 渲染玩家
-    this.ghostPlayers.forEach(ghost => {
-      if (!ghost.stateHistory.has(tick)) return
-      const fakeGhost = new GhostPlayer()
-      fakeGhost.state = ghost.stateHistory.get(tick)
-      fakeGhost.removed = false
-      fakeGhost.render(tmpctx, this)
-    })
-    if (this.player.stateHistory.has(tick)) {
-      const ghost = new GhostPlayer()
-      ghost.state = this.player.stateHistory.get(tick)
-      ghost.render(tmpctx, this)
-    }
-    this.player.render(tmpctx, this.scale)
-    tmpctx.restore()
-
-    this.importGameObjects(state)
-
-    const playerScreenX =
-      (this.player.r.x + this.player.width / 2 - this.camera.position.x) *
-      this.scale
-    const playerScreenY =
-      (this.player.r.y + this.player.height / 2 - this.camera.position.y) *
-      this.scale
-
-    const gradient = tmpctx.createRadialGradient(
-      playerScreenX,
-      playerScreenY,
-      Math.max(0, (this.timeTravelCircleRadius - 100) * this.scale),
-      playerScreenX,
-      playerScreenY,
-      this.timeTravelCircleRadius * this.scale
-    )
-    gradient.addColorStop(0, 'rgba(0, 0, 0, 0)')
-    gradient.addColorStop(
-      1,
-      this.timeTravelState === 'success'
-        ? 'rgba(255, 255, 255, 0.5)'
-        : this.tick < GameConfig.TIME_TRAVEL_DISTANCE
-        ? 'rgba(255, 0, 0, 0.5)'
-        : 'rgba(87, 87, 200, 0.5)'
-    )
-    tmpctx.fillStyle = gradient
-    tmpctx.beginPath()
-    tmpctx.arc(
-      playerScreenX,
-      playerScreenY,
-      this.timeTravelCircleRadius * this.scale,
-      0,
-      Math.PI * 2
-    )
-    tmpctx.fill()
-
-    tmpctx.save()
-    tmpctx.globalCompositeOperation = 'destination-in'
-    tmpctx.fillStyle = 'black'
-    tmpctx.beginPath()
-    tmpctx.arc(
-      playerScreenX,
-      playerScreenY,
-      this.timeTravelCircleRadius * this.scale,
-      0,
-      Math.PI * 2
-    )
-    tmpctx.fill()
-    tmpctx.restore()
-
-    ctx.save()
-    ctx.globalCompositeOperation = 'destination-out'
-    ctx.beginPath()
-    ctx.arc(
-      playerScreenX,
-      playerScreenY,
-      this.timeTravelCircleRadius * this.scale,
-      0,
-      Math.PI * 2
-    )
-    ctx.fill()
-    ctx.restore()
-
-    ctx.drawImage(tmpctx.canvas, 0, 0)
-
-    // 绘制圆圈边框
-    ctx.save()
-    ctx.strokeStyle =
-      this.timeTravelState === 'success'
-        ? '#ffffff'
-        : this.tick < GameConfig.TIME_TRAVEL_DISTANCE
-        ? '#ff0000'
-        : '#aaaaaa'
-    ctx.lineWidth = 5
-    ctx.beginPath()
-    ctx.arc(
-      playerScreenX,
-      playerScreenY,
-      this.timeTravelCircleRadius * this.scale,
-      0,
-      Math.PI * 2
-    )
-    ctx.stroke()
-    ctx.restore()
-
-    // 绘制提示文字
-    const holdTime = performance.now() - this.timeTravelStartTime
-    ctx.save()
-    ctx.fillStyle = '#00ffff'
-    ctx.font = '2rem SourceHanSerifCN, serif, sans-serif'
-    ctx.textAlign = 'center'
-
-    if (holdTime < 1000) {
-      const remainingTime = ((1000 - holdTime) / 1000).toFixed(1)
-      ctx.fillText(
-        `长按 ${remainingTime}s 激活时间回溯`,
-        this.displayWidth / 2,
-        this.displayHeight - 10 / this.scale
-      )
-    } else {
-      ctx.fillText(
-        '时间回溯激活中...',
-        this.displayWidth / 2,
-        this.displayHeight - 10 / this.scale
-      )
-    }
-
-    ctx.restore()
   }
 
   /**
@@ -931,9 +707,9 @@ export class Game {
         340
       )
     }
-    if (this.timeTravelState) {
+    if (timeTravel.state) {
       ctx.fillStyle = '#00ffff'
-      ctx.fillText('时间回溯预览中...' + this.timeTravelState, 20, 360)
+      ctx.fillText('时间回溯预览中...' + timeTravel.state, 20, 360)
     }
 
     // 调试信息：摄像机状态

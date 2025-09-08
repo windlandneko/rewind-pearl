@@ -1,3 +1,4 @@
+import TimeTravel from '../TimeTravel.js'
 import { Player } from './Player.js'
 
 /**
@@ -6,7 +7,7 @@ import { Player } from './Player.js'
  */
 export class GhostPlayer extends Player {
   type = 'ghost_player'
-  flag = false
+  unstableRate = 0
 
   update(dt, game) {
     if (!this.stateHistory.has(game.tick)) {
@@ -19,11 +20,10 @@ export class GhostPlayer extends Player {
     super.update(dt, game)
 
     const record = this.stateHistory.get(game.tick)
-    if (!this.flag) {
-      this.flag = true
-      this.validateState(record)
-    }
-    this.state = record
+    this.validateState(record)
+
+    if (this.unstableRate < 10) this.state = record
+    else TimeTravel.unstablize(this)
   }
 
   validateState(record) {
@@ -34,12 +34,7 @@ export class GhostPlayer extends Player {
         key => key === 'inputQueue' || record[key] === state[key]
       )
     ) {
-      console.log(
-        '时空结构被破坏',
-        Object.keys(record)
-          .filter(key => record[key] !== state[key])
-          .map(key => `${key}: ${record[key]} -> ${state[key]}`)
-      )
+      this.unstableRate++
     }
   }
 

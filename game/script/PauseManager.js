@@ -27,14 +27,6 @@ export class PauseManager {
   }
 
   /**
-   * 设置关联的游戏实例
-   * @param {Object} game - 游戏实例
-   */
-  setGame(game) {
-    this.game = game
-  }
-
-  /**
    * 初始化DOM元素
    */
   #initDOMElements() {
@@ -236,5 +228,4 @@ export class PauseManager {
 }
 
 // 创建全局暂停管理器实例
-export const pauseManager = new PauseManager()
-export default pauseManager
+export default new PauseManager()
