@@ -248,7 +248,7 @@ export class Game {
     }
   }
 
-  async start() {
+  async start(initial = false) {
     // 初始提示
     if (!localStorage.getItem('rewind-pearl-showhelp')) {
       PauseManager.showHelp()
@@ -259,7 +259,7 @@ export class Game {
       await Dialogue.play(this.levelData.introDialogue)
       this.levelData.introDialogue = null
     }
-    this.fadeBlack(true)
+    if (initial) this.fadeBlack(true)
 
     this.canvas.classList.remove('hidden')
 
@@ -305,7 +305,7 @@ export class Game {
     await this.fadeBlack()
     this.stop()
     this.loadLevel(LevelManager[targetLevel])
-    await this.start()
+    await this.start(true)
     await this.fadeBlack(true)
 
     this.isTransitioning = false
@@ -346,7 +346,7 @@ export class Game {
     this.maxTick = maxTick
     this.importGameObjects(gameObjects)
 
-    this.start()
+    this.start(true)
   }
 
   saveGame(name = '未命名存档', autosave = false) {
