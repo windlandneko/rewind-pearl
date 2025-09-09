@@ -273,7 +273,7 @@ export class Player extends BaseObject {
     const y = Math.round(this.r.y * scale) / scale
 
     // 受伤时闪烁效果
-    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.1) % 2 === 0) {
+    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.15) % 2 === 0) {
       ctx.globalAlpha = 0.5
     } else {
       ctx.globalAlpha = 1.0

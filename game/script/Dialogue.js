@@ -309,6 +309,7 @@ class Dialogue {
         }, 40)
         this.textDisplaying = true
       } else if (skip) {
+        this.$modernText.textContent = ''
         this.#parseText(this.$modernText, text)
       } else {
         this.#updateBubble(text)

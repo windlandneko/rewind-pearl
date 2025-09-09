@@ -23,6 +23,8 @@ main {
   align-items: flex-end;
   padding-right: 10vw;
   position: relative;
+
+  user-select: none;
 }
 
 #current-user {
@@ -91,6 +93,7 @@ main {
 .menu-item {
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .menu-button {

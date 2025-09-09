@@ -16,7 +16,6 @@ export class Enemy extends BaseObject {
   update(dt) {
     this.bobOffset += dt * 2
 
-    // 简单的左右移动AI
     this.v.x = this.speed * this.direction
     this.r.x += this.v.x * dt
     this.r.y = this.anchor.y + Math.sin(this.bobOffset) * 2

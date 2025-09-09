@@ -15,7 +15,7 @@ export const TILE_SIZE = 8
 
 // 动画配置
 export const TRANSITION_DURATION = 500 // 切换关卡黑屏时间（毫秒）
-export const SPRITE_FRAME_DURATION = 150 // 每帧持续时间（毫秒）
+export const SPRITE_FRAME_DURATION = 100 // 每帧持续时间（毫秒）
 
 // 调试配置
 export const SHOW_DEBUG_INFO = true
