@@ -1,6 +1,6 @@
 {
   "text_style": "modern",
-  "auto_next_delay": 10000,
+  "auto_next_delay": null,
   "events": [
     {
       "action": "background",

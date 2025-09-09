@@ -59,8 +59,8 @@ export function PrologueLevel(game) {
       80,
       136,
       'chapter1_start',
-      'character/hajimi/normal',
-      '测试'
+      'character/zhishiqie/normal',
+      '芝士企鹅'
     ),
     new Interactable(
       200,

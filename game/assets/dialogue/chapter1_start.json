@@ -1,6 +1,6 @@
 {
   "text_style": "modern",
-  "auto_next_delay": null,
+  "auto_next_delay": 3000,
   "events": [
     {
       "action": "add",
