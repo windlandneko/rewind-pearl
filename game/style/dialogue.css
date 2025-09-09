@@ -117,6 +117,9 @@
 .touhou-style-text.right svg {
   right: -2px;
 }
+.touhou-style-text.narration svg {
+  display: none;
+}
 
 .modern-style-text {
   position: absolute;

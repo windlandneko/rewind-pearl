@@ -87,6 +87,7 @@ class Dialogue {
 
     this.stop()
     this.dialogueData = Asset.get('dialogue/' + dialogue)
+    this.$dialogue.className = 'dialogue-container'
     this.$dialogue.classList.add(
       'visible',
       this.dialogueData?.text_style ?? 'modern'
@@ -253,11 +254,13 @@ class Dialogue {
       if (emotion) this.#updateCharacterEmotion(character, emotion)
 
       this.$modernText.classList.remove('narration')
+      this.$touhou.classList.remove('narration')
     } else {
       this.#updatePosition()
       this.$modernTitle.textContent = ''
       this.$modernSubtitle.textContent = ''
       this.$modernText.classList.add('narration')
+      this.$touhou.classList.add('narration')
     }
 
     if (text === null) {
@@ -266,51 +269,53 @@ class Dialogue {
     }
 
     if (text) {
-      if (this.dialogueData.text_style === 'modern' && !skip) {
-        this.textCursor = 0
-        clearInterval(this.textDisplayHandler)
-        this.$modernText.textContent = ''
-        this.textDisplayHandler = setInterval(() => {
-          if (this.textCursor === Infinity) {
-            this.$modernText.textContent = ''
-            this.#parseText(this.$modernText, text)
-          } else {
-            const span = document.createElement('span')
-            let nextLetter = text.charAt(this.textCursor++)
-            if (nextLetter === '\\') {
-              nextLetter = text.charAt(this.textCursor++)
-            } else if (nextLetter === '$') {
-              let divider = text.indexOf(':', this.textCursor)
-              let end = text.indexOf('$', divider)
+      if (this.dialogueData.text_style === 'modern') {
+        if (!skip) {
+          this.textCursor = 0
+          clearInterval(this.textDisplayHandler)
+          this.$modernText.textContent = ''
+          this.textDisplayHandler = setInterval(() => {
+            if (this.textCursor === Infinity) {
+              this.$modernText.textContent = ''
+              this.#parseText(this.$modernText, text)
+            } else {
+              const span = document.createElement('span')
+              let nextLetter = text.charAt(this.textCursor++)
+              if (nextLetter === '\\') {
+                nextLetter = text.charAt(this.textCursor++)
+              } else if (nextLetter === '$') {
+                let divider = text.indexOf(':', this.textCursor)
+                let end = text.indexOf('$', divider)
 
-              if (end === -1) {
-                nextLetter = '[[ERROR]]'
-                this.textCursor = text.length
-              } else {
-                nextLetter = text.slice(divider + 1, end)
-                span.className = text.slice(this.textCursor, divider)
-                this.textCursor = end + 1
+                if (end === -1) {
+                  nextLetter = '[[ERROR]]'
+                  this.textCursor = text.length
+                } else {
+                  nextLetter = text.slice(divider + 1, end)
+                  span.className = text.slice(this.textCursor, divider)
+                  this.textCursor = end + 1
+                }
               }
+              span.textContent = nextLetter
+              span.classList.add('appear')
+              this.$modernText.appendChild(span)
             }
-            span.textContent = nextLetter
-            span.classList.add('appear')
-            this.$modernText.appendChild(span)
-          }
-          if (this.textCursor >= text.length) {
-            this.textDisplaying = false
-            clearInterval(this.textDisplayHandler)
-            clearTimeout(this.autoNextHandler)
-            if (this.dialogueData.auto_next_delay > 0)
-              this.autoNextHandler = setTimeout(
-                () => this.next(),
-                this.dialogueData.auto_next_delay
-              )
-          }
-        }, 40)
-        this.textDisplaying = true
-      } else if (skip) {
-        this.$modernText.textContent = ''
-        this.#parseText(this.$modernText, text)
+            if (this.textCursor >= text.length) {
+              this.textDisplaying = false
+              clearInterval(this.textDisplayHandler)
+              clearTimeout(this.autoNextHandler)
+              if (this.dialogueData.auto_next_delay > 0)
+                this.autoNextHandler = setTimeout(
+                  () => this.next(),
+                  this.dialogueData.auto_next_delay
+                )
+            }
+          }, 40)
+          this.textDisplaying = true
+        } else {
+          this.$modernText.textContent = ''
+          this.#parseText(this.$modernText, text)
+        }
       } else {
         this.#updateBubble(text)
       }
@@ -462,7 +467,8 @@ class Dialogue {
 
   // 更新对话气泡
   #updateBubble(text) {
-    this.$touhou.className = `touhou-style-text ${this.currentSpeaker.position}`
+    this.$touhou.classList.remove('left', 'right', 'visible')
+    this.$touhou.classList.add(this.currentSpeaker.position)
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
     this.#parseText(this.$touhou, text)
