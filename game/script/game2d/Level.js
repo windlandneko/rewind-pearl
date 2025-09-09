@@ -7,6 +7,7 @@ import {
   MovingPlatform,
 } from './gameObject/index.js'
 import Vec2 from './Vector.js'
+import SoundManager from '../SoundManager.js'
 
 // 屏幕固定大小
 const SCREEN_HEIGHT = 8 * 24 // 192像素
@@ -18,7 +19,6 @@ export function PrologueLevel(game) {
   const width = SCREEN_WIDTH * 2.5
 
   game.levelData = {
-    name: 'PrologueLevel',
     introDialogue: 'prologue',
     height,
     width,
@@ -56,12 +56,18 @@ export function PrologueLevel(game) {
   // 剧情对话点
   game.gameObjects.push(
     new Interactable(
-      200,
-      160,
-      'prologue',
+      80,
+      136,
+      'chapter1_start',
       'character/hajimi/normal',
-      '测试',
-      true
+      '测试'
+    ),
+    new Interactable(
+      200,
+      136,
+      'chapter1_end',
+      'character/hajimi/normal',
+      '测试'
     )
   )
 
@@ -77,30 +83,31 @@ export function Chapter1Level(game) {
   const width = SCREEN_WIDTH
 
   game.levelData = {
-    name: 'Chapter1Level',
-    background: 'magic', // 异世界魔法背景
+    background: 'magic',
     height,
     width,
     worldBorder: true,
     spawnpoint: new Vec2(32, 150),
   }
 
-  // 基础墙壁
+  SoundManager.playBGM('Memories of Memories')
+
+  // 墙壁
   game.gameObjects.push(
-    new Platform(0, height - 20, width, 20), // 地面
-    new Platform(0, 0, width, 8), // 天花板
-    new Platform(0, 0, 8, height), // 左墙
-    new Platform(width - 8, 0, 8, height - 40) // 右墙
+    new Platform(0, height - 20, width, 20),
+    new Platform(0, 0, width, 8),
+    new Platform(0, 0, 8, height),
+    new Platform(width - 8, 0, 8, height - 40)
   )
 
-  // 剧情对话点
+  // 剧情对话
   game.gameObjects.push(
     new Interactable(80, 160, 'chapter1_start', '遇见芝士企鹅高松灯'),
     new Interactable(160, 160, 'chapter1_end', '收集灵感菇任务完成'),
     new Interactable(240, 160, 'chapter1_end', '石头替代路线')
   )
 
-  // 前往工厂的传送门
+  // 传送门
   game.gameObjects.push(
     new LevelChanger(width - 8, 150, 32, 32, 'Chapter2Level', true)
   )
@@ -112,7 +119,6 @@ export function Chapter2Level(game) {
   const width = SCREEN_WIDTH
 
   game.levelData = {
-    name: 'Chapter2Level',
     height,
     width,
     worldBorder: true,
@@ -147,7 +153,6 @@ export function Chapter3Level(game) {
   const width = SCREEN_WIDTH
 
   game.levelData = {
-    name: 'Chapter3Level',
     height,
     width,
     worldBorder: true,
@@ -184,7 +189,6 @@ export function Chapter4Level(game) {
   const width = SCREEN_WIDTH
 
   game.levelData = {
-    name: 'Chapter4Level',
     height,
     width,
     worldBorder: true,
@@ -218,7 +222,6 @@ export function Chapter5Level(game) {
   const width = SCREEN_WIDTH
 
   game.levelData = {
-    name: 'Chapter5Level',
     height,
     width,
     worldBorder: true,

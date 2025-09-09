@@ -17,7 +17,7 @@
   text-align: center;
   color: white;
 
-  transition: opacity 1s ease;
+  transition: opacity 0.8s ease;
 }
 .loading-container.hidden {
   opacity: 0;

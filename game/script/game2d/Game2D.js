@@ -207,6 +207,7 @@ export class Game {
     this.ghostPlayers = []
 
     setupFunction(this)
+    this.levelData.name = setupFunction.name
     this.player = new GameObject.Player(
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
@@ -876,13 +877,9 @@ export class Game {
 
     // 绘制时间线信息
     ctx.fillStyle = '#fff'
-    ctx.font = '1.8rem FiraCode, monospace'
+    ctx.font = '1.4rem FiraCode, monospace'
     ctx.textAlign = 'left'
-    ctx.fillText(
-      `当前: ${this.tick}/${this.maxTick}`,
-      timelineX + 5,
-      timelineY - 5
-    )
+    ctx.fillText(`${this.tick}/${this.maxTick}`, timelineX + 4, timelineY + 1)
 
     ctx.restore()
   }

@@ -1,6 +1,10 @@
 {
   "audio": {
-    "test": "audio/獣の知性 - [TH19] 東方獣王園.mp3"
+    "test": "audio/獣の知性 - [TH19] 東方獣王園.mp3",
+    "menu": "audio/To Far Shores.mp3",
+    "chat": "audio/甲論乙駁 _ あきやまうに.mp3",
+    "Gate of steiner": "audio/阿保剛 - Gate of steiner.mp3",
+    "Memories of Memories": "audio/Memories of Memories.mp3"
   },
 
   "character": {

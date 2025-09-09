@@ -6,6 +6,20 @@ if (currentUser && userElement) {
   userElement.textContent = `当前玩家: ${currentUser}`
 }
 
+// 音频控制
+document.addEventListener('DOMContentLoaded', () => {
+  const bgm = document.getElementById('bgm')
+
+  bgm.volume = 0.5
+  bgm.play().catch()
+  document.addEventListener('click', () => bgm.play(), {
+    once: true,
+  })
+  document.addEventListener('keydown', () => bgm.play(), {
+    once: true,
+  })
+})
+
 if (localStorage.getItem('rewind-pearl-autosave-' + currentUser)) {
   document.getElementById('continue-game').style.display = 'block'
 }

@@ -4,21 +4,13 @@ import { BaseObject } from './BaseObject.js'
 
 export class Interactable extends BaseObject {
   isHighlighted = false
-  sprite = null
   spriteId = null
 
-  constructor(x, y, dialogueId, spriteId, hint = '', force = null) {
-    super(x, y, 12, 12)
+  constructor(x, y, dialogueId, spriteId, hint = '') {
+    super(x, y, 16, 16)
     this.dialogueId = dialogueId
-    if (Asset.has(spriteId)) {
-      this.spriteId = spriteId
-      this.sprite = Asset.get(spriteId)
-      this.height = (this.width * this.sprite.height) / this.sprite.width
-    } else {
-      console.warn(`Sprite not found: ${spriteId}`)
-    }
+    this.spriteId = spriteId
     this.hint = hint
-    this.force = force
   }
 
   /**
@@ -53,35 +45,19 @@ export class Interactable extends BaseObject {
   render(ctx) {
     ctx.save()
 
-    // 如果被高亮，添加发光效果
-    if (this.isHighlighted) {
-      ctx.shadowColor = this.highlightColor
-      ctx.shadowBlur = 10
-    }
-
-    // 渲染sprite，保持原有的跳动效果
-    if (this.sprite) {
-      ctx.drawImage(
-        this.sprite,
-        this.r.x - this.width / 2,
-        this.r.y - this.height,
-        this.width,
-        this.height
-      )
+    if (Asset.has(this.spriteId)) {
+      const sprite = Asset.get(this.spriteId)
+      const height = (this.width * sprite.height) / sprite.width
+      ctx.drawImage(sprite, this.r.x, this.r.y, this.width, height)
     } else {
       ctx.fillStyle = '#ff845eff'
-      ctx.fillRect(
-        this.r.x - this.width / 2,
-        this.r.y - this.height,
-        this.width,
-        this.height
-      )
+      ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
     }
 
     ctx.restore()
 
     // 渲染提示文本
-    if (this.hint) {
+    if (this.hint && this.isHighlighted) {
       ctx.fillStyle = 'white'
       ctx.font = '5px HarmonyOS Sans SC, serif, sans-serif'
       const textWidth = ctx.measureText(this.hint).width
@@ -101,7 +77,6 @@ export class Interactable extends BaseObject {
       dialogueId: this.dialogueId,
       hint: this.hint,
       spriteId: this.spriteId,
-      force: this.force,
     }
   }
 

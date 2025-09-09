@@ -3,6 +3,10 @@
   "auto_next_delay": 10000,
   "events": [
     {
+      "action": "background",
+      "src": "intro"
+    },
+    {
       "action": "add",
       "id": "man",
       "title": "路人甲",
@@ -23,6 +27,10 @@
     {
       "id": "man",
       "text": "你听说了没，最近有好多起艺人和网红的失踪事件......"
+    },
+    {
+      "action": "bgm",
+      "name": "chat"
     },
     {
       "id": "woman",
@@ -88,6 +96,10 @@
       "text": "（这时他看到了一个熟悉的人影在注视着自己。）"
     },
     {
+      "action": "bgm",
+      "name": "Gate of steiner"
+    },
+    {
       "action": "add",
       "id": "wangyuan",
       "title": "王源",
@@ -111,7 +123,8 @@
       "text": "（冲他粲然一笑，挥了挥手）"
     },
     {
-      "action": "fade_to_black"
+      "action": "background",
+      "src": null
     },
     {
       "action": "remove",

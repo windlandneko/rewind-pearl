@@ -174,7 +174,7 @@ class Asset {
   async #loadAudio(url) {
     return new Promise((res, rej) => {
       const audio = new Audio()
-      audio.oncanplaythrough = () => res(url)
+      audio.oncanplaythrough = () => res(audio)
       audio.onprogress = ({ loaded, total }) => {
         if (!total) return
         this.onProgress?.({ type: 'progress', count: loaded, total })

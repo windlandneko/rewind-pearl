@@ -1,6 +1,7 @@
 import Asset from './Asset.js'
 import keyboard from './Keyboard.js'
 import PauseManager from './PauseManager.js'
+import SoundManager from './SoundManager.js'
 
 /**
  * Dialogue Manager
@@ -24,6 +25,7 @@ class Dialogue {
   $modernSubtitle = document.querySelector('.dialogue-container .subtitle')
   $modernText = document.querySelector('.dialogue-container .text')
   $touhou = document.querySelector('.dialogue-container .touhou-style-text')
+  $background = document.querySelector('.dialogue-background')
 
   #keyboardListeners = []
 
@@ -166,6 +168,12 @@ class Dialogue {
       case 'remove':
         this.#onRemove(event)
         break
+      case 'background':
+        this.#onBackground(event)
+        break
+      case 'bgm':
+        this.#onBGM(event)
+        break
       default:
         console.warn('[Dialogue] (processEvent) 未知的事件:', event)
         this.next()
@@ -301,7 +309,7 @@ class Dialogue {
         }, 40)
         this.textDisplaying = true
       } else if (skip) {
-        this.$modernText.textContent = text
+        this.#parseText(this.$modernText, text)
       } else {
         this.#updateBubble(text)
       }
@@ -346,6 +354,41 @@ class Dialogue {
       this.#updatePosition()
     }, 500)
 
+    this.next()
+  }
+
+  /**
+   * 处理背景事件
+   * @param {Object} event - 背景事件
+   */
+  #onBackground(event) {
+    const { src } = event
+    if (Asset.has('background/' + src)) {
+      this.$background.childNodes.forEach(child => {
+        child.classList.remove('visible')
+        setTimeout(() => child.remove(), 500)
+      })
+
+      const image = Asset.get('background/' + src)
+      setTimeout(() => image.classList.add('visible'), 0)
+      this.$background.appendChild(image)
+    } else if (src === null) {
+      this.$background.childNodes.forEach(child => {
+        child.classList.remove('visible')
+        setTimeout(() => child.remove(), 500)
+      })
+    } else {
+      console.warn('[Dialogue] (action: background) 背景图片不存在:', src)
+    }
+    this.next()
+  }
+
+  /**
+   * 处理背景音乐事件
+   * @param {Object} event - BGM事件
+   */
+  #onBGM(event) {
+    SoundManager.playBGM(event.name, event)
     this.next()
   }
 

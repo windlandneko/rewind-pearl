@@ -83,9 +83,8 @@ class Loading {
    * @param {number} [delay=500] - 延迟时间（毫秒）
    */
   async hide() {
-    await wait(500)
     this.$container.classList.add('hidden')
-    await wait(1000)
+    await wait(500)
     this.$container.remove()
   }
 }

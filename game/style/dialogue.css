@@ -12,8 +12,6 @@
   pointer-events: none;
   user-select: none;
 
-  /* background: url('../assets/image/title_bg.png') no-repeat center / cover, #000; */
-
   opacity: 0;
   transition: opacity 0.5s ease;
 }
@@ -26,6 +24,23 @@
 }
 .dialogue-container.modern .modern-style-text {
   display: block;
+}
+
+.dialogue-background > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+  z-index: 5;
+}
+.dialogue-background > img.visible {
+  opacity: 1;
 }
 
 .character {

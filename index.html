@@ -10,6 +10,10 @@
 </head>
 
 <body>
+  <audio id="bgm" loop style="display: none">
+    <source src="game/assets/audio/To Far Shores.mp3" type="audio/mpeg" />
+  </audio>
+
   <main>
     <div class="menu-section">
       <img src="logo.png" alt="再见丁真" class="game-title" />
@@ -28,9 +32,6 @@
         </li>
         <li class="menu-item">
           <a href="about/index.html" class="menu-button">关于</a>
-        </li>
-        <li class="menu-item">
-          <a href="settings/index.html" class="menu-button">设置</a>
         </li>
         <li class="menu-item">
           <button class="menu-button" onclick="logout()" style="display: grid">
