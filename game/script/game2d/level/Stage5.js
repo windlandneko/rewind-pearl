@@ -9,7 +9,6 @@ import {
 import Vec2 from '../Vector.js'
 import SoundManager from '../../SoundManager.js'
 
-// 屏幕固定大小
 const VIEW_HEIGHT = 8 * 24 // 192像素
 const VIEW_WIDTH = 8 * 40 // 320像素
 
