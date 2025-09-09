@@ -2,9 +2,9 @@ import { EventListener } from '../utils.js'
 import { Camera } from './Camera.js'
 import Keyboard from '../Keyboard.js'
 import PauseManager from '../PauseManager.js'
-import * as GameObject from './gameObject/index.js'
+import * as GameObjects from './gameObject/index.js'
 import * as GameConfig from './GameConfig.js'
-import * as LevelManager from './Level.js'
+import * as Levels from './level/index.js'
 import TimeTravel from './TimeTravel.js'
 import Dialogue from '../Dialogue.js'
 import Asset from '../Asset.js'
@@ -13,11 +13,11 @@ export class Game {
   listener = new EventListener()
 
   // 游戏对象
-  /** @type {GameObject.Player} */
+  /** @type {GameObjects.Player} */
   player = null
-  /** @type {GameObject.GhostPlayer[]} */
+  /** @type {GameObjects.GhostPlayer[]} */
   ghostPlayers = []
-  /** @type {GameObject.BaseObject[]} */
+  /** @type {GameObjects.BaseObject[]} */
   gameObjects = []
 
   // 渲染缓存（避免每帧重复过滤）
@@ -147,7 +147,7 @@ export class Game {
 
   importGameObjects(state) {
     this.gameObjects = state.map(state => {
-      const entity = new GameObject[state.type]()
+      const entity = new GameObjects[state.type]()
       entity.state = state
       return entity
     })
@@ -166,7 +166,7 @@ export class Game {
   executeTimeTravel() {
     const state = this.player.state
 
-    const ghost = new GameObject.GhostPlayer()
+    const ghost = new GameObjects.GhostPlayer()
     ghost.state = state
     ghost.stateHistory = this.player.stateHistory
     ghost.inputHistory = this.player.inputHistory
@@ -178,7 +178,7 @@ export class Game {
 
     this.ghostPlayers.push(ghost)
 
-    this.player = new GameObject.Player()
+    this.player = new GameObjects.Player()
     this.player.state = state
     this.camera.target = this.player
 
@@ -208,7 +208,7 @@ export class Game {
 
     setupFunction(this)
     this.levelData.name = setupFunction.name
-    this.player = new GameObject.Player(
+    this.player = new GameObjects.Player(
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
@@ -277,7 +277,7 @@ export class Game {
 
     await this.fadeBlack()
     this.stop()
-    this.loadLevel(LevelManager[targetLevel])
+    this.loadLevel(Levels[targetLevel])
     await this.start(true)
     await this.fadeBlack(true)
 
@@ -310,7 +310,7 @@ export class Game {
 
     const levelName = levelData.name || 'Level1'
 
-    this.loadLevel(LevelManager[levelName])
+    this.loadLevel(Levels[levelName])
     this.levelData.introDialogue = levelData.introDialogue
 
     this.player.state = player
