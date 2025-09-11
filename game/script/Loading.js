@@ -84,7 +84,7 @@ class Loading {
    */
   async hide() {
     this.$container.classList.add('hidden')
-    await wait(500)
+    await wait(300)
     this.$container.remove()
   }
 }

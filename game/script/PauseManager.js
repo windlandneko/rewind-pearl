@@ -1,4 +1,5 @@
 import SaveManager from './SaveManager.js'
+import SoundManager from './SoundManager.js'
 import Keyboard from './Keyboard.js'
 import { $, EventListener } from './utils.js'
 
@@ -43,6 +44,10 @@ export class PauseManager {
    */
   pause() {
     if (this.isPaused) return
+
+    SoundManager.playSound('pause', {
+      volume: 0.3
+    })
 
     this.isPaused = true
     this.$pauseOverlay.classList.add('show')

@@ -175,6 +175,9 @@ class Dialogue {
       case 'bgm':
         this.#onBGM(event)
         break
+      case 'sound':
+        this.#onSoundEffect(event)
+        break
       default:
         console.warn('[Dialogue] (processEvent) 未知的事件:', event)
         this.next()
@@ -395,6 +398,15 @@ class Dialogue {
    */
   #onBGM(event) {
     SoundManager.playBGM(event.name, event)
+    this.next()
+  }
+
+  /**
+   * 处理背景音乐事件
+   * @param {Object} event - BGM事件
+   */
+  #onSoundEffect(event) {
+    SoundManager.playSound(event.name, event)
     this.next()
   }
 

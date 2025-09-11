@@ -10,7 +10,7 @@ if (currentUser && userElement) {
 document.addEventListener('DOMContentLoaded', () => {
   const bgm = document.getElementById('bgm')
 
-  bgm.volume = 0.5
+  bgm.volume = 0.8
   bgm.play().catch()
   document.addEventListener('click', () => bgm.play(), {
     once: true,

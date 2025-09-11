@@ -12,7 +12,7 @@ class SoundManager {
 
   playBGM(
     name,
-    { loop = true, volume = 0.5, fadeIn = true, fadeTime = 1000 } = {}
+    { loop = true, volume = 0.3, fadeIn = true, fadeTime = 3000 } = {}
   ) {
     this.stopBGM({ fadeIn, fadeTime })
     const bgm = Asset.get('audio/' + name)
@@ -56,7 +56,7 @@ class SoundManager {
       }
     }
 
-    const sound = Asset.get('audio/' + name)
+    const sound = Asset.get('soundEffects/' + name)
     if (!sound) {
       console.warn(`Sound not found: ${name}`)
       return

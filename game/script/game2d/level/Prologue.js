@@ -5,6 +5,7 @@ import {
   LevelChanger,
   Platform,
   MovingPlatform,
+  CrazyPlatform,
 } from '../gameObject/index.js'
 import Vec2 from '../Vector.js'
 import SoundManager from '../../SoundManager.js'
@@ -32,6 +33,8 @@ export function Prologue(game) {
     new Platform(width - 100, height - 32, 120, 32),
     new Platform(0, 0, width, 8),
     new Platform(0, 0, 8, height),
+
+    new CrazyPlatform(80, 120, 32, 4),
 
     new MovingPlatform(
       new Vec2(100, height - 32),
