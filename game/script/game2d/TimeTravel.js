@@ -1,4 +1,5 @@
 import { TIME_TRAVEL_DISTANCE, TIME_TRAVEL_CHARGE_TIME } from './GameConfig.js'
+import { Player } from './gameObject/Player.js'
 import { GhostPlayer } from './gameObject/GhostPlayer.js'
 
 class TimeTravelManager {
@@ -44,11 +45,46 @@ class TimeTravelManager {
         this.state = null
         this.radius = 0
 
-        this.#game.executeTimeTravel()
+        this.executeTimeTravel()
       }
     } else {
       this.radius = Math.max(0, this.radius - dt * 100)
     }
+  }
+
+  /**
+   * 执行时间回溯
+   */
+  executeTimeTravel() {
+    const state = this.#game.player.state
+
+    const ghost = new GhostPlayer()
+    ghost.state = state
+    ghost.stateHistory = this.#game.player.stateHistory
+
+    ghost.spawnX = this.#game.player.spawnX
+    ghost.spawnY = this.#game.player.spawnY
+    ghost.lifetimeBegin = this.#game.player.lifetimeBegin
+    ghost.lifetimeEnd = this.#game.tick
+
+    this.#game.ghostPlayers.push(ghost)
+
+    this.#game.player = new Player()
+    this.#game.player.state = state
+    this.#game.camera.target = this.#game.player
+
+    this.#game.tick = Math.max(1, this.#game.tick - 5 * 100)
+    this.#game.player.spawnX = this.#game.player.r.x
+    this.#game.player.spawnY = this.#game.player.r.y
+    this.#game.player.lifetimeBegin = this.#game.tick
+
+    const targetState = this.#game.history.get(this.#game.tick)
+    this.#game.importGameObjects(targetState)
+    this.#game.ghostPlayers.forEach(ghost => {
+      if (ghost.stateHistory.has(this.#game.tick))
+        ghost.state = ghost.stateHistory.get(this.#game.tick)
+      else console.warn('Ghost missing state at tick', this.#game.tick)
+    })
   }
 
   render() {

@@ -5,12 +5,25 @@ export class MovingPlatform extends Platform {
   timer = 0
   deltaPosition = null
 
-  constructor(from, to, width, height, interval) {
+  constructor(from, to, width, height, interval = 5, moveType = 'random') {
     super(from?.x, from?.y, width, height)
     this.r = this.from = from ?? new Vec2()
     this.to = to ?? new Vec2()
     this.interval = interval
     this.deltaPosition = new Vec2(0, 0)
+    this.moveType = moveType
+  }
+
+  get moveFunction() {
+    const k = this.timer / this.interval
+    switch (this.moveType) {
+      case 'linear':
+        return Math.abs(2 * (k % 1) - 1)
+      case 'sin':
+        return Math.sin(2 * Math.PI * k) / 2 + 0.5
+      default:
+        return Math.random()
+    }
   }
 
   update(dt) {
@@ -19,10 +32,7 @@ export class MovingPlatform extends Platform {
 
     // 更新平台位置
     this.timer += dt
-    this.r = this.to
-      .sub(this.from)
-      .mul(Math.sin((this.timer / this.interval) * Math.PI * 2) / 2 + 0.5)
-      .add(this.from)
+    this.r = this.to.sub(this.from).mul(this.moveFunction).add(this.from)
 
     // 计算平台的移动向量
     this.deltaPosition = this.r.sub(oldPosition)
@@ -50,6 +60,7 @@ export class MovingPlatform extends Platform {
       toX: this.to.x,
       toY: this.to.y,
       interval: this.interval,
+      moveType: this.moveType,
       timer: this.timer,
       deltaPositionX: this.deltaPosition?.x || 0,
       deltaPositionY: this.deltaPosition?.y || 0,
@@ -61,6 +72,7 @@ export class MovingPlatform extends Platform {
     this.from = new Vec2(state.fromX, state.fromY)
     this.to = new Vec2(state.toX, state.toY)
     this.interval = state.interval
+    this.moveType = state.moveType
     this.timer = state.timer
     this.deltaPosition = new Vec2(
       state.deltaPositionX || 0,

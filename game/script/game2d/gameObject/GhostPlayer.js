@@ -1,12 +1,28 @@
 import TimeTravel from '../TimeTravel.js'
-import { Player } from './Player.js'
+import { Player, InputEnum } from './Player.js'
 
 /**
  * 玩家幽灵 - 代表过去的自己
  * 会按照录制的输入数据进行移动，并验证状态一致性
  */
 export class GhostPlayer extends Player {
-  unstableRate = 0
+  unstable = 0
+
+  async processInputEvents(dt, game) {
+    const state = this.stateHistory.get(game.tick)?.inputState
+    if (state & InputEnum.INTERACT) {
+      for (const entity of game.renderGroups.interactables) {
+        if (await entity.handleKeyInteraction?.(this, game)) break
+      }
+    }
+
+    if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
+    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
+
+    if (state & InputEnum.WALK_LEFT) this.onHorizontalInput(-1, dt)
+    else if (state & InputEnum.WALK_RIGHT) this.onHorizontalInput(1, dt)
+    else this.onHorizontalInput(0, dt)
+  }
 
   update(dt, game) {
     if (!this.stateHistory.has(game.tick)) {
@@ -14,15 +30,13 @@ export class GhostPlayer extends Player {
       return
     }
     this.removed = false
+    const record = this.stateHistory.get(game.tick)
 
-    this.inputQueue = this.inputHistory.get(game.tick) || []
     super.update(dt, game)
 
-    const record = this.stateHistory.get(game.tick)
-    this.validateState(record)
-
-    if (this.unstableRate < 10) this.state = record
-    else TimeTravel.unstablize(this)
+    // todo: fix timeline-consistency validator
+    // this.validateState(record)
+    this.state = record
   }
 
   validateState(record) {
@@ -30,39 +44,47 @@ export class GhostPlayer extends Player {
 
     if (
       !Object.keys(record).every(
-        key => key === 'inputQueue' || record[key] === state[key]
+        key =>
+          key === 'type' || key === 'inputState' || record[key] === state[key]
       )
     ) {
-      this.unstableRate++
-    }
-  }
+      this.unstable++
 
-  processInputEvents(dt, game) {
-    super.processInputEvents(dt, game, true)
+      if (this.unstable > 1) {
+        console.log(
+          Object.keys(record).filter(
+            key =>
+              key !== 'type' &&
+              key !== 'inputState' &&
+              record[key] !== state[key]
+          )
+        )
+      }
+    }
   }
 
   render(ctx, { scale, tick }) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 
-    if (Math.abs(tick - this.lifetimeBegin - 16) < 32) {
+    if (Math.abs(tick - this.lifetimeBegin - 16) < 16) {
       ctx.beginPath()
       ctx.arc(
         this.spawnX + this.width / 2,
         this.spawnY + this.height / 2,
-        Math.min(12, 32 - Math.abs(tick - this.lifetimeBegin - 16)),
+        12 * Math.cos(((tick - this.lifetimeBegin - 16) / 16) * (Math.PI / 2)),
         0,
         Math.PI * 2
       )
       ctx.fillStyle = '#fffc'
       ctx.fill()
     }
-    if (Math.abs(tick - this.lifetimeEnd + 16) < 32) {
+    if (Math.abs(tick - this.lifetimeEnd + 16) < 16) {
       ctx.beginPath()
       ctx.arc(
         x + this.width / 2,
         y + this.height / 2,
-        Math.min(12, 32 - Math.abs(tick - this.lifetimeEnd + 16)),
+        12 * Math.cos(((tick - this.lifetimeEnd + 16) / 16) * (Math.PI / 2)),
         0,
         Math.PI * 2
       )

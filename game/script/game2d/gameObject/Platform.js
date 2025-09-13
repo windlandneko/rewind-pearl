@@ -33,20 +33,20 @@ export class Platform extends BaseObject {
     )
 
     // 根据重叠方向调整位置和速度
-    if (minOverlap === overlapTop && player.v.y > 0) {
+    if (minOverlap === overlapTop) {
       // 从上方碰撞（着地）
       player.r.y = this.r.y - player.height
       player.v.y = 0
       player.onGround = true
-    } else if (minOverlap === overlapBottom && player.v.y < 0) {
+    } else if (minOverlap === overlapBottom) {
       // 从下方碰撞（撞头）
       player.r.y = this.r.y + this.height
       player.v.y = 0
-    } else if (minOverlap === overlapLeft && player.v.x > 0) {
+    } else if (minOverlap === overlapLeft) {
       // 从左侧碰撞
       player.r.x = this.r.x - player.width
       player.v.x = 0
-    } else if (minOverlap === overlapRight && player.v.x < 0) {
+    } else if (minOverlap === overlapRight) {
       // 从右侧碰撞
       player.r.x = this.r.x + this.width
       player.v.x = 0

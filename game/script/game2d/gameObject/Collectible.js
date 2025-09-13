@@ -2,7 +2,6 @@ import { BaseObject } from './BaseObject.js'
 
 export class Collectible extends BaseObject {
   color = '#FFC107'
-  bonus = 10
   bobOffset = 0
 
   constructor(x, y, spriteId) {
@@ -10,38 +9,42 @@ export class Collectible extends BaseObject {
   }
 
   update(dt) {
-    // 上下浮动效果
     this.bobOffset += dt
   }
 
   interactWithPlayer(player, game) {
     if (player.checkCollision(this)) {
       this.removed = true
-      player.score += this.bonus
+      player.score += 1
     }
   }
 
   render(ctx) {
-    ctx.fillStyle = this.color
-    ctx.fillRect(
-      this.r.x,
-      this.r.y + Math.sin(this.bobOffset) * 3,
-      this.width,
-      this.height
-    )
+    if (Asset.has(this.spriteId)) {
+      const sprite = Asset.get(this.spriteId)
+      const dy = this.height + Math.sin(this.bobOffset) * 3
+      ctx.drawImage(
+        sprite,
+        this.r.x,
+        this.r.y + dy,
+        this.width,
+        this.height + dy
+      )
+    } else {
+      ctx.fillStyle = '#ff845eff'
+      ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
+    }
   }
 
   get state() {
     return {
       ...super.state,
-      bonus: this.bonus,
       bobOffset: this.bobOffset,
     }
   }
 
   set state(state) {
     super.state = state
-    this.bonus = state.bonus
     this.bobOffset = state.bobOffset
   }
 }

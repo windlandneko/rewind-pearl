@@ -38,6 +38,7 @@ main {
   );
 
   overflow: hidden;
+  user-select: none;
 
   display: grid;
   place-items: center;

@@ -3,6 +3,16 @@ import Vec2 from '../Vector.js'
 import AnimationManager from '../Animation.js'
 import SpriteAnimation from '../Sprite.js'
 import Asset from '../../Asset.js'
+import Keyboard from '../../Keyboard.js'
+import { MAX_SNAPSHOTS_COUNT } from '../GameConfig.js'
+
+export const InputEnum = {
+  INTERACT: 1 << 0,
+  JUMP_DOWN: 1 << 1,
+  JUMP_UP: 1 << 2,
+  WALK_LEFT: 1 << 3,
+  WALK_RIGHT: 1 << 4,
+}
 
 export class Player extends BaseObject {
   color = 'blue'
@@ -38,8 +48,7 @@ export class Player extends BaseObject {
   previousPosition = null
   previousDirection = 1 // 最后移动的方向，1为右，-1为左
 
-  inputQueue = []
-  inputHistory = new Map()
+  inputState = 0
   stateHistory = new Map()
   lifetimeBegin = 0
   lifetimeEnd = null
@@ -95,34 +104,29 @@ export class Player extends BaseObject {
     }
   }
 
-  async processInputEvents(dt, game, ghost = false) {
-    while (this.inputQueue.length) {
-      const event = this.inputQueue.shift()
-      switch (event) {
-        case 'keydown:interact':
-          for (const entity of game.renderGroups.interactables) {
-            if (await entity.handleKeyInteraction?.(this, game)) break
-          }
-          break
-        case 'keydown:jump':
-          this.onJumpInput()
-          break
-        case 'keyup:jump':
-          this.jumpKeyPressed = false
-          break
-        case 'walk:left':
-          this.onHorizontalInput(-1, dt)
-          break
-        case 'walk:right':
-          this.onHorizontalInput(1, dt)
-          break
-        case 'walk:stop':
-          this.onHorizontalInput(0, dt)
-          break
-        default:
-          console.warn(`[Game2D] 没见过的输入事件: ${event}`)
+  async processInputEvents(dt, game) {
+    // 外部输入事件
+    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
+    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
+    if (keyLeft && !keyRight) {
+      this.inputState |= InputEnum.WALK_LEFT
+    } else if (keyRight && !keyLeft) {
+      this.inputState |= InputEnum.WALK_RIGHT
+    }
+
+    const state = this.inputState
+    if (state & InputEnum.INTERACT) {
+      for (const entity of game.renderGroups.interactables) {
+        if (await entity.handleKeyInteraction?.(this, game)) break
       }
     }
+
+    if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
+    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
+
+    if (state & InputEnum.WALK_LEFT) this.onHorizontalInput(-1, dt)
+    else if (state & InputEnum.WALK_RIGHT) this.onHorizontalInput(1, dt)
+    else this.onHorizontalInput(0, dt)
   }
 
   update(dt, game) {
@@ -154,6 +158,11 @@ export class Player extends BaseObject {
     // 动画
     this.updateAnimation()
     this.animationManager.update(dt)
+
+    this.stateHistory.set(game.tick, this.state)
+    this.stateHistory.delete(game.tick - MAX_SNAPSHOTS_COUNT)
+
+    this.inputState = 0
   }
 
   /**
@@ -162,13 +171,13 @@ export class Player extends BaseObject {
   #updateJump(dt) {
     // 更新跳跃计时器
     if (this.jumpKeyPressed) {
-      this.jumpTimer += dt
-      this.v.y = Math.min(this.v.y, -this.currentJumpSpeed)
-
       // 超过最大跳跃时间后停止变高跳跃
-      if (this.jumpTimer >= this.maxJumpTime) {
+      if (this.jumpTimer >= this.maxJumpTime || this.v.y >= 0) {
         this.jumpKeyPressed = false
       }
+
+      this.jumpTimer += dt
+      this.v.y = Math.min(this.v.y, -this.currentJumpSpeed)
     }
 
     // 落地，重置N段跳
@@ -301,7 +310,7 @@ export class Player extends BaseObject {
       health: this.health,
       score: this.score,
       onGround: this.onGround,
-      inputQueue: this.inputQueue,
+      inputState: this.inputState,
 
       // 跳跃相关状态
       jumpKeyPressed: this.jumpKeyPressed,
@@ -331,7 +340,7 @@ export class Player extends BaseObject {
     this.health = state.health
     this.score = state.score
     this.onGround = state.onGround
-    this.inputQueue = state.inputQueue
+    this.inputState = state.inputState
 
     // 跳跃相关状态
     this.jumpKeyPressed = state.jumpKeyPressed

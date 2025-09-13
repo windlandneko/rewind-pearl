@@ -8,6 +8,7 @@ import * as Levels from './level/index.js'
 import TimeTravel from './TimeTravel.js'
 import Dialogue from '../Dialogue.js'
 import Asset from '../Asset.js'
+import { InputEnum } from './gameObject/Player.js'
 
 export class Game {
   listener = new EventListener()
@@ -23,6 +24,7 @@ export class Game {
   // 渲染缓存（避免每帧重复过滤）
   renderGroups = {
     platforms: [],
+    movingPlatforms: [],
     collectibles: [],
     enemies: [],
     interactables: [],
@@ -46,6 +48,8 @@ export class Game {
   #keyboardListeners = []
 
   constructor() {
+    window.game = this
+
     const main = document.querySelector('main')
     const { width, height } = main.getBoundingClientRect()
 
@@ -72,7 +76,7 @@ export class Game {
       this.canvas.height = this.displayHeight = height * DPR
 
       if (this.isRunning)
-        this.scale = this.displayHeight / this.levelData.height
+        this.scale = this.displayHeight / this.camera.viewport.height
 
       // 同步预览画布尺寸
       this.canvas2.width = this.displayWidth
@@ -112,23 +116,23 @@ export class Game {
     TimeTravel.game = this
 
     addEventListener('beforeunload', event => {
-      if (!this.onSavedExit) event.preventDefault()
+      // if (!this.onSavedExit) event.preventDefault()
     })
   }
 
   #addKeyboardListeners() {
     this.#keyboardListeners.push(
       Keyboard.onKeydown(['E'], async () => {
-        this.player.inputQueue.push('keydown:interact')
+        this.player.inputState |= InputEnum.INTERACT
       }),
       Keyboard.onKeydown(['Esc'], () => {
         PauseManager.pause()
       }),
       Keyboard.onKeydown('Space', () => {
-        this.player.inputQueue.push('keydown:jump')
+        this.player.inputState |= InputEnum.JUMP_DOWN
       }),
       Keyboard.onKeyup('Space', () => {
-        this.player.inputQueue.push('keyup:jump')
+        this.player.inputState |= InputEnum.JUMP_UP
       }),
 
       Keyboard.onKeydown(['R'], () => {
@@ -158,42 +162,6 @@ export class Game {
 
   exportGameObjects() {
     return this.gameObjects.map(obj => obj.state)
-  }
-
-  /**
-   * 执行时间回溯
-   */
-  executeTimeTravel() {
-    const state = this.player.state
-
-    const ghost = new GameObjects.GhostPlayer()
-    ghost.state = state
-    ghost.stateHistory = this.player.stateHistory
-    ghost.inputHistory = this.player.inputHistory
-
-    ghost.spawnX = this.player.spawnX
-    ghost.spawnY = this.player.spawnY
-    ghost.lifetimeBegin = this.player.lifetimeBegin
-    ghost.lifetimeEnd = this.tick
-
-    this.ghostPlayers.push(ghost)
-
-    this.player = new GameObjects.Player()
-    this.player.state = state
-    this.camera.target = this.player
-
-    this.tick = Math.max(1, this.tick - 5 * 100)
-    this.player.lifetimeBegin = this.tick
-    this.player.spawnX = this.player.r.x
-    this.player.spawnY = this.player.r.y
-
-    const targetState = this.history.get(this.tick)
-    this.importGameObjects(targetState)
-    this.ghostPlayers.forEach(ghost => {
-      if (ghost.stateHistory.has(this.tick))
-        ghost.state = ghost.stateHistory.get(this.tick)
-      else ghost.removed = true
-    })
   }
 
   /**
@@ -251,7 +219,7 @@ export class Game {
       this.render(this.ctx)
       TimeTravel.render(this)
 
-      this.#renderTimeline(this.ctx)
+      // this.#renderTimeline(this.ctx)
       // 渲染关卡过渡效果
       if (this.transitionOpacity) {
         this.ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
@@ -305,7 +273,7 @@ export class Game {
     })
   }
 
-  loadGame({ levelData, gameObjects, player, tick, maxTick }) {
+  loadGame({ levelData, gameObjects, player }) {
     this.stop()
 
     const levelName = levelData.name || 'Level1'
@@ -315,8 +283,8 @@ export class Game {
 
     this.player.state = player
 
-    this.tick = tick
-    this.maxTick = maxTick
+    this.tick = 0
+    this.maxTick = 0
     this.importGameObjects(gameObjects)
 
     this.start(true)
@@ -332,8 +300,6 @@ export class Game {
 
     const gameState = {
       timestamp: Date.now(),
-      tick: this.tick,
-      maxTick: this.maxTick,
       player: this.player?.state || {},
       gameObjects: this.exportGameObjects(),
       levelData: this.levelData,
@@ -407,19 +373,6 @@ export class Game {
   async update(dt) {
     if (PauseManager.isPaused) return
 
-    // 外部输入事件
-    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
-    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
-    if (keyLeft && !keyRight) {
-      this.player.inputQueue.push('walk:left')
-    } else if (keyRight && !keyLeft) {
-      this.player.inputQueue.push('walk:right')
-    } else {
-      this.player.inputQueue.push('walk:stop')
-    }
-    if (this.player.inputQueue.length)
-      this.player.inputHistory.set(this.tick, [...this.player.inputQueue])
-
     TimeTravel.update(dt)
 
     if (!this.isRunning || TimeTravel.state !== null) return
@@ -439,7 +392,6 @@ export class Game {
     // 更新玩家
     this.ghostPlayers.forEach(ghost => ghost.update(dt, this))
     this.player.update(dt, this)
-    this.player.stateHistory.set(this.tick, this.player.state)
 
     // 世界边界
     if (this.levelData.worldBorder) {
@@ -476,7 +428,23 @@ export class Game {
     })
 
     // 更新游戏对象与玩家的互动（碰撞检测等）
-    this.gameObjects.forEach(obj => {
+    this.renderGroups.movingPlatforms.forEach(obj => {
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
+    })
+    this.renderGroups.collectibles.forEach(obj => {
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
+    })
+    this.renderGroups.enemies.forEach(obj => {
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
+    })
+    this.renderGroups.interactables.forEach(obj => {
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
+    })
+    this.renderGroups.platforms.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this)
     })
@@ -507,6 +475,9 @@ export class Game {
     this.renderGroups.platforms.forEach(entity =>
       entity.render(ctx, this.scale)
     )
+    this.renderGroups.movingPlatforms.forEach(entity =>
+      entity.render(ctx, this.scale)
+    )
     this.renderGroups.collectibles.forEach(entity =>
       entity.render(ctx, this.scale)
     )
@@ -530,7 +501,10 @@ export class Game {
    */
   #updateRenderGroups() {
     this.renderGroups.platforms = this.gameObjects.filter(
-      obj => obj.type === 'Platform' || obj.type === 'MovingPlatform'
+      obj => obj.type === 'Platform'
+    )
+    this.renderGroups.movingPlatforms = this.gameObjects.filter(
+      obj => obj.type === 'MovingPlatform' || obj.type === 'CrazyPlatform'
     )
     this.renderGroups.collectibles = this.gameObjects.filter(
       obj => obj.type === 'Collectible'
@@ -548,20 +522,20 @@ export class Game {
    */
   #setupCamera() {
     // 计算摄像机视窗尺寸
-    const cameraWidth =
-      this.levelData.height * (this.displayWidth / this.displayHeight)
+    const height = this.levelData.camera?.height ?? this.levelData.height
+    const width = height * (this.displayWidth / this.displayHeight)
 
     // 设置摄像机参数
-    this.camera.setViewportSize(cameraWidth, this.levelData.height)
+    this.camera.setViewportSize(width, height)
     this.camera.target = this.player
 
-    // 设置跟随边距（屏幕的1/4作为padding）
-    const paddingX = cameraWidth * 0.25
-    const paddingY = this.levelData.height * 0.25
+    // 设置跟随边距
+    const paddingX = width * 0.3
+    const paddingY = height * 0.3
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
 
     // 设置平滑跟随
-    this.camera.smoothFactor = 0.08
+    this.camera.smoothFactor = 0.05
 
     // 设置世界边界
     this.camera.setWorldBounds(
@@ -574,7 +548,7 @@ export class Game {
     // 立即居中到玩家
     this.camera.centerOnTarget()
 
-    this.scale = this.displayHeight / this.levelData.height
+    this.scale = this.displayHeight / this.camera.viewport.height
   }
 
   /**
