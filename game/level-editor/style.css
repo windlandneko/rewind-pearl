@@ -1,0 +1,240 @@
+@import url('../style/font.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body,
+html {
+  font-family: 'SourceHanSerifCN', monospace;
+}
+
+#canvas {
+  display: block;
+  background-color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+#vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    transparent 30%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  z-index: 2;
+}
+
+#toolbar {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.9);
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  padding: 8px;
+  gap: 8px;
+  z-index: 4;
+}
+
+@media (max-width: 860px) {
+  #toolbar {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.tool {
+  width: 72px;
+  height: 72px;
+  background-color: transparent;
+  color: #333;
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+#toolbar > button:hover:not(.active) {
+  background-color: #eee;
+}
+#toolbar > button:active:not(.active) {
+  background-color: #ddd;
+}
+
+#pointerTool.active {
+  background-color: #007acc !important;
+  color: white !important;
+}
+
+#exportBtn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #28a745;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 10;
+}
+
+#propertiesPanel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  backdrop-filter: blur(16px);
+  max-height: calc(100vh - 40px);
+  width: 240px;
+  z-index: 4;
+}
+
+#propertiesPanel h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.property {
+  margin-bottom: 10px;
+}
+
+.property label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.property input,
+.property select {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.property-pair {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.property-pair > div {
+  flex: 1;
+}
+
+.property-pair label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.property-pair input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.tool .icon {
+  font-size: 20px;
+  margin-bottom: 2px;
+}
+
+.tool::after {
+  margin-top: 2px;
+  font-size: 10px;
+  color: #666;
+}
+
+.tool:nth-child(1)::after {
+  content: '1';
+}
+.tool:nth-child(1).active::after {
+  color: #ffffff;
+}
+
+.tool:nth-child(2)::after {
+  content: '2';
+}
+
+.tool:nth-child(3)::after {
+  content: '3';
+}
+
+.tool:nth-child(4)::after {
+  content: '4';
+}
+
+.tool:nth-child(5)::after {
+  content: '5';
+}
+
+.tool:nth-child(6)::after {
+  content: '6';
+}
+
+.tool:nth-child(7)::after {
+  content: '7';
+}
+
+.tool:nth-child(8)::after {
+  content: '8';
+}
+
+.tool:nth-child(9)::after {
+  content: '9';
+}
+
+.tool:nth-child(10)::after {
+  content: '0';
+}
+
+#header {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 3;
+}
+
+#header h1 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+#header p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: rgba(0, 0, 0, 0.4);
+  font-family: 'HarmonyOS Sans SC', sans-serif;
+}
+
+#header kbd {
+  background: #eee;
+  border-radius: 3px;
+  border: 1px solid #b4b4b4;
+  box-shadow: inset 0 -1px 0 #b4b4b4;
+  color: #333;
+  font-size: 0.9em;
+  font-weight: 600;
+  padding: 2px 4px;
+}

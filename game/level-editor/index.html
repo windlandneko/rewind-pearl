@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关卡编辑器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="header">
+        <h1>关卡编辑器</h1>
+        <p>提示：关卡数据会自动保存。</p>
+        <p>快捷键：<kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd> 删除选中元素，<kbd>alt</kbd> 取消吸附网格。</p>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div id="vignette"></div>
+    <div id="toolbar">
+        <button id="pointerTool" class="tool active">
+            <i class="fas fa-mouse-pointer icon"></i>
+            <span>指针</span>
+        </button>
+        <button id="platformTool" class="tool">
+            <i class="fas fa-square icon"></i>
+            <span>平台</span>
+        </button>
+        <button id="interactableTool" class="tool">
+            <i class="fas fa-comment icon"></i>
+            <span>互动</span>
+        </button>
+        <button id="movingPlatformTool" class="tool">
+            <i class="fas fa-arrows-alt icon"></i>
+            <span>移动平台</span>
+        </button>
+        <button id="levelChangerTool" class="tool">
+            <i class="fas fa-door-open icon"></i>
+            <span>关卡切换</span>
+        </button>
+        <button id="enemyTool" class="tool">
+            <i class="fas fa-skull icon"></i>
+            <span>敌人</span>
+        </button>
+        <button id="collectibleTool" class="tool">
+            <i class="fas fa-gem icon"></i>
+            <span>收集品</span>
+        </button>
+        <button id="hazardTool" class="tool">
+            <i class="fas fa-exclamation-triangle icon"></i>
+            <span>危险</span>
+        </button>
+        <button id="decorationTool" class="tool">
+            <i class="fas fa-palette icon"></i>
+            <span>装饰</span>
+        </button>
+        <button id="eraserTool" class="tool">
+            <i class="fas fa-eraser icon"></i>
+            <span>橡皮擦</span>
+        </button>
+    </div>
+    <div id="propertiesPanel">
+        <h3 id="propertiesTitle">属性编辑器</h3>
+        <div id="propertiesContent"></div>
+    </div>
+    <button id="exportBtn"><i class="fas fa-share-square"></i> 导出</button>
+    <script src="main.js" defer></script>
+</body>
+
+</html>

@@ -522,7 +522,7 @@ export class Game {
    */
   #setupCamera() {
     // 计算摄像机视窗尺寸
-    const height = this.levelData.camera?.height ?? this.levelData.height
+    const height = this.levelData.cameraHeight ?? this.levelData.height
     const width = height * (this.displayWidth / this.displayHeight)
 
     // 设置摄像机参数

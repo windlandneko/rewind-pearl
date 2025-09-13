@@ -4,9 +4,7 @@
 @import url('pause.css');
 
 :root {
-  /* todo */
-  --game-aspect-ratio: 4 / 3;
-  --game-aspect-ratio: 40 / 24;
+  --game-aspect-ratio: 5 / 3;
   --game-padding: 5vh;
   --game-padding: 0vh;
 }
