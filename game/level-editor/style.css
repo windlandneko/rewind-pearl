@@ -334,20 +334,18 @@ html {
   transform: translateX(-50%);
   text-align: center;
   z-index: 3;
+  pointer-events: none;
 }
 #header .hint {
-  animation: fadeOut 5s ease-out forwards;
+  animation: fadeOut 15s ease-out forwards;
   opacity: 0;
-}
-#header .hint:hover {
-  opacity: 1 !important;
 }
 
 @keyframes fadeOut {
   from {
     opacity: 1;
   }
-  60% {
+  80% {
     opacity: 1;
   }
   to {
