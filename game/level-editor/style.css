@@ -43,10 +43,9 @@ html {
   left: 50%;
   transform: translateX(-50%);
   background-color: rgba(255, 255, 255, 0.9);
-  display: grid;
-  grid-template-columns: repeat(10, 1fr) auto auto;
-  padding: 8px;
-  gap: 8px;
+  display: flex;
+  padding: 4px;
+  gap: 4px;
   z-index: 4;
 }
 
@@ -57,8 +56,8 @@ html {
 }
 
 .tool {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   background-color: transparent;
   color: #333;
   border: 2px solid transparent;
@@ -82,17 +81,27 @@ html {
   color: white !important;
 }
 
-#exportBtn {
+.actions {
   position: absolute;
   top: 20px;
   right: 20px;
+  z-index: 10;
+}
+
+.actions button {
   background-color: #28a745;
   color: white;
   padding: 10px 20px;
   border: none;
   cursor: pointer;
   font-size: 14px;
-  z-index: 10;
+  min-width: 90px;
+  margin-left: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.actions button.active {
+  background-color: #dc3545;
 }
 
 #propertiesPanel {
@@ -158,55 +167,53 @@ html {
 
 .tool .icon {
   font-size: 20px;
-  margin-bottom: 2px;
 }
 
 .tool::after {
-  margin-top: 2px;
-  font-size: 10px;
+  font-size: 9px;
   color: #666;
 }
 
-.tool:nth-child(1)::after {
+.tool:nth-of-type(1)::after {
   content: '1';
 }
-.tool:nth-child(1).active::after {
+.tool:nth-of-type(1).active::after {
   color: #ffffff;
 }
 
-.tool:nth-child(2)::after {
+.tool:nth-of-type(2)::after {
   content: '2';
 }
 
-.tool:nth-child(3)::after {
+.tool:nth-of-type(3)::after {
   content: '3';
 }
 
-.tool:nth-child(4)::after {
+.tool:nth-of-type(4)::after {
   content: '4';
 }
 
-.tool:nth-child(5)::after {
+.tool:nth-of-type(5)::after {
   content: '5';
 }
 
-.tool:nth-child(6)::after {
+.tool:nth-of-type(6)::after {
   content: '6';
 }
 
-.tool:nth-child(7)::after {
+.tool:nth-of-type(7)::after {
   content: '7';
 }
 
-.tool:nth-child(8)::after {
+.tool:nth-of-type(8)::after {
   content: '8';
 }
 
-.tool:nth-child(9)::after {
+.tool:nth-of-type(9)::after {
   content: '9';
 }
 
-.tool:nth-child(10)::after {
+.tool:nth-of-type(10)::after {
   content: '0';
 }
 
@@ -215,11 +222,11 @@ html {
   width: 2px;
   height: 40px;
   background-color: #ccc;
-  margin: 16px 4px;
+  margin: auto 0;
 }
 
 .play-control {
-  background-color: #4CAF50 !important;
+  background-color: #4caf50 !important;
   color: white !important;
   border: 2px solid #45a049 !important;
 }
@@ -252,6 +259,25 @@ html {
   transform: translateX(-50%);
   text-align: center;
   z-index: 3;
+}
+#header .hint {
+  animation: fadeOut 3s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+#header .hint:hover {
+  opacity: 1 !important;
 }
 
 #header h1 {

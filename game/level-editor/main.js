@@ -23,12 +23,13 @@ const TOOL_COLOR = {
   platform: '#888',
   interactable: '#0f0',
   movingPlatform: '#520',
-  levelChanger: '#00f',
+  levelChanger: '#fff',
   enemy: '#800',
   collectible: '#0ff',
   hazard: '#f80',
   decoration: '#ccc',
   eraser: '#d22',
+  spawnpoint: 'rgba(0, 57, 164, 0.25)',
 }
 
 const DIRECTION = {
@@ -97,7 +98,6 @@ let spawnpoint = {
   y: levelData.height / 2 - 8,
   width: 10,
   height: 16,
-  color: 'rgba(0, 57, 164, 0.25)',
 }
 objects.push(spawnpoint)
 
@@ -203,9 +203,9 @@ function showProperties(obj) {
       })
       addProperty({
         label: '精灵ID',
-        value: obj.sprite || '',
+        value: obj.spriteId || '',
         type: 'text',
-        onChange: value => (obj.sprite = value),
+        onChange: value => (obj.spriteId = value),
       })
       addProperty({
         label: '提示文本',
@@ -269,6 +269,13 @@ function showProperties(obj) {
         value: obj.force || false,
         type: 'checkbox',
         onChange: value => (obj.force = value),
+      })
+    case TOOL.collectible:
+      addProperty({
+        label: '精灵ID',
+        value: obj.spriteId || '',
+        type: 'text',
+        onChange: value => (obj.spriteId = value),
       })
       break
   }
@@ -447,13 +454,12 @@ document.getElementById('exportBtn').addEventListener('click', exportCode)
 
 // 播放控制按钮
 document.getElementById('playBtn').addEventListener('click', togglePlayMode)
-document.getElementById('resetBtn').addEventListener('click', resetAnimation)
 
 // 设置工具
 function setTool(tool) {
   // 在播放模式下禁用工具切换
   if (isPlayMode) return
-  
+
   currentTool = tool
   document.querySelectorAll('.tool').forEach(btn => {
     btn.classList.remove('active')
@@ -565,7 +571,8 @@ function drawLevelBounds() {
 // 绘制对象
 function drawObject(obj) {
   // 收集品是单点物体，不需要检查宽度和高度
-  if (obj.type !== TOOL.collectible && (obj.height <= 0 || obj.width <= 0)) return
+  if (obj.type !== TOOL.collectible && (obj.height <= 0 || obj.width <= 0))
+    return
 
   // 为移动平台绘制结束锚点和虚线
   if (obj.type === TOOL.movingPlatform) {
@@ -573,10 +580,10 @@ function drawObject(obj) {
   }
 
   ctx.save()
-  ctx.fillStyle = obj.color
+  ctx.fillStyle = TOOL_COLOR[obj.type] || '#000'
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
-  
+
   if (obj.type === TOOL.collectible) {
     // 收集品绘制为圆形
     const radius = 6 // 收集品的半径
@@ -587,13 +594,13 @@ function drawObject(obj) {
     // 其他物体绘制为矩形
     ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
   }
-  
-    ctx.restore()
-  
-    // 绘制元素中心图标
-    drawElementIcon(obj)
-  
-    // 绘制选中状态（单选或多选）
+
+  ctx.restore()
+
+  // 绘制元素中心图标
+  drawElementIcon(obj)
+
+  // 绘制选中状态（单选或多选）
   if (selectedObjects.includes(obj)) {
     // 绘制调整大小手柄
     drawResizeHandles(obj)
@@ -603,10 +610,10 @@ function drawObject(obj) {
 // 绘制调整大小手柄
 function drawResizeHandles(obj) {
   if (obj.type === 'spawnpoint' || obj.type === TOOL.collectible) return // 玩家出生点和收集品不绘制调整手柄
-  
+
   const k = 8 / zoom
   let handles = []
-  
+
   if (obj.type === TOOL.movingPlatform) {
     // 移动平台只绘制右、下和右下角的手柄，因为左上角与移动轨迹绑定
     handles = [
@@ -645,7 +652,7 @@ function drawResizeHandles(obj) {
       )
     }
   }
-  
+
   ctx.fillStyle = '#fff'
   ctx.strokeStyle = '#0009'
   ctx.lineWidth = 1 / zoom
@@ -709,7 +716,7 @@ function getCollectibleAABB(obj) {
     x: obj.x - radius,
     y: obj.y - radius,
     width: radius * 2,
-    height: radius * 2
+    height: radius * 2,
   }
 }
 
@@ -718,9 +725,9 @@ function drawElementIcon(obj) {
   const centerX = obj.x + obj.width / 2
   const centerY = obj.y + obj.height / 2
   const iconSize = Math.min(obj.width, obj.height) * 0.6 // 图标大小为元素大小的60%
-  
+
   ctx.save()
-  
+
   // 根据元素类型设置图标颜色
   // 深色背景的元素使用白色图标，浅色背景的使用深色图标
   const darkBackgroundTypes = [TOOL.movingPlatform, TOOL.enemy, TOOL.hazard]
@@ -729,54 +736,54 @@ function drawElementIcon(obj) {
   } else {
     ctx.fillStyle = '#333333' // 深色图标
   }
-  
+
   ctx.font = `${iconSize}px "Font Awesome 6 Free", "FontAwesome", Arial, sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  
+
   // 使用Unicode字符而不是Font Awesome类名
   switch (obj.type) {
     case TOOL.platform:
       // 平台图标 - 使用方块字符
       ctx.fillText('■', centerX, centerY)
       break
-      
+
     case TOOL.hazard:
       // 危险图标 - 使用感叹号三角形
       ctx.fillText('⚠', centerX, centerY)
       break
-      
+
     case TOOL.movingPlatform:
       // 移动平台图标 - 使用箭头
       ctx.fillText('↔', centerX, centerY)
       break
-      
+
     case TOOL.collectible:
       // 收集品图标 - 使用钻石字符
       ctx.fillText('♦', centerX, centerY)
       break
-      
+
     case TOOL.levelChanger:
       // 关卡切换图标 - 使用门字符
       ctx.fillText('🚪', centerX, centerY)
       break
-      
+
     case TOOL.enemy:
       // 敌人图标 - 使用骷髅字符
       ctx.fillText('💀', centerX, centerY)
       break
-      
+
     case TOOL.interactable:
       // 互动图标 - 使用对话气泡
       ctx.fillText('💬', centerX, centerY)
       break
-      
+
     case TOOL.decoration:
       // 装饰图标 - 使用调色板
       ctx.fillText('🎨', centerX, centerY)
       break
   }
-  
+
   ctx.restore()
 }
 
@@ -785,31 +792,31 @@ function drawSelectionBox(obj) {
   ctx.strokeStyle = '#007acc'
   ctx.lineWidth = 2 / zoom
   ctx.setLineDash([])
-  
+
   if (obj.type === TOOL.movingPlatform) {
     // 移动平台的选择框
     const x = Math.min(obj.x, obj.fromX, obj.toX)
     const y = Math.min(obj.y, obj.fromY, obj.toY)
     const width = Math.max(obj.x + obj.width, obj.fromX, obj.toX) - x
     const height = Math.max(obj.y + obj.height, obj.fromY, obj.toY) - y
-    
+
     ctx.strokeRect(x, y, width, height)
-    
+
     // 绘制调整手柄
     drawResizeHandles(obj)
-    
+
     // 绘制移动平台锚点
     drawMovingPlatformAnchor(obj)
   } else if (obj.type === TOOL.collectible) {
     // 收集品的选择框 - 使用AABB
     const aabb = getCollectibleAABB(obj)
     ctx.strokeRect(aabb.x, aabb.y, aabb.width, aabb.height)
-    
+
     // 收集品不绘制调整手柄
   } else {
     // 普通对象的选择框
     ctx.strokeRect(obj.x, obj.y, obj.width, obj.height)
-    
+
     // 绘制调整手柄
     drawResizeHandles(obj)
   }
@@ -825,17 +832,21 @@ function getObjectsInBox() {
   return objects.filter(obj => {
     // 排除玩家出生点
     if (obj.type === 'spawnpoint') return false
-    
+
     // 收集品使用点检测
     if (obj.type === TOOL.collectible) {
-      return obj.x >= x && obj.x <= x + width && obj.y >= y && obj.y <= y + height
+      return (
+        obj.x >= x && obj.x <= x + width && obj.y >= y && obj.y <= y + height
+      )
     }
-    
+
     // 检查对象是否与框选区域相交
-    return !(obj.x >= x + width || 
-             obj.x + obj.width <= x || 
-             obj.y >= y + height || 
-             obj.y + obj.height <= y)
+    return !(
+      obj.x >= x + width ||
+      obj.x + obj.width <= x ||
+      obj.y >= y + height ||
+      obj.y + obj.height <= y
+    )
   })
 }
 
@@ -890,15 +901,14 @@ function getSnappedValue(value) {
 }
 
 // 鼠标事件
-canvas.addEventListener('mousedown', e => {
+canvas.addEventListener('mousedown', event => {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
-  
-  const mousePos = getMousePos(e)
-  const obj = getObjectAt(mousePos, true, 0)
-  
+
+  const mousePos = getMousePos(event)
+
   // 检查是否按下了Ctrl键进行框选
-  if (e.ctrlKey && currentTool === TOOL.pointer) {
+  if (event.ctrlKey && currentTool === TOOL.pointer) {
     isBoxSelecting = true
     boxSelectStart = mousePos
     boxSelectEnd = mousePos
@@ -908,7 +918,7 @@ canvas.addEventListener('mousedown', e => {
     draw()
     return
   }
-  
+
   if (currentTool === TOOL.eraser) {
     const obj = getObjectAt(mousePos, true, 0)
     if (obj && obj.type !== 'spawnpoint') {
@@ -918,8 +928,8 @@ canvas.addEventListener('mousedown', e => {
       draw()
     }
   } else if (currentTool === TOOL.pointer) {
-     const clickedObject = getObjectAt(mousePos, true, 0)
-     
+    const clickedObject = getObjectAt(mousePos, true, 0)
+
     if (clickedObject) {
       // 先检查是否在已选中的对象上点击
       if (isSelected(clickedObject)) {
@@ -931,7 +941,7 @@ canvas.addEventListener('mousedown', e => {
             if (selectedObj.type === TOOL.movingPlatform) {
               const anchor = getMovingPlatformAnchor(selectedObj, mousePos)
               if (anchor) {
-                saveState()  // 保存状态到历史栈
+                saveState() // 保存状态到历史栈
                 isDraggingAnchor = anchor
                 draggingAnchor = selectedObj
                 showProperties(selectedObj)
@@ -940,14 +950,14 @@ canvas.addEventListener('mousedown', e => {
                 return
               }
             }
-            
+
             // 检查是否点击了调整手柄
             resizeHandle = getResizeHandle(selectedObj, mousePos)
             if (resizeHandle) {
-              saveState()  // 保存状态到历史栈
+              saveState() // 保存状态到历史栈
               isResizing = true
             } else {
-              saveState()  // 保存状态到历史栈
+              saveState() // 保存状态到历史栈
               isDragging = true
             }
             dragStart = {
@@ -958,7 +968,7 @@ canvas.addEventListener('mousedown', e => {
           }
         } else if (selectedObjects.length > 1) {
           // 多选拖拽
-          saveState()  // 保存状态到历史栈
+          saveState() // 保存状态到历史栈
           isMultiDragging = true
           multiDragStart = {
             x: mousePos.x,
@@ -967,23 +977,23 @@ canvas.addEventListener('mousedown', e => {
           // 记录每个对象的初始位置
           multiDragOffsets = selectedObjects.map(obj => ({
             offsetX: mousePos.x - obj.x,
-            offsetY: mousePos.y - obj.y
+            offsetY: mousePos.y - obj.y,
           }))
           showProperties(levelData)
         }
       } else {
         // 在未选中的对象上点击，处理选择逻辑
-        if (e.ctrlKey) {
+        if (event.ctrlKey) {
           // Ctrl+点击：保留已选择的物体，添加新选择
           addToSelection(clickedObject)
-        } else if (e.shiftKey) {
+        } else if (event.shiftKey) {
           // Shift+点击：切换选择状态
           addToSelection(clickedObject)
         } else {
           // 普通点击：单选
           setSingleSelection(clickedObject)
         }
-        
+
         // 选择后立即开始拖拽
         if (selectedObjects.length === 1) {
           const selectedObj = getSelectedObject()
@@ -991,7 +1001,7 @@ canvas.addEventListener('mousedown', e => {
             if (selectedObj.type === TOOL.movingPlatform) {
               const anchor = getMovingPlatformAnchor(selectedObj, mousePos)
               if (anchor) {
-                saveState()  // 保存状态到历史栈
+                saveState() // 保存状态到历史栈
                 isDraggingAnchor = anchor
                 draggingAnchor = selectedObj
                 showProperties(selectedObj)
@@ -1000,14 +1010,14 @@ canvas.addEventListener('mousedown', e => {
                 return
               }
             }
-            
+
             // 检查是否点击了调整手柄
             resizeHandle = getResizeHandle(selectedObj, mousePos)
             if (resizeHandle) {
-              saveState()  // 保存状态到历史栈
+              saveState() // 保存状态到历史栈
               isResizing = true
             } else {
-              saveState()  // 保存状态到历史栈
+              saveState() // 保存状态到历史栈
               isDragging = true
             }
             dragStart = {
@@ -1018,7 +1028,7 @@ canvas.addEventListener('mousedown', e => {
           }
         } else if (selectedObjects.length > 1) {
           // 多选拖拽
-          saveState()  // 保存状态到历史栈
+          saveState() // 保存状态到历史栈
           isMultiDragging = true
           multiDragStart = {
             x: mousePos.x,
@@ -1027,20 +1037,23 @@ canvas.addEventListener('mousedown', e => {
           // 记录每个对象的初始位置
           multiDragOffsets = selectedObjects.map(obj => ({
             offsetX: mousePos.x - obj.x,
-            offsetY: mousePos.y - obj.y
+            offsetY: mousePos.y - obj.y,
           }))
           showProperties(levelData)
         }
       }
-     } else {
-       // 点击空白区域，取消选择
-       clearSelection()
-       // 开始平移
-       isPanning = true
-       panStart = { x: e.clientX - panOffset.x, y: e.clientY - panOffset.y }
-       showProperties(levelData)
-     }
-     updateCursor(mousePos)
+    } else {
+      // 点击空白区域，取消选择
+      clearSelection()
+      // 开始平移
+      isPanning = true
+      panStart = {
+        x: event.clientX - panOffset.x,
+        y: event.clientY - panOffset.y,
+      }
+      showProperties(levelData)
+    }
+    updateCursor(mousePos)
   } else {
     // 开始创建新对象
     isCreating = true
@@ -1064,98 +1077,98 @@ document.addEventListener('mousemove', e => {
   const mousePos = getMousePos(e)
   lastMousePos = mousePos
   updateCursor(mousePos)
-  
+
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
-  
+
   if (isBoxSelecting) {
     boxSelectEnd = mousePos
     draw()
   } else if (isDraggingAnchor === 'from') {
     draggingAnchor.fromX = getSnappedValue(mousePos.x)
     draggingAnchor.fromY = getSnappedValue(mousePos.y)
-    
+
     // 平台中心跟随轨迹起点
     draggingAnchor.x = draggingAnchor.fromX
     draggingAnchor.y = draggingAnchor.fromY
-    
+
     showProperties(draggingAnchor)
     draw()
   } else if (isDraggingAnchor === 'to') {
     draggingAnchor.toX = getSnappedValue(mousePos.x)
     draggingAnchor.toY = getSnappedValue(mousePos.y)
-    
+
     // 平台中心保持在轨迹起点，不移动
     // draggingAnchor.x 和 draggingAnchor.y 保持不变
-    
+
     showProperties(draggingAnchor)
     draw()
-   } else if (isDragging) {
+  } else if (isDragging) {
     const selectedObj = getSelectedObject()
     if (selectedObj) {
       const newX = getSnappedValue(mousePos.x - dragStart.x)
       const newY = getSnappedValue(mousePos.y - dragStart.y)
-      
+
       // 计算偏移量
       const deltaX = newX - selectedObj.x
       const deltaY = newY - selectedObj.y
-      
+
       // 更新平台位置
       selectedObj.x = newX
       selectedObj.y = newY
-      
+
       // 对于移动平台，轨迹起点跟随平台中心
       if (selectedObj.type === TOOL.movingPlatform) {
         // 计算轨迹终点的相对位置
         const relativeToX = selectedObj.toX - selectedObj.fromX
         const relativeToY = selectedObj.toY - selectedObj.fromY
-        
+
         // 更新轨迹起点为新的平台中心
         selectedObj.fromX = newX
         selectedObj.fromY = newY
-        
+
         // 更新轨迹终点保持相对位置
         selectedObj.toX = getSnappedValue(newX + relativeToX)
         selectedObj.toY = getSnappedValue(newY + relativeToY)
       }
-      
+
       showProperties(selectedObj)
       draw()
     }
   } else if (isMultiDragging && selectedObjects.length > 0) {
-     // 多选移动
-     selectedObjects.forEach((obj, index) => {
-       const offset = multiDragOffsets[index]
-       if (offset) {
-         const newX = getSnappedValue(mousePos.x - offset.offsetX)
-         const newY = getSnappedValue(mousePos.y - offset.offsetY)
-         
-         // 计算偏移量
-         const deltaX = newX - obj.x
-         const deltaY = newY - obj.y
-         
-         // 更新对象位置
-         obj.x = newX
-         obj.y = newY
-         
-         // 对于移动平台，轨迹起点跟随平台中心
-         if (obj.type === TOOL.movingPlatform) {
-           // 计算轨迹终点的相对位置
-           const relativeToX = obj.toX - obj.fromX
-           const relativeToY = obj.toY - obj.fromY
-           
-           // 更新轨迹起点为新的平台中心
-           obj.fromX = newX
-           obj.fromY = newY
-           
-           // 更新轨迹终点保持相对位置
-           obj.toX = getSnappedValue(newX + relativeToX)
-           obj.toY = getSnappedValue(newY + relativeToY)
-         }
-       }
-     })
-     draw()
-   } else if (isResizing) {
+    // 多选移动
+    selectedObjects.forEach((obj, index) => {
+      const offset = multiDragOffsets[index]
+      if (offset) {
+        const newX = getSnappedValue(mousePos.x - offset.offsetX)
+        const newY = getSnappedValue(mousePos.y - offset.offsetY)
+
+        // 计算偏移量
+        const deltaX = newX - obj.x
+        const deltaY = newY - obj.y
+
+        // 更新对象位置
+        obj.x = newX
+        obj.y = newY
+
+        // 对于移动平台，轨迹起点跟随平台中心
+        if (obj.type === TOOL.movingPlatform) {
+          // 计算轨迹终点的相对位置
+          const relativeToX = obj.toX - obj.fromX
+          const relativeToY = obj.toY - obj.fromY
+
+          // 更新轨迹起点为新的平台中心
+          obj.fromX = newX
+          obj.fromY = newY
+
+          // 更新轨迹终点保持相对位置
+          obj.toX = getSnappedValue(newX + relativeToX)
+          obj.toY = getSnappedValue(newY + relativeToY)
+        }
+      }
+    })
+    draw()
+  } else if (isResizing) {
     const selectedObj = getSelectedObject()
     if (selectedObj) {
       resizeObject(selectedObj, resizeHandle, mousePos)
@@ -1186,7 +1199,7 @@ document.addEventListener('mousemove', e => {
 function onMouseup() {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
-  
+
   if (isBoxSelecting) {
     // 完成框选
     const boxedObjects = getObjectsInBox()
@@ -1201,11 +1214,12 @@ function onMouseup() {
     isBoxSelecting = false
   } else if (isCreating && tempObject) {
     // 收集品不需要检查宽度和高度，其他物体需要
-    const isValidObject = tempObject.type === TOOL.collectible || 
-                         (tempObject.width > 0 && tempObject.height > 0)
-    
+    const isValidObject =
+      tempObject.type === TOOL.collectible ||
+      (tempObject.width > 0 && tempObject.height > 0)
+
     if (isValidObject) {
-      saveState()  // 保存状态到历史栈
+      saveState() // 保存状态到历史栈
       objects.push(tempObject)
       setSingleSelection(tempObject)
       showProperties(tempObject)
@@ -1217,15 +1231,15 @@ function onMouseup() {
     tempObject = null
     isCreating = false
   }
-   isDragging = false
-   isResizing = false
-   isPanning = false
-   isMultiDragging = false
-   multiDragOffsets = []
-   isDraggingAnchor = null
-   draggingAnchor = null
-   updateCursor() // 重置cursor
-   draw()
+  isDragging = false
+  isResizing = false
+  isPanning = false
+  isMultiDragging = false
+  multiDragOffsets = []
+  isDraggingAnchor = null
+  draggingAnchor = null
+  updateCursor() // 重置cursor
+  draw()
 }
 document.addEventListener('mouseup', onMouseup)
 addEventListener('blur', () => {
@@ -1267,7 +1281,7 @@ function getMousePos(e) {
 function getObjectAt(pos, moveTop, padding = 6 / zoom) {
   for (let i = objects.length - 1; i >= 0; i--) {
     const obj = objects[i]
-    
+
     // 收集品使用点碰撞检测
     if (obj.type === TOOL.collectible) {
       const radius = 6 // 收集品的半径
@@ -1284,7 +1298,8 @@ function getObjectAt(pos, moveTop, padding = 6 / zoom) {
         pos.x <= obj.x + obj.width + padding &&
         pos.y >= obj.y - padding &&
         pos.y <= obj.y + obj.height + padding) ||
-      (obj.type === TOOL.movingPlatform && getMovingPlatformAnchor(obj, pos) !== null)
+      (obj.type === TOOL.movingPlatform &&
+        getMovingPlatformAnchor(obj, pos) !== null)
     ) {
       if (moveTop) {
         objects.splice(i, 1)
@@ -1382,7 +1397,6 @@ function createObject(type, pos) {
     y,
     width: GRID_SIZE,
     height: GRID_SIZE,
-    color: TOOL_COLOR[type] || '#000',
   }
   switch (type) {
     case TOOL.collectible:
@@ -1391,25 +1405,25 @@ function createObject(type, pos) {
         type,
         x,
         y,
-        color: TOOL_COLOR[type] || '#000',
+        spriteId: 'spriteId',
       }
       break
     case TOOL.interactable:
       obj = {
         ...obj,
         dialogue: 'dialogue',
-        sprite: 'sprite',
+        spriteId: 'spriteId',
         text: 'text',
       }
       break
     case TOOL.movingPlatform:
       obj = {
         ...obj,
-        fromX: x,  // 轨迹起点就是平台中心
-        fromY: y,  // 轨迹起点就是平台中心
-        toX: x + GRID_SIZE * 2,  // 终点在右侧
-        toY: y,    // 终点在同一水平线
-        interval: 5,  // 运动周期（秒）
+        fromX: x, // 轨迹起点就是平台中心
+        fromY: y, // 轨迹起点就是平台中心
+        toX: x + GRID_SIZE * 2, // 终点在右侧
+        toY: y, // 终点在同一水平线
+        interval: 5, // 运动周期（秒）
         moveType: 'linear',
       }
       break
@@ -1429,10 +1443,11 @@ function togglePlayMode() {
   }
 }
 
+let startTime = 0
 function startAnimation() {
   isPlayMode = true
   updatePlayButton()
-  
+
   // 保存所有移动平台的原始位置
   platformOriginalPositions.clear()
   objects.forEach(obj => {
@@ -1443,30 +1458,25 @@ function startAnimation() {
         fromX: obj.fromX,
         fromY: obj.fromY,
         toX: obj.toX,
-        toY: obj.toY
+        toY: obj.toY,
       })
     }
   })
-  
+
   // 开始动画循环
+  startTime = performance.now()
   animate()
 }
 
 function stopAnimation() {
   isPlayMode = false
   updatePlayButton()
-  
+
   if (animationId) {
     cancelAnimationFrame(animationId)
     animationId = null
   }
-}
 
-function resetAnimation() {
-  if (isPlayMode) {
-    stopAnimation()
-  }
-  
   // 恢复所有移动平台到原始位置
   platformOriginalPositions.forEach((originalPos, obj) => {
     obj.x = originalPos.x
@@ -1476,7 +1486,7 @@ function resetAnimation() {
     obj.toX = originalPos.toX
     obj.toY = originalPos.toY
   })
-  
+
   draw()
 }
 
@@ -1484,11 +1494,11 @@ function updatePlayButton() {
   const playBtn = document.getElementById('playBtn')
   const playIcon = playBtn.querySelector('.icon')
   const playText = playBtn.querySelector('span')
-  
+
   if (isPlayMode) {
     playBtn.classList.add('active')
     playIcon.className = 'fas fa-pause icon'
-    playText.textContent = '暂停'
+    playText.textContent = '停止'
   } else {
     playBtn.classList.remove('active')
     playIcon.className = 'fas fa-play icon'
@@ -1498,16 +1508,16 @@ function updatePlayButton() {
 
 function animate() {
   if (!isPlayMode) return
-  
-  const currentTime = Date.now()
-  
+
+  const currentTime = performance.now() - startTime
+
   // 更新所有移动平台
   objects.forEach(obj => {
     if (obj.type === TOOL.movingPlatform) {
       updateMovingPlatform(obj, currentTime)
     }
   })
-  
+
   draw()
   animationId = requestAnimationFrame(animate)
 }
@@ -1515,12 +1525,12 @@ function animate() {
 function updateMovingPlatform(obj, currentTime) {
   const originalPos = platformOriginalPositions.get(obj)
   if (!originalPos) return
-  
+
   // 使用interval属性（秒为单位），转换为毫秒
   const duration = (obj.interval || 5) * 1000
   const elapsed = currentTime % duration
   const progress = elapsed / duration
-  
+
   // 根据moveType选择不同的运动函数
   let smoothProgress
   switch (obj.moveType || 'linear') {
@@ -1540,11 +1550,13 @@ function updateMovingPlatform(obj, currentTime) {
       // 默认线性往复运动
       smoothProgress = progress < 0.5 ? progress * 2 : 2 - progress * 2
   }
-  
+
   // 计算当前位置
-  const currentX = originalPos.fromX + (originalPos.toX - originalPos.fromX) * smoothProgress
-  const currentY = originalPos.fromY + (originalPos.toY - originalPos.fromY) * smoothProgress
-  
+  const currentX =
+    originalPos.fromX + (originalPos.toX - originalPos.fromX) * smoothProgress
+  const currentY =
+    originalPos.fromY + (originalPos.toY - originalPos.fromY) * smoothProgress
+
   // 更新平台位置
   obj.x = currentX
   obj.y = currentY
@@ -1578,10 +1590,14 @@ function exportCode(event) {
         code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
         break
       case TOOL.interactable:
-        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.sprite}', '${obj.text}'),\n`
+        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.text}'),\n`
         break
       case TOOL.movingPlatform:
-        code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${obj.fromY}), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${obj.interval || 5}, '${obj.moveType || 'linear'}'),\n`
+        code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
+          obj.fromY
+        }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
+          obj.interval || 5
+        }, '${obj.moveType || 'linear'}'),\n`
         break
       case TOOL.levelChanger:
         code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force}),\n`
@@ -1590,7 +1606,7 @@ function exportCode(event) {
         code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
         break
       case TOOL.collectible:
-        code += `    new Collectible(${obj.x}, ${obj.y}),\n`
+        code += `    new Collectible(${obj.x}, ${obj.y}, ${obj.spriteId}),\n`
         break
       case TOOL.hazard:
         code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
@@ -1625,10 +1641,10 @@ function getCursorStyle(mousePos) {
 
   const objectAtZeroPadding = getObjectAt(mousePos, false, 0)
 
-   if (isDraggingAnchor) return 'move'
-   if (isPanning) return 'grabbing'
-   if (isResizing) return null // 保持当前样式
-   if (isMultiDragging) return 'move'
+  if (isDraggingAnchor) return 'move'
+  if (isPanning) return 'grabbing'
+  if (isResizing) return null // 保持当前样式
+  if (isMultiDragging) return 'move'
 
   if (currentTool === TOOL.eraser) {
     return objectAtZeroPadding ? 'not-allowed' : 'default'
@@ -1664,15 +1680,19 @@ function getCursorStyle(mousePos) {
 document.addEventListener('keydown', event => {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
-  
+
   // 如果用户正在输入框中输入，不拦截事件
-  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+  if (
+    event.target.tagName === 'INPUT' ||
+    event.target.tagName === 'TEXTAREA' ||
+    event.target.tagName === 'SELECT'
+  ) {
     return
   }
-  
+
   if (event.key === 'Delete' && selectedObjects.length > 0) {
-    saveState()  // 保存状态到历史栈
-    
+    saveState() // 保存状态到历史栈
+
     // 删除多选对象
     if (selectedObjects.length > 0) {
       objects = objects.filter(o => !selectedObjects.includes(o))
@@ -1681,14 +1701,14 @@ document.addEventListener('keydown', event => {
       objects = objects.filter(o => o !== selectedObjects[0])
       console.log('已删除对象:', selectedObjects[0].type)
     }
-    
+
     clearSelection()
     showProperties(levelData)
     updateCursor(lastMousePos)
     draw()
     event.preventDefault()
   }
-  
+
   // 复制粘贴快捷键
   if (event.ctrlKey) {
     if (event.key === 'a') {
@@ -1732,7 +1752,7 @@ document.addEventListener('keydown', event => {
     const selectedObj = selectedObjects[0]
     const index = objects.indexOf(selectedObj)
     if (index > 0) {
-      saveState()  // 保存状态到历史栈
+      saveState() // 保存状态到历史栈
       objects.splice(index, 1)
       objects.splice(index - 1, 0, selectedObj)
       draw()
@@ -1743,7 +1763,7 @@ document.addEventListener('keydown', event => {
     const selectedObj = selectedObjects[0]
     const index = objects.indexOf(selectedObj)
     if (index < objects.length - 1) {
-      saveState()  // 保存状态到历史栈
+      saveState() // 保存状态到历史栈
       objects.splice(index, 1)
       objects.splice(index + 1, 0, selectedObj)
       draw()
@@ -1759,25 +1779,25 @@ let copiedObject = null
 let copiedObjects = [] // 多选复制对象数组
 
 // 撤回重做相关
-let undoStack = []  // 撤回栈
-let redoStack = []  // 重做栈
-const MAX_HISTORY = 50  // 最大历史记录数
+let undoStack = [] // 撤回栈
+let redoStack = [] // 重做栈
+const MAX_HISTORY = 50 // 最大历史记录数
 
 // 保存当前状态到历史栈
 function saveState() {
   const state = {
     objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects))
+    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
   }
-  
+
   // 添加到撤回栈
   undoStack.push(state)
-  
+
   // 限制历史记录数量
   if (undoStack.length > MAX_HISTORY) {
     undoStack.shift()
   }
-  
+
   // 清空重做栈（新操作后不能重做之前的操作）
   redoStack = []
 }
@@ -1785,19 +1805,19 @@ function saveState() {
 // 撤回操作
 function undo() {
   if (undoStack.length === 0) return
-  
+
   // 保存当前状态到重做栈
   const currentState = {
     objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects))
+    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
   }
   redoStack.push(currentState)
-  
+
   // 从撤回栈恢复状态
   const previousState = undoStack.pop()
   objects = previousState.objects
   selectedObjects = previousState.selectedObjects
-  
+
   // 更新属性面板
   if (selectedObjects.length === 1) {
     showProperties(selectedObjects[0])
@@ -1806,7 +1826,7 @@ function undo() {
   } else {
     hideProperties()
   }
-  
+
   console.log('已撤回操作')
   draw()
 }
@@ -1814,19 +1834,19 @@ function undo() {
 // 重做操作
 function redo() {
   if (redoStack.length === 0) return
-  
+
   // 保存当前状态到撤回栈
   const currentState = {
     objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects))
+    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
   }
   undoStack.push(currentState)
-  
+
   // 从重做栈恢复状态
   const nextState = redoStack.pop()
   objects = nextState.objects
   selectedObjects = nextState.selectedObjects
-  
+
   // 更新属性面板
   if (selectedObjects.length === 1) {
     showProperties(selectedObjects[0])
@@ -1835,7 +1855,7 @@ function redo() {
   } else {
     hideProperties()
   }
-  
+
   console.log('已重做操作')
   draw()
 }
@@ -1843,41 +1863,41 @@ function redo() {
 // 复制对象（支持多选）
 function copyObjects() {
   const objectsToCopy = selectedObjects
-  
+
   if (objectsToCopy.length === 0) return
-  
+
   // 过滤掉不能复制的对象
   const validObjects = objectsToCopy.filter(obj => obj.type !== 'spawnpoint')
-  
+
   if (validObjects.length === 0) return
-  
+
   // 深拷贝对象数组
   copiedObjects = validObjects.map(obj => JSON.parse(JSON.stringify(obj)))
-  
+
   console.log(`已复制 ${copiedObjects.length} 个对象`)
 }
 
 // 粘贴对象（支持多选）
 function pasteObjects() {
   if (!copiedObjects || copiedObjects.length === 0) return
-  
-  saveState()  // 保存状态到历史栈
-  
+
+  saveState() // 保存状态到历史栈
+
   // 深拷贝并偏移位置
   const newObjects = copiedObjects.map(obj => {
     const newObj = JSON.parse(JSON.stringify(obj))
     const offset = GRID_SIZE
-    const newX = getSnappedValue(lastMousePos.x + offset)
-    const newY = getSnappedValue(lastMousePos.y + offset)
-    
+    const newX = getSnappedValue(obj.x + offset)
+    const newY = getSnappedValue(obj.y + offset)
+
     // 计算偏移量
     const deltaX = newX - obj.x
     const deltaY = newY - obj.y
-    
+
     // 移动平台主体
     newObj.x = newX
     newObj.y = newY
-    
+
     // 对于移动平台，需要保持轨迹的相对位置
     if (newObj.type === TOOL.movingPlatform) {
       newObj.fromX = getSnappedValue(obj.fromX + deltaX)
@@ -1885,13 +1905,13 @@ function pasteObjects() {
       newObj.toX = getSnappedValue(obj.toX + deltaX)
       newObj.toY = getSnappedValue(obj.toY + deltaY)
     }
-    
+
     return newObj
   })
-  
+
   // 添加到对象数组
   objects.push(...newObjects)
-  
+
   // 选中新粘贴的对象
   selectedObjects = newObjects
   if (newObjects.length === 1) {
@@ -1899,7 +1919,7 @@ function pasteObjects() {
   } else if (newObjects.length > 1) {
     showProperties(levelData)
   }
-  
+
   console.log(`已粘贴 ${newObjects.length} 个对象`)
   draw()
 }
@@ -1907,12 +1927,16 @@ function pasteObjects() {
 addEventListener('keydown', event => {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
-  
+
   // 如果用户正在输入框中输入，不拦截事件
-  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+  if (
+    event.target.tagName === 'INPUT' ||
+    event.target.tagName === 'TEXTAREA' ||
+    event.target.tagName === 'SELECT'
+  ) {
     return
   }
-  
+
   if (event.key === 'Alt') {
     isFreeMove = true
     updateCursor(lastMousePos)
@@ -1921,10 +1945,14 @@ addEventListener('keydown', event => {
 })
 addEventListener('keyup', event => {
   // 如果用户正在输入框中输入，不拦截事件
-  if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+  if (
+    event.target.tagName === 'INPUT' ||
+    event.target.tagName === 'TEXTAREA' ||
+    event.target.tagName === 'SELECT'
+  ) {
     return
   }
-  
+
   if (event.key === 'Alt') {
     isFreeMove = false
     updateCursor(lastMousePos)

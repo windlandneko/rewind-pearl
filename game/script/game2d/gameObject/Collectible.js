@@ -6,6 +6,7 @@ export class Collectible extends BaseObject {
 
   constructor(x, y, spriteId) {
     super(x, y, 8, 8)
+    this.spriteId = spriteId
   }
 
   update(dt) {
@@ -22,7 +23,7 @@ export class Collectible extends BaseObject {
   render(ctx) {
     if (Asset.has(this.spriteId)) {
       const sprite = Asset.get(this.spriteId)
-      const dy = this.height + Math.sin(this.bobOffset) * 3
+      const dy = this.height + Math.sin(this.bobOffset) * 2
       ctx.drawImage(
         sprite,
         this.r.x,
@@ -40,11 +41,13 @@ export class Collectible extends BaseObject {
     return {
       ...super.state,
       bobOffset: this.bobOffset,
+      spriteId: this.spriteId,
     }
   }
 
   set state(state) {
     super.state = state
     this.bobOffset = state.bobOffset
+    this.spriteId = state.spriteId
   }
 }

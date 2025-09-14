@@ -12,8 +12,13 @@
 <body>
     <div id="header">
         <h1>关卡编辑器</h1>
-        <p>提示：关卡数据会自动保存。</p>
-        <p>快捷键：<kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd> 删除选中元素，<kbd>alt</kbd> 取消吸附网格，<kbd>Ctrl+C</kbd> 复制，<kbd>Ctrl+V</kbd> 粘贴，<kbd>Ctrl+Z</kbd> 撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Ctrl+拖拽</kbd> 框选。</p>
+        <div class="hint">
+            <p>提示：关卡数据会自动保存。</p>
+            <p><kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd>
+                删除选中元素，<kbd>Alt</kbd> 取消吸附网格，<kbd>Shift</kbd> 多选</p>
+            <p><kbd>Ctrl+A</kbd> 全选，<kbd>Ctrl+C</kbd> 复制，<kbd>Ctrl+V</kbd> 粘贴，<kbd>Ctrl+Z</kbd>
+                撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Ctrl+鼠标</kbd> 框选</p>
+        </div>
     </div>
     <canvas id="canvas"></canvas>
     <div id="vignette"></div>
@@ -22,6 +27,7 @@
             <i class="fas fa-mouse-pointer icon"></i>
             <span>指针</span>
         </button>
+        <div class="tool-separator"></div>
         <button id="platformTool" class="tool">
             <i class="fas fa-square icon"></i>
             <span>平台</span>
@@ -54,25 +60,20 @@
             <i class="fas fa-palette icon"></i>
             <span>装饰</span>
         </button>
+        <div class="tool-separator"></div>
         <button id="eraserTool" class="tool">
             <i class="fas fa-eraser icon"></i>
             <span>橡皮擦</span>
-        </button>
-        <div class="tool-separator"></div>
-        <button id="playBtn" class="tool play-control">
-            <i class="fas fa-play icon"></i>
-            <span>播放</span>
-        </button>
-        <button id="resetBtn" class="tool play-control">
-            <i class="fas fa-stop icon"></i>
-            <span>重置</span>
         </button>
     </div>
     <div id="propertiesPanel">
         <h3 id="propertiesTitle">属性编辑器</h3>
         <div id="propertiesContent"></div>
     </div>
-    <button id="exportBtn"><i class="fas fa-share-square"></i> 导出</button>
+    <div class="actions">
+        <button id="exportBtn"><i class="fas fa-share-square"></i> <span>导出</span></button>
+        <button id="playBtn"><i class="fas fa-play icon"></i> <span>播放</span></button>
+    </div>
     <script src="main.js" defer></script>
 </body>
 
