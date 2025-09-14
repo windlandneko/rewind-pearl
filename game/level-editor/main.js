@@ -109,6 +109,12 @@ const propertiesPanel = document.getElementById('propertiesPanel')
 const propertiesTitle = document.getElementById('propertiesTitle')
 const propertiesContent = document.getElementById('propertiesContent')
 
+// 关卡管理
+let levels = {} // 存储关卡数据，键为关卡名称，值为关卡数据
+const levelSelect = document.getElementById('levelSelect')
+const renameLevelBtn = document.getElementById('renameLevelBtn')
+const deleteLevelBtn = document.getElementById('deleteLevelBtn')
+
 // 初始化
 propertiesPanel.style.display = 'none'
 
@@ -313,46 +319,6 @@ function showProperties(obj) {
   }
 }
 showProperties(levelData)
-
-// 恢复保存的状态
-function loadState() {
-  const savedState = localStorage.getItem('level-editor-state')
-  if (savedState) {
-    try {
-      const state = JSON.parse(savedState)
-      levelData = state.levelData
-      objects = state.objects
-      panOffset = state.panOffset
-      zoom = state.zoom
-      targetZoom = state.zoom
-      // 重新设置spawnpoint引用
-      spawnpoint = objects.find(obj => obj.type === 'spawnpoint') || spawnpoint
-      // 重新显示属性
-      showProperties(levelData)
-      // 重新绘制
-      draw()
-    } catch (e) {
-      console.error('Failed to load state:', e)
-    }
-  }
-}
-
-// 保存当前状态
-function storeCurrentState() {
-  const state = {
-    levelData,
-    objects,
-    panOffset,
-    zoom,
-  }
-  localStorage.setItem('level-editor-state', JSON.stringify(state))
-}
-
-// 加载状态
-loadState()
-
-// 在页面卸载前保存状态
-window.addEventListener('beforeunload', storeCurrentState)
 
 function addProperty({
   label,
@@ -1970,7 +1936,6 @@ function pasteObjects() {
   }
 
   console.log(`已粘贴 ${newObjects.length} 个对象`)
-  draw()
 }
 
 addEventListener('keydown', event => {
@@ -2008,3 +1973,223 @@ addEventListener('keyup', event => {
     event.preventDefault()
   }
 })
+
+// 关卡选择切换与新建
+let currentLevelName = null
+levelSelect.addEventListener('change', () => {
+  const selected = levelSelect.value
+  if (selected === '') {
+    // 新建关卡
+    const name = prompt('请输入新关卡名称：')
+    if (!name) {
+      // 恢复原选项
+      levelSelect.value = currentLevelName || ''
+      return
+    }
+    if (levels[name]) {
+      alert('关卡名已存在！')
+      levelSelect.value = currentLevelName || ''
+      return
+    }
+    // 自动保存当前关卡
+    if (currentLevelName) saveCurrentLevel(currentLevelName)
+    // 新建关卡数据
+    levelData = {
+      type: 'levelData',
+      introDialogue: null,
+      background: 'test',
+      bgm: 'test',
+      height: 192,
+      width: 320,
+      worldBorder: false,
+      cameraHeight: 192,
+      cameraWidth: 320,
+    }
+    objects = []
+    spawnpoint = {
+      type: 'spawnpoint',
+      x: levelData.width / 2 - 5,
+      y: levelData.height / 2 - 8,
+      width: 10,
+      height: 16,
+    }
+    objects.push(spawnpoint)
+    panOffset = { x: 0, y: 0 }
+    zoom = 3
+    targetZoom = 3
+    selectedObjects = []
+    undoStack = []
+    redoStack = []
+    levels[name] = {
+      levelData: JSON.parse(JSON.stringify(levelData)),
+      objects: JSON.parse(JSON.stringify(objects)),
+      spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
+      panOffset: { ...panOffset },
+      zoom,
+    }
+    currentLevelName = name
+    localStorage.setItem('level-editor-levels', JSON.stringify(levels))
+    updateLevelSelect()
+    levelSelect.value = name
+    showProperties(levelData)
+    draw()
+    return
+  }
+  // 切换关卡，先保存当前关卡
+  if (currentLevelName) saveCurrentLevel(currentLevelName)
+  loadLevelByName(selected)
+})
+
+function saveCurrentLevel(name) {
+  levels[name] = {
+    levelData: JSON.parse(JSON.stringify(levelData)),
+    objects: JSON.parse(JSON.stringify(objects)),
+    spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
+    panOffset: { ...panOffset },
+    zoom,
+  }
+  localStorage.setItem('level-editor-levels', JSON.stringify(levels))
+}
+
+function loadLevelByName(name) {
+  const level = levels[name]
+  if (!level) return
+  levelData = level.levelData
+  objects = level.objects
+  spawnpoint = level.spawnpoint
+  panOffset = level.panOffset || { x: 0, y: 0 }
+  zoom = level.zoom || 3
+  targetZoom = zoom
+  selectedObjects = []
+  undoStack = []
+  redoStack = []
+  currentLevelName = name
+  showProperties(levelData)
+  draw()
+}
+
+// 关卡重命名
+renameLevelBtn.addEventListener('click', () => {
+  if (!currentLevelName) return alert('请先选择关卡')
+  const newName = prompt('请输入新的关卡名称：', currentLevelName)
+  if (!newName || newName === currentLevelName) return
+  if (levels[newName]) {
+    alert('该名称已存在！')
+    return
+  }
+  // 修改levels对象的key
+  levels[newName] = levels[currentLevelName]
+  delete levels[currentLevelName]
+  currentLevelName = newName
+  localStorage.setItem('level-editor-levels', JSON.stringify(levels))
+  updateLevelSelect()
+  levelSelect.value = newName
+})
+
+// 关卡删除
+deleteLevelBtn.addEventListener('click', () => {
+  if (!currentLevelName) return alert('请先选择关卡')
+  if (Object.keys(levels).length <= 1) {
+    alert('至少保留一个关卡！')
+    return
+  }
+  if (!confirm('确定要删除当前关卡吗？')) return
+  delete levels[currentLevelName]
+  localStorage.setItem('level-editor-levels', JSON.stringify(levels))
+  // 切换到第一个关卡
+  const first = Object.keys(levels)[0]
+  loadLevelByName(first)
+  updateLevelSelect()
+  levelSelect.value = first
+  currentLevelName = first
+})
+
+// 只保留一次自动保存绑定，且用最新逻辑
+window.addEventListener('beforeunload', () => {
+  if (currentLevelName) saveCurrentLevel(currentLevelName)
+  // 记录当前关卡名到全局状态
+  localStorage.setItem('level-editor-state', currentLevelName)
+})
+
+// 初始化关卡列表和全局状态，并自动加载当前关卡
+const savedLevels = localStorage.getItem('level-editor-levels')
+if (savedLevels) {
+  levels = JSON.parse(savedLevels)
+}
+updateLevelSelect()
+// 自动加载上次编辑的关卡，否则新建一个
+const state = localStorage.getItem('level-editor-state')
+let loaded = false
+if (state) {
+  try {
+    if (state && levels[state]) {
+      loadLevelByName(state)
+      levelSelect.value = state
+      loaded = true
+    }
+  } catch (e) {
+    console.error('Failed to load state:', e)
+  }
+}
+if (!loaded) {
+  // 没有任何关卡则新建一个默认关卡
+  if (Object.keys(levels).length === 0) {
+    const name = '默认关卡'
+    levelData = {
+      type: 'levelData',
+      introDialogue: null,
+      background: 'test',
+      bgm: 'test',
+      height: 192,
+      width: 320,
+      worldBorder: false,
+      cameraHeight: 192,
+      cameraWidth: 320,
+    }
+    objects = []
+    spawnpoint = {
+      type: 'spawnpoint',
+      x: levelData.width / 2 - 5,
+      y: levelData.height / 2 - 8,
+      width: 10,
+      height: 16,
+    }
+    objects.push(spawnpoint)
+    panOffset = { x: 0, y: 0 }
+    zoom = 3
+    targetZoom = 3
+    selectedObjects = []
+    undoStack = []
+    redoStack = []
+    levels[name] = {
+      levelData: JSON.parse(JSON.stringify(levelData)),
+      objects: JSON.parse(JSON.stringify(objects)),
+      spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
+      panOffset: { ...panOffset },
+      zoom,
+    }
+    currentLevelName = name
+    localStorage.setItem('level-editor-levels', JSON.stringify(levels))
+    updateLevelSelect()
+    levelSelect.value = name
+    showProperties(levelData)
+    draw()
+  }
+  // 有关卡但没有lastLevel，默认加载第一个
+  if (Object.keys(levels).length > 0 && !currentLevelName) {
+    const first = Object.keys(levels)[0]
+    loadLevelByName(first)
+    levelSelect.value = first
+  }
+}
+
+// 更新关卡选择下拉菜单
+function updateLevelSelect() {
+  levelSelect.innerHTML = '<option value="">新建关卡...</option>'
+  Object.keys(levels).forEach(name => {
+    const option = document.createElement('option')
+    option.value = name
+    option.textContent = name
+    levelSelect.appendChild(option)
+  })
+}

@@ -180,8 +180,8 @@ export class Game {
     this.history = new Map()
     this.ghostPlayers = []
 
-    setupFunction(this)
-    this.levelData.name = setupFunction.name
+    setupFunction?.(this)
+    this.levelData.name = setupFunction?.name
     this.player = new GameObjects.Player(
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
