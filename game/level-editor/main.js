@@ -928,7 +928,7 @@ canvas.addEventListener('mousedown', event => {
       draw()
     }
   } else if (currentTool === TOOL.pointer) {
-    const clickedObject = getObjectAt(mousePos, true, 0)
+    const clickedObject = getObjectAt(mousePos, true)
 
     if (clickedObject) {
       // 先检查是否在已选中的对象上点击
@@ -1662,7 +1662,7 @@ function getCursorStyle(mousePos) {
     return 'crosshair'
   }
 
-  const object = getObjectAt(mousePos, false, 0)
+  const object = getObjectAt(mousePos, false)
   if (!object) return 'default'
 
   const handle = getResizeHandle(object, mousePos)
