@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bosegluon 玻色胶子</title>
+
+<!-- Red Hat Display 字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- MathJax -->
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!-- Anime.js -->
+<script src="js/anime.min.js"></script>
+
+<!-- Liquid Glass Effects -->
+<script src="js/card-liquid-glass.js"></script>
+
+<style>
+:root {
+  --f-size: 15;
+  --f-unit: 1vmin;
+  --f: calc(var(--f-size) * var(--f-unit));
+  --bg: #f5f5f5; 
+}
+
+*, *::after, *::before {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-family: 'Red Hat Display', sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden; /* 防止水平滚动条 */
+}
+
+/* Canvas 背景容器 */
+#background-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Hero 模块（荷兰角效果，无液态玻璃） */
+.hero {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(6deg);
+  margin: 0 auto;
+  width: 100%;
+  overflow: visible;
+  z-index: -1;
+  opacity: 1.0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Hero 内部反向旋转 */
+.hero-content {
+  transform: rotate(-6deg);
+  padding: 2rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.hero h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.hero .formula {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin-top: 1rem;
+  color: #333;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/* Liquid Glass 卡片样式 */
+.card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: visible;
+  transform: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
+  text-align: left;
+}
+.card blockquote {
+  margin-bottom: 1rem;
+  color: #333;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  font-style: italic;
+}
+/* 液态玻璃效果 - 优化性能版本 */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+  z-index: 3;
+  will-change: transform;
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent),
+    radial-gradient(circle at 50% 50%, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.06) 30%, 
+      transparent 70%);
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  z-index: 2;
+  opacity: 0.7;
+  will-change: transform, opacity;
+}
+
+.card:hover::after {
+  transform: translateX(100%);
+  opacity: 0.9;
+}
+
+.card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+
+/* 通用section液态玻璃效果 - 优化性能 */
+section.animate-element {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  backdrop-filter: blur(12px) saturate(1.1) contrast(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  max-width: 800px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  position: relative;
+  overflow: visible;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+section.animate-element::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  z-index: 3;
+  will-change: transform;
+}
+
+section.animate-element::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: 
+    linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent),
+    radial-gradient(circle at 50% 50%, 
+      rgba(255, 255, 255, 0.08) 0%, 
+      rgba(255, 255, 255, 0.03) 30%, 
+      transparent 70%);
+  transition: transform 0.4s ease, opacity 0.3s ease;
+  z-index: 2;
+  opacity: 0.5;
+  will-change: transform, opacity;
+}
+
+section.animate-element:hover {
+  transform: translateY(-8px) scale(1.03);
+  backdrop-filter: blur(16px) saturate(1.2) contrast(1.1);
+  box-shadow: 
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+}
+
+section.animate-element:hover::after {
+  transform: translateX(100%);
+  opacity: 0.7;
+}
+
+section.animate-element h2 {
+  color: #1a1a1a;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+  font-weight: 700;
+  margin-top: 0;
+}
+
+section.animate-element p {
+  color: #2d2d2d;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  margin: 0.5rem 0 0 0;
+}
+
+/* Footer 样式 - 优化性能 */
+.footer {
+  margin-top: 4rem;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 50%, 
+    rgba(255, 255, 255, 0.08) 100%);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.08), 
+    transparent);
+  animation: footerShimmer 4s infinite;
+  will-change: transform;
+}
+
+@keyframes footerShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.footer-content {
+  position: relative;
+  z-index: 1;
+}
+
+.footer-content p {
+  margin: 0.5rem 0;
+  color: #2d2d2d;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.footer-content p:first-child {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* 社交链接样式 */
+.social-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.5rem;
+  color: #2d2d2d;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.social-link:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.social-icon {
+  max-width: 1.5rem;
+  max-height: 1.5rem;
+  width: auto;
+  height: auto;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  object-fit: contain;
+}
+
+.social-separator {
+  width: 2px;
+  height: 2rem;
+  background: linear-gradient(to bottom, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0.4) 80%,
+    transparent 100%);
+  margin: 0 0.5rem;
+  border-radius: 1px;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .social-links {
+    margin-top: 1rem;
+    padding: 0.3rem 0;
+  }
+  
+  .social-link {
+    min-width: 2.2rem;
+    height: 2.2rem;
+    padding: 0.4rem;
+  }
+  
+  .social-icon {
+    max-width: 1.3rem;
+    max-height: 1.3rem;
+    width: auto;
+    height: auto;
+  }
+  
+  .social-separator {
+    height: 1.8rem;
+    margin: 0 0.4rem;
+  }
+  
+  /* About Me 卡片移动端样式 */
+  .card div[style*="display: flex"] {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .card img[alt="Bosegluon Avatar"] {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 0 auto !important;
+  }
+}
+
+/* 项目链接悬停效果 */
+.card a[href*="github.com"] {
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.card a[href*="github.com"]:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card a[href*="github.com"]:active {
+  transform: translateY(0);
+}
+
+/* 性能优化 - 减少重绘和重排 */
+* {
+  box-sizing: border-box;
+}
+
+.card, section.animate-element, .footer {
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+/* 减少不必要的动画 */
+@media (prefers-reduced-motion: reduce) {
+  .card::after, section.animate-element::after, .footer::before {
+    animation: none;
+    transition: none;
+  }
+  
+  .card:hover, section.animate-element:hover {
+    transform: none;
+  }
+}
+
+.card h2 {
+  margin-top: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.card p {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  color: #2d2d2d;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+/* 动画相关样式 */
+.animate-element {
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.animate-element.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 卡片动画样式 - 已合并到液态玻璃样式中 */
+
+/* Glitch 效果 */
+.wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  min-height: 300px;
+  padding: 5% 5% 5%;
+}
+
+.wrapper p {
+  flex: 1;
+  line-height: .75;
+  margin: auto;
+  color: #000000;
+  text-align: center;
+  transform: scaleX(var(--scale, 1));
+  animation: glitch-p 11s infinite alternate;
+  font-size: 2em;
+  font-weight: bold;
+  position: relative;
+}
+
+.wrapper p::before,
+.wrapper p::after {
+  --top: 0;        /* offset from top [0 - 10] */
+  --left: 0;       /* offset from left [0.001 - 1] */
+  --v-height: 30%; /* visible part */
+  
+  --n-tenth: calc(var(--f-size) * .1 * var(--top));
+  --t-cut: calc(var(--n-tenth) / var(--f-size) * 100%);
+  --b-cut: calc(var(--t-cut) + var(--v-height));
+  
+  content: attr(data-text);
+  position: absolute;
+  width: 100%;
+  left: 0;
+  text-align: center;
+  
+  transform: translateX(calc(var(--left) * 100%));
+  
+  /* this helps to get rid of pixelization */
+  filter: drop-shadow(0 0 transparent); 
+  
+  text-shadow: calc(var(--left) * -3em) 0 .02em lime, 
+               calc(var(--left) * -6em) 0 .02em #ff00e1;
+  
+  background-color: var(--bg);
+  clip-path: polygon(0% var(--t-cut), 100% var(--t-cut), 100% var(--b-cut), 0% var(--b-cut));
+}
+
+.wrapper p::before {
+  animation: glitch-b 1.7s infinite alternate-reverse;
+}
+
+.wrapper p::after {
+  animation: glitch-a 3.1s infinite alternate;
+}
+
+@keyframes glitch-p {
+  17% { --scale: .87; }
+  31% { --scale: 1.1; }
+  37% { --scale: 1.3; }
+  47% { --scale: .91; }
+  87% { --scale: 1; }
+}
+
+@keyframes glitch-a {
+  10%,30%,50%,70%,90% {
+    --top: 0;
+    --left: 0;
+  }
+  0% {
+   --v-height: 15%; 
+  }
+  20% {
+    --left: .005;
+  }
+  40% {
+    --left: .01;
+    --v-height: 20%;
+    --top: 3;
+  }
+  60% {
+    --left: .03;
+    --v-height: 25%;
+    --top: 6;
+  }
+  80% {
+    --left: .07;
+    --v-height: 5%;
+    --top: 8;
+  }
+  100% {
+    --left: .083;
+    --v-height: 30%;
+    --top: 1;
+  }
+}
+
+@keyframes glitch-b {
+    10%,30%,50%,70%,90% {
+    --top: 0;
+    --left: 0;
+  }
+  0% {
+   --v-height: 15%; 
+   --top: 10;
+  }
+  20% {
+    --left: -.005;
+  }
+  40% {
+    --left: -.01;
+    --v-height: 17%;
+    --top: 3;
+  }
+  60% {
+    --left: -.03;
+    --v-height: 35%;
+    --top: 6;
+  }
+  80% {
+    --left: -.07;
+    --v-height: 5%;
+    --top: 8;
+  }
+  100% {
+    --left: -.083;
+    --v-height: 30%;
+    --top: 1;
+  }
+}
+
+/* 随机字符乱码效果 */
+.glitch-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.glitch-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 255, 136, 0.1) 50%, transparent 100%);
+  animation: glitch-scan 4s infinite;
+  pointer-events: none;
+}
+
+@keyframes glitch-scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+
+/* 随机闪烁效果 */
+.glitch-flicker {
+  animation: flicker 2s infinite linear;
+}
+
+@keyframes flicker {
+  0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100% {
+    opacity: 1;
+  }
+  20%, 21.999%, 63%, 63.999%, 65%, 69.999% {
+    opacity: 0.4;
+  }
+}
+</style>
+</head>
+<body>
+<!-- Canvas 背景 -->
+<canvas id="background-canvas"></canvas>
+
+<!-- Banner Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <img src="banner.png" alt="Bosegluon Banner" style="max-width: 100%; height: auto; border-radius: 8px; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; pointer-events: none;">
+  </div>
+  <div class="formula">
+    $$ F_{\mu\nu}^a = \partial_\mu A_\nu^a - \partial_\nu A_\mu^a - g_s f^{abc} A_\mu^b A_\nu^c $$
+  </div>
+</section>
+
+<!-- Title Card -->
+<!-- <div class="card animate-element">
+  <div class="wrapper">
+    <p data-text="Bosegluon 玻色胶子">Bosegluon 玻色胶子</p>
+  </div>
+
+</div> -->
+<!--中间空一个足够大的空间至少半个屏幕-->
+<div style="height:150vh;"></div>
+
+<!-- 卡片 -->
+<div class="card animate-element">
+  <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <img src="avatar.png" alt="Bosegluon Avatar" style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.3); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); flex-shrink: 0;">
+    <div>
+      <h2 class="glitch-text" style="margin: 0; font-size: 1.8rem;">Bosegluon<div class="glitch-overlay"></div></h2>
+      <p style="margin: 0.3rem 0 0 0; color: #666; font-size: 1rem;">玻色胶子</p>
+    </div>
+  </div>
+  <blockquote>The particle that transmits the strong interaction</blockquote>
+  <p>学生，2024级，人工智能专业。编曲爱好者、编程爱好者、视觉设计爱好者、绘画爱好者、计算机图形学爱好者、人工智能爱好者。</p>
+</div>
+<div style="height: 100px;"></div>
+<div class="card animate-element">
+  <h2 class="glitch-text">Profile<div class="glitch-overlay"></div></h2>
+  <p>我是《再见珍珠》的协助者 Bosegluon 玻色胶子，是 Charlie 的好朋友（算是吧）。
+</p>
+<p> 
+  你说得对，但是《再见珍珠》是由 Ave Mujica 自主研发的一款全新开放世界冒险游戏。游戏发生在一个被称作“理塘”的幻想世界，
+  在这里，被神选中的人将被授予“看片神器”，导引元素之力。你将扮演一位名为“理塘王”的神秘角色，在自由的旅行中邂逅性格各异、
+  能力独特的同伴们，和他们一起击败强敌，找回失散的亲人——同时，逐步发掘“看片神器”的真相。
+</p>
+<p> 
+    最后，还请多多支持 Charlie，多多支持《再见珍珠》。
+</p>
+<p>
+  猹狸好强。
+</p>
+</div>
+<div style="height: 100px;"></div>
+<div class="card animate-element">
+  <h2 class="glitch-text">Projects<div class="glitch-overlay"></div></h2>
+ 
+  <p><strong>《再见珍珠》关卡编辑器优化、关卡测试工具、游戏关卡设计系统画面实现。</strong></p>
+
+  <a href="https://github.com/Bosegluon2/threshold" target="_blank" style="color: inherit; text-decoration: none; display: block; padding: 0.5rem; border-radius: 8px; transition: all 0.3s ease; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); position: relative; z-index: 10; cursor: pointer;">
+    《临界点》 - 主要开发人员，负责游戏关卡设计、人物设计绘制、动画特效。
+  </a>
+</div>
+<div style="height: 100px;"></div>
+<div class="card animate-element">
+  <h2 class="glitch-text">Contact<div class="glitch-overlay"></div></h2>
+  <p>Email: bosegluon@gmail.com</p>
+</div>
+
+
+
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; 2025-2026 Bosegluon. All rights reserved.</p>
+    <p>The particle that transmits the strong interaction</p>
+    <div class="social-links">
+      <a href="https://space.bilibili.com/1407233266" target="_blank" rel="noopener noreferrer" class="social-link">
+        <img src="assets/icons/bilibili.svg" alt="Bilibili" class="social-icon">
+      </a>
+      <div class="social-separator"></div>
+      <a href="https://github.com/Bosegluon2" target="_blank" rel="noopener noreferrer" class="social-link">
+        <img src="assets/icons/github.svg" alt="GitHub" class="social-icon">
+      </a>
+      <div class="social-separator"></div>
+      <a href="https://www.kaggle.com/rayenmarino" target="_blank" rel="noopener noreferrer" class="social-link">
+        <img src="assets/icons/kaggle.svg" alt="Kaggle" class="social-icon">
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+
+// Glitch 效果现在由 CSS 处理
+function addGlitchEffect() {
+  // CSS 动画已经处理了 glitch 效果
+  // 这里可以添加额外的 JavaScript 效果如果需要
+}
+
+// 页面加载完成后执行动画
+document.addEventListener('DOMContentLoaded', function() {
+  // 添加 glitch 效果
+  addGlitchEffect();
+  // 创建 Intersection Observer 来检测元素是否进入视口
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        
+        // 使用 anime.js 创建更丰富的动画效果
+        anime({
+          targets: entry.target,
+          translateY: [50, 0],
+          opacity: [0, 1],
+          duration: 800,
+          easing: 'easeOutExpo',
+          delay: anime.stagger(100) // 为多个元素添加延迟
+        });
+        
+        // 停止观察已动画的元素
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1, // 当元素10%可见时触发
+    rootMargin: '0px 0px -50px 0px' // 提前50px触发
+  });
+
+  // 观察所有需要动画的元素
+  document.querySelectorAll('.animate-element').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Hero 部分的特殊动画
+  anime({
+    targets: '.hero h1',
+    translateY: [30, 0],
+    opacity: [0, 1],
+    duration: 1000,
+    easing: 'easeOutExpo',
+    delay: 200
+  });
+
+  // Banner 滚动变淡效果
+  const hero = document.querySelector('.hero');
+  let lastScrollY = window.scrollY;
+  
+  function updateBannerOpacity() {
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    
+    // 计算滚动进度 (0 到 1)
+    const scrollProgress = Math.min(scrollY / (documentHeight - windowHeight), 1);
+    
+    // 当开始滚动时，banner逐渐变淡
+    // 滚动到页面高度的20%时，banner完全消失
+    const fadeStart = 0.05; // 滚动5%时开始变淡
+    const fadeEnd = 0.2;    // 滚动20%时完全消失
+    
+    let opacity;
+    if (scrollProgress < fadeStart) {
+      opacity = 1.0; // 初始完全不透明
+    } else if (scrollProgress < fadeEnd) {
+      // 在fadeStart和fadeEnd之间线性插值
+      const fadeProgress = (scrollProgress - fadeStart) / (fadeEnd - fadeStart);
+      opacity = 1.0 * (1 - fadeProgress);
+    } else {
+      opacity = 0; // 完全透明
+    }
+    
+    hero.style.opacity = opacity;
+    lastScrollY = scrollY;
+  }
+  
+  // 监听滚动事件
+  window.addEventListener('scroll', updateBannerOpacity);
+  
+  // 初始调用
+  updateBannerOpacity();
+
+  anime({
+    targets: '.hero .formula',
+    translateY: [20, 0],
+    opacity: [0, 1],
+    duration: 800,
+    easing: 'easeOutExpo',
+    delay: 600
+  });
+
+  // 为卡片添加鼠标悬停动画
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      anime({
+        targets: this,
+        scale: 1.08,
+        translateY: -15,
+        duration: 400,
+        easing: 'easeOutBack'
+      });
+    });
+
+    card.addEventListener('mouseleave', function() {
+      anime({
+        targets: this,
+        scale: 1,
+        translateY: 0,
+        duration: 400,
+        easing: 'easeOutQuad'
+      });
+    });
+  });
+});
+
+// Canvas 随机几何背景
+function initBackgroundCanvas() {
+  const canvas = document.getElementById('background-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // 存储几何图形数据
+  let shapes = [];
+  let animationId;
+  let startTime = null;
+  
+  // 设置 Canvas 尺寸
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    generateShapes();
+  }
+  
+  // 生成几何图形数据
+  function generateShapes() {
+    shapes = [];
+    const colors = [
+      'rgba(59, 130, 246, 0.8)',   // 蓝色
+      'rgba(236, 72, 153, 0.8)',    // 粉色
+      'rgba(34, 197, 94, 0.8)',    // 绿色
+      'rgba(168, 85, 247, 0.8)',   // 紫色
+      'rgba(251, 191, 36, 0.8)'    // 黄色
+    ];
+    
+    // 绘制 8-12 个随机几何图形
+    const shapeCount = 30;
+    
+    for (let i = 0; i < shapeCount; i++) {
+      const size = Math.random() * 100 + 20; // 20-120px
+      shapes.push({
+        x: Math.random() * canvas.width + (Math.random()-0.5) * 1000,
+        y: Math.random() * canvas.height + (Math.random()-0.5) * 1000,
+        size: size,
+        baseRotation: Math.random() * 360 * Math.PI / 180, // 基础旋转角度
+        rotationSpeed: (Math.random() - 0.5) *5.0, // 旋转速度
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shapeType: Math.random(),
+        opacity: 0.6 + Math.random() * 0.4, // 0.6-1.0 透明度
+        // 视差层次：大图形在前景，小图形在背景
+        parallaxLayer: size > 80 ? 'foreground' : size > 50 ? 'midground' : 'background'
+      });
+    }
+  }
+  
+  // 缓存视差系数，避免重复计算
+  const parallaxFactors = {
+    'foreground': 0.8,
+    'midground': 0.4,
+    'background': 0.1
+  };
+  
+  // 绘制旋转的几何图形
+  function drawShapes() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    shapes.forEach((shape, index) => {
+      // 使用当前旋转角度
+      const shapeRotation = shape.currentRotation || shape.baseRotation;
+      
+      // 直接使用缓存的视差系数
+      const parallaxFactor = parallaxFactors[shape.parallaxLayer] || 0.1;
+      
+      // 使用插值后的滚动位置计算视差位移
+      const parallaxOffset = currentScrollY * parallaxFactor;
+      
+      // 计算最终位置
+      const finalX = shape.x + parallaxOffset;
+      const finalY = shape.y - parallaxOffset * 0.3; // Y轴位移稍小，更自然
+      
+      ctx.save();
+      ctx.translate(finalX, finalY);
+      ctx.rotate(shapeRotation);
+      ctx.globalAlpha = shape.opacity;
+      ctx.fillStyle = shape.color;
+      ctx.beginPath();
+      
+      if (shape.shapeType < 0.6) {
+        // 绘制圆形 (60% 概率)
+        ctx.arc(0, 0, shape.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (shape.shapeType < 0.8) {
+        // 绘制三角形 (20% 概率)
+        ctx.moveTo(0, -shape.size / 2);
+        ctx.lineTo(-shape.size / 2, shape.size / 2);
+        ctx.lineTo(shape.size / 2, shape.size / 2);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        // 绘制方形 (20% 概率)
+        ctx.rect(-shape.size / 2, -shape.size / 2, shape.size, shape.size);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+  }
+  
+  // 插值优化变量
+  let lastTime = 0;
+  let targetScrollY = 0;
+  let currentScrollY = 0;
+  let lerpFactor = 0.08; // 插值系数，越小越平滑
+  
+  // 性能监控
+  let frameCount = 0;
+  let lastFPSUpdate = 0;
+  let currentFPS = 60;
+  
+  // 动画时间管理
+  let animationStartTime = null; // 记录动画开始的高精度时间
+  
+  // 平滑插值函数
+  function lerp(start, end, factor) {
+    return start + (end - start) * factor;
+  }
+  
+  // 指数平滑插值，更自然的缓动效果
+  function smoothLerp(start, end, factor) {
+    return start + (end - start) * (1 - Math.pow(1 - factor, 3));
+  }
+  
+  
+  // 动画循环
+  function animate(currentTime) {
+    // 确保 currentTime 有效
+    if (!currentTime) {
+      currentTime = performance.now();
+    }
+    
+    // 初始化开始时间
+    if (animationStartTime === null) {
+      animationStartTime = currentTime;
+    }
+    
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    
+    // 性能监控
+    frameCount++;
+    if (currentTime - lastFPSUpdate >= 1000) {
+      currentFPS = frameCount;
+      frameCount = 0;
+      lastFPSUpdate = currentTime;
+      
+      // 自适应插值系数，根据性能调整
+      if (currentFPS < 30) {
+        lerpFactor = Math.min(lerpFactor * 1.2, 0.15); // 降低平滑度，提高性能
+      } else if (currentFPS > 55) {
+        lerpFactor = Math.max(lerpFactor * 0.9, 0.05); // 提高平滑度
+      }
+    }
+    
+    // 使用指数平滑插值滚动位置，更自然的缓动
+    currentScrollY = smoothLerp(currentScrollY, targetScrollY, lerpFactor);
+    
+    // 更新旋转角度
+    shapes.forEach((shape, index) => {
+      // 直接计算当前旋转角度（累积旋转）
+      // 使用高精度时间计算，确保时间差为正数
+      const timeElapsed = Math.max(0, (currentTime - animationStartTime) * 0.001);
+      shape.currentRotation = shape.baseRotation + shape.rotationSpeed * timeElapsed;
+      
+      // 调试：每5秒输出一次第一个图形的旋转信息
+      if (index === 0 && Math.floor(timeElapsed) % 5 === 0 && Math.floor(timeElapsed * 100) % 100 < 10) {
+        console.log(`时间调试: currentTime=${currentTime.toFixed(1)}, animationStartTime=${animationStartTime.toFixed(1)}, timeElapsed=${timeElapsed.toFixed(2)}s, rotationSpeed=${shape.rotationSpeed.toFixed(3)}, currentRotation=${(shape.currentRotation * 180 / Math.PI).toFixed(1)}°`);
+      }
+    });
+    
+    drawShapes();
+    animationId = requestAnimationFrame(animate);
+  }
+  
+  // 停止动画
+  function stopAnimation() {
+    if (animationId) {
+      cancelAnimationFrame(animationId);
+      animationId = null;
+    }
+    // 重置插值变量
+    targetScrollY = 0;
+    currentScrollY = 0;
+    currentRotation = {};
+    // 重置时间变量
+    animationStartTime = null;
+    lastTime = 0;
+  }
+  
+  // 初始化
+  resizeCanvas();
+  animate(performance.now());
+  
+  // 监听窗口大小变化
+  window.addEventListener('resize', () => {
+    resizeCanvas();
+  });
+  
+  // 监听滚动事件，更新目标滚动位置
+  function handleScroll() {
+    targetScrollY = window.scrollY;
+  }
+  
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  
+  // 页面可见性变化时暂停/恢复动画
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stopAnimation();
+    } else {
+      // 不重置时间基准，保持连续旋转
+      animate(Date.now());
+    }
+  });
+  
+  // 返回控制函数
+  return {
+    stop: stopAnimation,
+    start: () => {
+      // 不重置时间基准，保持连续旋转
+      animate(Date.now());
+    }
+  };
+}
+
+// 页面加载完成后初始化
+let backgroundAnimation;
+document.addEventListener('DOMContentLoaded', () => {
+  backgroundAnimation = initBackgroundCanvas();
+});
+
+</script>
+
+</body>
+</html>
