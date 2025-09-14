@@ -13,7 +13,7 @@
     <div id="header">
         <h1>关卡编辑器</h1>
         <p>提示：关卡数据会自动保存。</p>
-        <p>快捷键：<kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd> 删除选中元素，<kbd>alt</kbd> 取消吸附网格。</p>
+        <p>快捷键：<kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd> 删除选中元素，<kbd>alt</kbd> 取消吸附网格，<kbd>Ctrl+C</kbd> 复制，<kbd>Ctrl+V</kbd> 粘贴，<kbd>Ctrl+Z</kbd> 撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Ctrl+拖拽</kbd> 框选。</p>
     </div>
     <canvas id="canvas"></canvas>
     <div id="vignette"></div>
@@ -57,6 +57,15 @@
         <button id="eraserTool" class="tool">
             <i class="fas fa-eraser icon"></i>
             <span>橡皮擦</span>
+        </button>
+        <div class="tool-separator"></div>
+        <button id="playBtn" class="tool play-control">
+            <i class="fas fa-play icon"></i>
+            <span>播放</span>
+        </button>
+        <button id="resetBtn" class="tool play-control">
+            <i class="fas fa-stop icon"></i>
+            <span>重置</span>
         </button>
     </div>
     <div id="propertiesPanel">

@@ -4,6 +4,10 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 body,
@@ -40,7 +44,7 @@ html {
   transform: translateX(-50%);
   background-color: rgba(255, 255, 255, 0.9);
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(10, 1fr) auto auto;
   padding: 8px;
   gap: 8px;
   z-index: 4;
@@ -204,6 +208,41 @@ html {
 
 .tool:nth-child(10)::after {
   content: '0';
+}
+
+/* 播放控制按钮样式 */
+.tool-separator {
+  width: 2px;
+  height: 40px;
+  background-color: #ccc;
+  margin: 16px 4px;
+}
+
+.play-control {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border: 2px solid #45a049 !important;
+}
+
+.play-control:hover {
+  background-color: #45a049 !important;
+}
+
+.play-control:active {
+  background-color: #3d8b40 !important;
+}
+
+.play-control.active {
+  background-color: #f44336 !important;
+  border-color: #d32f2f !important;
+}
+
+.play-control.active:hover {
+  background-color: #d32f2f !important;
+}
+
+.play-control::after {
+  display: none !important;
 }
 
 #header {
