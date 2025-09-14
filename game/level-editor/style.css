@@ -261,23 +261,23 @@ html {
   z-index: 3;
 }
 #header .hint {
-  animation: fadeOut 3s ease-out forwards;
+  animation: fadeOut 5s ease-out forwards;
   opacity: 0;
+}
+#header .hint:hover {
+  opacity: 1 !important;
 }
 
 @keyframes fadeOut {
   from {
     opacity: 1;
   }
-  80% {
+  60% {
     opacity: 1;
   }
   to {
     opacity: 0;
   }
-}
-#header .hint:hover {
-  opacity: 1 !important;
 }
 
 #header h1 {

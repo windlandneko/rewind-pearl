@@ -266,7 +266,7 @@ function showProperties(obj) {
       })
       addProperty({
         label: '强制传送',
-        value: obj.force || false,
+        value: obj.force || true,
         type: 'checkbox',
         onChange: value => (obj.force = value),
       })
@@ -1428,7 +1428,7 @@ function createObject(type, pos) {
       }
       break
     case TOOL.levelChanger:
-      obj = { ...obj, nextStage: 'nextStage', force: false }
+      obj = { ...obj, nextStage: 'nextStage', force: true }
       break
   }
   return obj
@@ -1641,17 +1641,13 @@ function getCursorStyle(mousePos) {
 
   const objectAtZeroPadding = getObjectAt(mousePos, false, 0)
 
-  if (isDraggingAnchor) return 'move'
+  if (isDraggingAnchor) return 'crosshair'
   if (isPanning) return 'grabbing'
   if (isResizing) return null // 保持当前样式
   if (isMultiDragging) return 'move'
 
   if (currentTool === TOOL.eraser) {
     return objectAtZeroPadding ? 'not-allowed' : 'default'
-  }
-
-  if (objectAtZeroPadding && objectAtZeroPadding.type === 'spawnpoint') {
-    return 'move'
   }
 
   if (
@@ -1666,7 +1662,7 @@ function getCursorStyle(mousePos) {
   if (!object) return 'default'
 
   const handle = getResizeHandle(object, mousePos)
-  if (!handle) return 'move'
+  if (!handle || selectedObjects.length === 0) return 'move'
 
   let dir = ''
   if (handle & DIRECTION.NORTH) dir += 'n'

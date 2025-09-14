@@ -1,4 +1,5 @@
 import { BaseObject } from './BaseObject.js'
+import Asset from '../../Asset.js'
 
 export class Collectible extends BaseObject {
   color = '#FFC107'
