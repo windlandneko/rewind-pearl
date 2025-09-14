@@ -13,7 +13,7 @@ const TOOL = {
   enemy: 'enemy',
   collectible: 'collectible',
   hazard: 'hazard',
-  decoration: 'decoration',
+  trigger: 'trigger',
   eraser: 'eraser',
 }
 
@@ -27,7 +27,7 @@ const TOOL_COLOR = {
   enemy: '#800',
   collectible: '#0ff',
   hazard: '#f80',
-  decoration: '#ccc',
+  trigger: '#ccc',
   eraser: '#d22',
   spawnpoint: 'rgba(0, 57, 164, 0.25)',
 }
@@ -121,32 +121,43 @@ function showProperties(obj) {
   propertiesPanel.style.display = 'block'
 
   // 通用属性
-  if (obj.type !== 'levelData')
-    addPropertyPair(
-      {
-        label: 'X',
-        value: obj.x,
-        type: 'number',
-        onChange: value => (obj.x = parseFloat(value)),
-      },
-      {
-        label: 'Y',
-        value: obj.y,
-        type: 'number',
-        onChange: value => (obj.y = parseFloat(value)),
-      }
-    )
+  if (obj.type !== 'levelData') {
+    addProperty({
+      label: '# ref',
+      value: obj.ref || '',
+      type: 'text',
+      editable: obj.type !== 'spawnpoint',
+      onChange: value => (obj.ref = value),
+    })
+    if (obj.type !== 'movingPlatform')
+      addPropertyPair(
+        {
+          label: 'X',
+          value: obj.x,
+          type: 'number',
+          onChange: value => (obj.x = parseFloat(value)),
+        },
+        {
+          label: 'Y',
+          value: obj.y,
+          type: 'number',
+          onChange: value => (obj.y = parseFloat(value)),
+        }
+      )
+  }
   addPropertyPair(
     {
       label: '↔ 宽度',
       value: obj.width,
       type: 'number',
+      editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
       onChange: value => (obj.width = parseFloat(value)),
     },
     {
       label: '↕ 高度',
       value: obj.height,
       type: 'number',
+      editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
       onChange: value => (obj.height = parseFloat(value)),
     }
   )
@@ -254,7 +265,7 @@ function showProperties(obj) {
         value: obj.moveType || 'linear',
         type: 'select',
         onChange: value => (obj.moveType = value),
-        options: ['linear', 'sin', 'random'],
+        options: ['linear', 'sin', 'still', 'random'],
       })
       break
     case TOOL.levelChanger:
@@ -270,12 +281,33 @@ function showProperties(obj) {
         type: 'checkbox',
         onChange: value => (obj.force = value),
       })
+      break
     case TOOL.collectible:
       addProperty({
         label: '精灵ID',
         value: obj.spriteId || '',
         type: 'text',
         onChange: value => (obj.spriteId = value),
+      })
+      break
+    case TOOL.trigger:
+      addProperty({
+        label: '一次性触发器',
+        value: obj.once || false,
+        type: 'checkbox',
+        onChange: value => (obj.once = value),
+      })
+      addProperty({
+        label: '触发函数（进入）',
+        value: obj.enterCallback || '',
+        type: 'textarea',
+        onChange: value => (obj.enterCallback = value),
+      })
+      addProperty({
+        label: '触发函数（离开）',
+        value: obj.leaveCallback || '',
+        type: 'textarea',
+        onChange: value => (obj.leaveCallback = value),
       })
       break
   }
@@ -306,7 +338,7 @@ function loadState() {
 }
 
 // 保存当前状态
-function saveState() {
+function storeCurrentState() {
   const state = {
     levelData,
     objects,
@@ -320,7 +352,7 @@ function saveState() {
 loadState()
 
 // 在页面卸载前保存状态
-window.addEventListener('beforeunload', saveState)
+window.addEventListener('beforeunload', storeCurrentState)
 
 function addProperty({
   label,
@@ -352,6 +384,10 @@ function addProperty({
     input = document.createElement('input')
     input.type = 'checkbox'
     input.checked = value
+  } else if (type === 'textarea') {
+    input = document.createElement('textarea')
+    input.value = value
+    input.rows = 4
   } else {
     input = document.createElement('input')
     input.type = type
@@ -445,8 +481,8 @@ document
   .getElementById('hazardTool')
   ?.addEventListener('click', () => setTool(TOOL.hazard))
 document
-  .getElementById('decorationTool')
-  ?.addEventListener('click', () => setTool(TOOL.decoration))
+  .getElementById('triggerTool')
+  ?.addEventListener('click', () => setTool(TOOL.trigger))
 document
   .getElementById('eraserTool')
   ?.addEventListener('click', () => setTool(TOOL.eraser))
@@ -778,9 +814,9 @@ function drawElementIcon(obj) {
       ctx.fillText('💬', centerX, centerY)
       break
 
-    case TOOL.decoration:
-      // 装饰图标 - 使用调色板
-      ctx.fillText('🎨', centerX, centerY)
+    case TOOL.trigger:
+      // 触发器图标 - 使用星星字符
+      ctx.fillText('★', centerX, centerY)
       break
   }
 
@@ -907,6 +943,8 @@ canvas.addEventListener('mousedown', event => {
 
   const mousePos = getMousePos(event)
 
+  const obj = getObjectAt(mousePos, true)
+
   // 检查是否按下了Ctrl键进行框选
   if (event.ctrlKey && currentTool === TOOL.pointer) {
     isBoxSelecting = true
@@ -927,12 +965,10 @@ canvas.addEventListener('mousedown', event => {
       showProperties(levelData)
       draw()
     }
-  } else if (currentTool === TOOL.pointer) {
-    const clickedObject = getObjectAt(mousePos, true)
-
-    if (clickedObject) {
+  } else if (currentTool === TOOL.pointer || obj) {
+    if (obj) {
       // 先检查是否在已选中的对象上点击
-      if (isSelected(clickedObject)) {
+      if (isSelected(obj)) {
         // 在已选中的对象上点击，直接开始拖拽
         if (selectedObjects.length === 1) {
           // 单选拖拽：检查移动平台锚点或调整手柄
@@ -985,13 +1021,13 @@ canvas.addEventListener('mousedown', event => {
         // 在未选中的对象上点击，处理选择逻辑
         if (event.ctrlKey) {
           // Ctrl+点击：保留已选择的物体，添加新选择
-          addToSelection(clickedObject)
+          addToSelection(obj)
         } else if (event.shiftKey) {
           // Shift+点击：切换选择状态
-          addToSelection(clickedObject)
+          addToSelection(obj)
         } else {
           // 普通点击：单选
-          setSingleSelection(clickedObject)
+          setSingleSelection(obj)
         }
 
         // 选择后立即开始拖拽
@@ -1430,6 +1466,13 @@ function createObject(type, pos) {
     case TOOL.levelChanger:
       obj = { ...obj, nextStage: 'nextStage', force: true }
       break
+    case TOOL.trigger:
+      obj = {
+        ...obj,
+        once: true,
+        enterCallback:
+          "game.player.maxAirJumps = 1\ngame.sound.play('bonus')\n",
+      }
   }
   return obj
 }
@@ -1534,6 +1577,7 @@ function updateMovingPlatform(obj, currentTime) {
   // 根据moveType选择不同的运动函数
   let smoothProgress
   switch (obj.moveType || 'linear') {
+    case 'still':
     case 'linear':
       // 线性运动：在起点和终点之间往复移动
       smoothProgress = progress < 0.5 ? progress * 2 : 2 - progress * 2
@@ -1563,7 +1607,7 @@ function updateMovingPlatform(obj, currentTime) {
 }
 
 // 导出代码
-function exportCode(event) {
+function exportCode() {
   let code = `\
   const height = ${levelData.height}
   const width = ${levelData.width}
@@ -1585,36 +1629,45 @@ function exportCode(event) {
   game.gameObjects.push(
   `
   objects.forEach(obj => {
+    if (obj.type === 'spawnpoint') return // 跳过玩家出生点
     switch (obj.type) {
       case TOOL.platform:
-        code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
+        code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.interactable:
-        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.text}'),\n`
+        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.text}')`
         break
       case TOOL.movingPlatform:
         code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
           obj.fromY
         }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
           obj.interval || 5
-        }, '${obj.moveType || 'linear'}'),\n`
+        }, '${obj.moveType || 'linear'}')`
         break
       case TOOL.levelChanger:
-        code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force}),\n`
+        code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
         break
       case TOOL.enemy:
-        code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
+        code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.collectible:
-        code += `    new Collectible(${obj.x}, ${obj.y}, ${obj.spriteId}),\n`
+        code += `    new Collectible(${obj.x}, ${obj.y}, ${obj.spriteId})`
         break
       case TOOL.hazard:
-        code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
+        code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
-      case TOOL.decoration:
-        code += `    new Decoration(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}),\n`
+      case TOOL.trigger:
+        code += `    new Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${
+          obj.height
+        }, ${obj.once}, ${
+          obj.enterCallback ? `game => {${obj.enterCallback}}` : 'null'
+        }, ${obj.leaveCallback ? `game => {${obj.leaveCallback}}` : 'null'})`
         break
+      default:
+        console.warn('未知对象类型，无法导出代码:', obj)
     }
+    if (obj.ref) code += `.ref('${obj.ref}')`
+    code += ',\n'
   })
   code = code.slice(0, -2) + '\n  )\n'
   navigator.clipboard.writeText(code).then(() => {
@@ -1738,7 +1791,7 @@ document.addEventListener('keydown', event => {
       TOOL.enemy,
       TOOL.collectible,
       TOOL.hazard,
-      TOOL.decoration,
+      TOOL.trigger,
     ]
     setTool(toolNames[toolIndex])
     event.preventDefault()

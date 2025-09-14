@@ -1,6 +1,7 @@
 import { EventListener } from '../utils.js'
 import { Camera } from './Camera.js'
 import Keyboard from '../Keyboard.js'
+import SoundManager from '../SoundManager.js'
 import PauseManager from '../PauseManager.js'
 import * as GameObjects from './gameObject/index.js'
 import * as GameConfig from './GameConfig.js'
@@ -29,6 +30,7 @@ export class Game {
     enemies: [],
     interactables: [],
   }
+  #ref = new Map()
 
   // 游戏状态
   isRunning = false
@@ -47,9 +49,9 @@ export class Game {
 
   #keyboardListeners = []
 
-  constructor() {
-    window.game = this
+  sound = SoundManager
 
+  constructor() {
     const main = document.querySelector('main')
     const { width, height } = main.getBoundingClientRect()
 
@@ -162,6 +164,10 @@ export class Game {
 
   exportGameObjects() {
     return this.gameObjects.map(obj => obj.state)
+  }
+
+  ref(name) {
+    return this.#ref.get(name)
   }
 
   /**
@@ -472,17 +478,17 @@ export class Game {
     // this.#renderBackgroundGrid(ctx)
 
     // 按优先级渲染游戏对象
-    this.renderGroups.platforms.forEach(entity =>
-      entity.render(ctx, this.scale)
-    )
-    this.renderGroups.movingPlatforms.forEach(entity =>
-      entity.render(ctx, this.scale)
-    )
     this.renderGroups.collectibles.forEach(entity =>
       entity.render(ctx, this.scale)
     )
     this.renderGroups.enemies.forEach(entity => entity.render(ctx, this.scale))
     this.renderGroups.interactables.forEach(entity =>
+      entity.render(ctx, this.scale)
+    )
+    this.renderGroups.platforms.forEach(entity =>
+      entity.render(ctx, this.scale)
+    )
+    this.renderGroups.movingPlatforms.forEach(entity =>
       entity.render(ctx, this.scale)
     )
 
@@ -513,8 +519,16 @@ export class Game {
       obj => obj.type === 'Enemy'
     )
     this.renderGroups.interactables = this.gameObjects.filter(
-      obj => obj.type === 'Interactable' || obj.type === 'LevelChanger'
+      obj =>
+        obj.type === 'Interactable' ||
+        obj.type === 'LevelChanger' ||
+        obj.type === 'Trigger'
     )
+
+    this.#ref = new Map()
+    this.gameObjects.forEach(obj => {
+      if (obj._ref) this.#ref.set(obj._ref, obj)
+    })
   }
 
   /**

@@ -3,15 +3,30 @@ import Vec2 from '../Vector.js'
 
 export class MovingPlatform extends Platform {
   timer = 0
+  target = 0
   deltaPosition = null
 
-  constructor(from, to, width, height, interval = 5, moveType = 'random') {
+  /**
+   * 移动平台
+   * @param {Vec2} from
+   * @param {Vec2} to
+   * @param {number} width
+   * @param {number} height
+   * @param {number} interval
+   * @param {string} moveType
+   */
+  constructor(from, to, width, height, interval = 5, moveType = 'still') {
     super(from?.x, from?.y, width, height)
     this.r = this.from = from ?? new Vec2()
     this.to = to ?? new Vec2()
     this.interval = interval
     this.deltaPosition = new Vec2(0, 0)
     this.moveType = moveType
+  }
+
+  set(position) {
+    if (this.moveType === 'still') this.target = position
+    return this
   }
 
   get moveFunction() {
@@ -21,8 +36,10 @@ export class MovingPlatform extends Platform {
         return Math.abs(2 * (k % 1) - 1)
       case 'sin':
         return Math.sin(2 * Math.PI * k) / 2 + 0.5
-      default:
+      case 'random':
         return Math.random()
+      default:
+        return 0
     }
   }
 
@@ -32,7 +49,15 @@ export class MovingPlatform extends Platform {
 
     // 更新平台位置
     this.timer += dt
-    this.r = this.to.sub(this.from).mul(this.moveFunction).add(this.from)
+    if (this.moveType === 'still') {
+      let k = this.r.sub(this.from).len() / this.to.sub(this.from).len()
+      if (k < this.target) k = Math.min(1, k + dt / this.interval)
+      else k = Math.max(0, k - dt / this.interval)
+
+      this.r = this.to.sub(this.from).mul(k).add(this.from)
+    } else {
+      this.r = this.to.sub(this.from).mul(this.moveFunction).add(this.from)
+    }
 
     // 计算平台的移动向量
     this.deltaPosition = this.r.sub(oldPosition)
@@ -62,6 +87,7 @@ export class MovingPlatform extends Platform {
       interval: this.interval,
       moveType: this.moveType,
       timer: this.timer,
+      target: this.target,
       deltaPositionX: this.deltaPosition?.x || 0,
       deltaPositionY: this.deltaPosition?.y || 0,
     }
@@ -74,6 +100,7 @@ export class MovingPlatform extends Platform {
     this.interval = state.interval
     this.moveType = state.moveType
     this.timer = state.timer
+    this.target = state.target
     this.deltaPosition = new Vec2(
       state.deltaPositionX || 0,
       state.deltaPositionY || 0

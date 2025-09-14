@@ -45,7 +45,7 @@ export class PauseManager {
   pause() {
     if (this.isPaused) return
 
-    SoundManager.playSound('pause', {
+    SoundManager.play('pause', {
       volume: 0.3
     })
 

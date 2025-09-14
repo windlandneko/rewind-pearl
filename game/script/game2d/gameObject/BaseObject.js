@@ -60,6 +60,16 @@ export class BaseObject {
   }
 
   /**
+   * 设置引用名称，可供回调函数使用
+   * @param {*} name
+   * @returns
+   */
+  ref(name) {
+    this._ref = name
+    return this
+  }
+
+  /**
    * 导出对象状态用于时间回溯
    */
   get state() {
@@ -73,6 +83,7 @@ export class BaseObject {
       height: this.height,
       color: this.color,
       removed: this.removed,
+      _ref: this._ref,
     }
   }
 
@@ -88,6 +99,7 @@ export class BaseObject {
     this.height = state.height
     this.color = state.color
     this.removed = state.removed
+    this._ref = state._ref
   }
 
   get type() {

@@ -40,13 +40,12 @@ export class Player extends BaseObject {
   jumpBufferTimer = 0 // 计时器
 
   // N段跳
-  maxAirJumps = 1 // 最大空中跳跃次数
+  maxAirJumps = 0 // 最大空中跳跃次数
   airJumpSpeed = 80 // N段跳速度，一般稍小于跳跃速度
   airJumpsCount = 0 // 已使用的空中跳跃次数
 
   previousOnGround = false
   previousPosition = null
-  previousDirection = 1 // 最后移动的方向，1为右，-1为左
 
   inputState = 0
   stateHistory = new Map()
@@ -306,26 +305,35 @@ export class Player extends BaseObject {
   get state() {
     return {
       ...super.state,
-      // 游戏状态
-      health: this.health,
-      score: this.score,
-      onGround: this.onGround,
-      inputState: this.inputState,
-
-      // 跳跃相关状态
+      gravity: this.gravity,
+      moveSpeed: this.moveSpeed,
+      jumpSpeed: this.jumpSpeed,
       jumpKeyPressed: this.jumpKeyPressed,
       jumpTimer: this.jumpTimer,
-      coyoteTimer: this.coyoteTimer,
-      jumpBufferTimer: this.jumpBufferTimer,
-      airJumpsCount: this.airJumpsCount,
+      maxJumpTime: this.maxJumpTime,
 
-      // 伤害状态
+      invincibleTime: this.invincibleTime,
+
+      onGround: this.onGround,
+      health: this.health,
+      score: this.score,
       damageTimer: this.damageTimer,
 
-      // 前一帧状态
+      coyote: this.coyote,
+      coyoteTimer: this.coyoteTimer,
+
+      jumpBuffer: this.jumpBuffer,
+      jumpBufferTimer: this.jumpBufferTimer,
+
+      maxAirJumps: this.maxAirJumps,
+      airJumpSpeed: this.airJumpSpeed,
+      airJumpsCount: this.airJumpsCount,
+
       previousOnGround: this.previousOnGround,
       previousPositionX: this.previousPosition.x,
       previousPositionY: this.previousPosition.y,
+
+      inputState: this.inputState,
 
       // 动画状态
       currentAnimationName:
@@ -336,26 +344,35 @@ export class Player extends BaseObject {
   set state(state) {
     super.state = state
 
-    // 游戏状态
-    this.health = state.health
-    this.score = state.score
-    this.onGround = state.onGround
-    this.inputState = state.inputState
-
-    // 跳跃相关状态
+    this.gravity = state.gravity
+    this.moveSpeed = state.moveSpeed
+    this.jumpSpeed = state.jumpSpeed
     this.jumpKeyPressed = state.jumpKeyPressed
     this.jumpTimer = state.jumpTimer
-    this.coyoteTimer = state.coyoteTimer
-    this.jumpBufferTimer = state.jumpBufferTimer
-    this.airJumpsCount = state.airJumpsCount
+    this.maxJumpTime = state.maxJumpTime
 
-    // 伤害状态
+    this.invincibleTime = state.invincibleTime
+
+    this.onGround = state.onGround
+    this.health = state.health
+    this.score = state.score
     this.damageTimer = state.damageTimer
 
-    // 前一帧状态
+    this.coyote = state.coyote
+    this.coyoteTimer = state.coyoteTimer
+
+    this.jumpBuffer = state.jumpBuffer
+    this.jumpBufferTimer = state.jumpBufferTimer
+
+    this.maxAirJumps = state.maxAirJumps
+    this.airJumpSpeed = state.airJumpSpeed
+    this.airJumpsCount = state.airJumpsCount
+
     this.previousOnGround = state.previousOnGround
-    this.previousPosition.x = state.previousPositionX
-    this.previousPosition.y = state.previousPositionY
+    this.previousPositionX = state.previousPositionX
+    this.previousPositionY = state.previousPositionY
+
+    this.inputState = state.inputState
 
     // 动画状态
     if (state.currentAnimationName && this.animationManager) {

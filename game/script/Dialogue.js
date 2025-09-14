@@ -406,7 +406,7 @@ class Dialogue {
    * @param {Object} event - BGM事件
    */
   #onSoundEffect(event) {
-    SoundManager.playSound(event.name, event)
+    SoundManager.play(event.name, event)
     this.next()
   }
 
