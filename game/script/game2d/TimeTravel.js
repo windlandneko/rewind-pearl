@@ -105,7 +105,8 @@ class TimeTravelManager {
 
     // 应用相机变换
     tmpctx.scale(game.scale, game.scale)
-    tmpctx.translate(-game.camera.position.x, -game.camera.position.y)
+    const renderPos = game.camera.getRenderPosition()
+    tmpctx.translate(-renderPos.x, -renderPos.y)
 
     // 绘制背景网格
     // game.#renderBackgroundGrid(tmpctx)
@@ -146,10 +147,10 @@ class TimeTravelManager {
     game.importGameObjects(state)
 
     const playerScreenX =
-      (game.player.r.x + game.player.width / 2 - game.camera.position.x) *
+      (game.player.r.x + game.player.width / 2 - renderPos.x) *
       game.scale
     const playerScreenY =
-      (game.player.r.y + game.player.height / 2 - game.camera.position.y) *
+      (game.player.r.y + game.player.height / 2 - renderPos.y) *
       game.scale
 
     const gradient = tmpctx.createRadialGradient(

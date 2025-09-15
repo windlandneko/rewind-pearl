@@ -19,6 +19,19 @@ export class Camera {
   #lerpFactor
 
   position = new Vec2(0, 0)
+  
+  // 震动系统
+  #shakeIntensity = 0
+  #shakeDuration = 0
+  #shakeTimer = 0
+  #shakeFrequency = 5
+  #shakeOffset = new Vec2(0, 0)
+  
+  // 持续微震动系统
+  #microShakeIntensity = 2
+  #microShakeFrequency = 0.3
+  #microShakeOffset = new Vec2(0, 0)
+  #microShakeTime = 0
 
   /**
    * 设置跟随目标
@@ -80,10 +93,132 @@ export class Camera {
   }
 
   /**
+   * 触发相机震动
+   * @param {number} intensity - 震动强度
+   * @param {number} duration - 震动持续时间（秒）
+   * @param {number} frequency - 震动频率（每秒震动次数，默认50）
+   */
+  shake(intensity = 10, duration = 0.5, frequency = 1000) {
+    this.#shakeIntensity = Math.max(this.#shakeIntensity, intensity)
+    this.#shakeDuration = Math.max(this.#shakeDuration, duration)
+    this.#shakeTimer = 0
+    this.#shakeFrequency = frequency
+  }
+
+  /**
+   * 简单的噪波函数（基于伪随机）
+   * @param {number} x - X坐标
+   * @param {number} y - Y坐标
+   * @returns {number} 噪波值 (-1 到 1)
+   */
+  #noise(x, y) {
+    const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453
+    return (n - Math.floor(n)) * 2 - 1
+  }
+
+  /**
+   * 平滑噪波插值
+   * @param {number} a - 起始值
+   * @param {number} b - 结束值
+   * @param {number} t - 插值参数 (0-1)
+   * @returns {number} 插值结果
+   */
+  #smoothStep(a, b, t) {
+    t = t * t * (3 - 2 * t) // 平滑插值函数
+    return a + (b - a) * t
+  }
+
+  /**
+   * 2D噪波函数
+   * @param {number} x - X坐标
+   * @param {number} y - Y坐标
+   * @returns {number} 噪波值 (-1 到 1)
+   */
+  #noise2D(x, y) {
+    const xi = Math.floor(x)
+    const yi = Math.floor(y)
+    const xf = x - xi
+    const yf = y - yi
+
+    // 获取四个角的噪波值
+    const n00 = this.#noise(xi, yi)
+    const n01 = this.#noise(xi, yi + 1)
+    const n10 = this.#noise(xi + 1, yi)
+    const n11 = this.#noise(xi + 1, yi + 1)
+
+    // 在X方向插值
+    const nx0 = this.#smoothStep(n00, n10, xf)
+    const nx1 = this.#smoothStep(n01, n11, xf)
+
+    // 在Y方向插值
+    return this.#smoothStep(nx0, nx1, yf)
+  }
+
+  /**
+   * 更新震动效果
+   * @param {number} dt - 帧时间间隔
+   */
+  #updateShake(dt) {
+    if (this.#shakeTimer < this.#shakeDuration) {
+      this.#shakeTimer += dt
+      
+      // 计算震动衰减（线性衰减）
+      const progress = this.#shakeTimer / this.#shakeDuration
+      const currentIntensity = this.#shakeIntensity * (1 - progress)
+      
+      // 使用噪波生成震动偏移
+      const time = this.#shakeTimer * this.#shakeFrequency
+      const noiseScale = 1.0 // 进一步提高噪波缩放因子，增加频率
+      
+      // 为X和Y使用不同的噪波坐标，避免对称
+      const noiseX = this.#noise2D(time * noiseScale, 0)
+      const noiseY = this.#noise2D(0, time * noiseScale)
+      
+      // 震动幅度
+      const amplitudeMultiplier = 1.0
+      this.#shakeOffset.x = noiseX * currentIntensity * amplitudeMultiplier
+      this.#shakeOffset.y = noiseY * currentIntensity * amplitudeMultiplier
+    } else {
+      // 震动结束，重置
+      this.#shakeIntensity = 0
+      this.#shakeDuration = 0
+      this.#shakeTimer = 0
+      this.#shakeOffset.x = 0
+      this.#shakeOffset.y = 0
+    }
+  }
+
+  /**
+   * 更新微震动效果
+   * @param {number} dt - 帧时间间隔
+   */
+  #updateMicroShake(dt) {
+    this.#microShakeTime += dt
+    
+    // 使用噪波生成微震动偏移
+    const time = this.#microShakeTime * this.#microShakeFrequency
+    const noiseScale = 1.0
+    
+    // 为X和Y使用不同的噪波坐标，避免对称
+    const noiseX = this.#noise2D(time * noiseScale, 0)
+    const noiseY = this.#noise2D(0, time * noiseScale)
+    
+    // 微震动幅度
+    this.#microShakeOffset.x = noiseX * this.#microShakeIntensity
+    this.#microShakeOffset.y = noiseY * this.#microShakeIntensity
+  }
+
+  /**
    * 更新摄像机位置
    * @param {number} dt - 帧时间间隔
    */
-  update() {
+  update(dt) {
+    // 更新震动效果
+    this.#updateShake(dt)
+    
+    // 更新微震动效果
+    this.#updateMicroShake(dt)
+    
     if (!this.#target) return
 
     // 目标在屏幕中的位置
@@ -172,9 +307,10 @@ export class Camera {
    * @returns {{x: number, y: number, width: number, height: number}}
    */
   get viewport() {
+    const renderPos = this.getRenderPosition()
     return {
-      x: this.position.x,
-      y: this.position.y,
+      x: renderPos.x,
+      y: renderPos.y,
       width: this.viewportWidth,
       height: this.viewportHeight,
     }
@@ -198,15 +334,27 @@ export class Camera {
   }
 
   /**
+   * 获取相机的实际渲染位置（包含震动偏移）
+   * @returns {Object} 包含x和y的位置对象
+   */
+  getRenderPosition() {
+    return {
+      x: this.position.x + this.#shakeOffset.x + this.#microShakeOffset.x,
+      y: this.position.y + this.#shakeOffset.y + this.#microShakeOffset.y
+    }
+  }
+
+  /**
    * 将世界坐标转换为屏幕坐标
    * @param {number} worldX - 世界X坐标
    * @param {number} worldY - 世界Y坐标
    * @returns {{x: number, y: number}}
    */
   worldToScreen(worldX, worldY) {
+    const renderPos = this.getRenderPosition()
     return {
-      x: worldX - this.position.x,
-      y: worldY - this.position.y,
+      x: worldX - renderPos.x,
+      y: worldY - renderPos.y,
     }
   }
 
@@ -217,9 +365,10 @@ export class Camera {
    * @returns {{x: number, y: number}}
    */
   screenToWorld(screenX, screenY) {
+    const renderPos = this.getRenderPosition()
     return {
-      x: screenX + this.position.x,
-      y: screenY + this.position.y,
+      x: screenX + renderPos.x,
+      y: screenY + renderPos.y,
     }
   }
 
