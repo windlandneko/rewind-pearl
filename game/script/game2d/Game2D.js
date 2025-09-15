@@ -139,7 +139,7 @@ export class Game {
       }),
 
       Keyboard.onKeydown(['R'], () => {
-        TimeTravel.startTimeTravelPreview(this)
+        if (this.player.onGround) TimeTravel.startTimeTravelPreview(this)
       }),
       Keyboard.onKeyup(['R'], () => {
         TimeTravel.endTimeTravelPreview(this)
