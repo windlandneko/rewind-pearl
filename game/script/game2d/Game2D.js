@@ -426,12 +426,12 @@ export class Game {
         this.player.r.y = 0
         this.player.v.y = 0
       }
-    }
-    // 下
-    if (this.player.r.y > this.levelData.height) {
-      this.player.r.x = this.levelData.spawnpoint.x
-      this.player.r.y = this.levelData.spawnpoint.y
-      this.player.onDamage()
+      // 下
+      if (this.player.r.y > this.levelData.height) {
+        this.player.r.x = this.levelData.spawnpoint.x
+        this.player.r.y = this.levelData.spawnpoint.y
+        this.player.onDamage()
+      }
     }
 
     // 更新游戏对象本身

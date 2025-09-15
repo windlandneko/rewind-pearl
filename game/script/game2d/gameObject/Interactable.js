@@ -57,12 +57,8 @@ export class Interactable extends BaseObject {
     if (this.hint && this.isHighlighted) {
       ctx.fillStyle = 'white'
       ctx.font = '5px HarmonyOS Sans SC, serif, sans-serif'
-      const textWidth = ctx.measureText(this.hint).width
-      ctx.fillText(
-        this.hint,
-        this.r.x + this.width / 2 - textWidth / 2,
-        this.r.y - 5
-      )
+      ctx.textAlign = 'center'
+      ctx.fillText(this.hint, this.r.x + this.width / 2, this.r.y - 5)
     }
   }
 
