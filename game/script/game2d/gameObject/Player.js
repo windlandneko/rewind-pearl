@@ -57,7 +57,7 @@ export class Player extends BaseObject {
   animationManager = new AnimationManager()
 
   constructor(x, y) {
-    super(x, y, 8, 16)
+    super(x, y, 8, 18)
     this.previousPosition = new Vec2(x, y)
     this.groundCheckBox = {
       r: this.r.add(1, this.height),
@@ -349,7 +349,7 @@ export class Player extends BaseObject {
     const spriteWidth = 32
     const spriteHeight = 32
     const spriteX = x + (this.width - spriteWidth) / 2
-    const spriteY = y + this.height - spriteHeight
+    const spriteY = y + this.height - spriteHeight - 1
 
     this.animationManager.render(
       ctx,
