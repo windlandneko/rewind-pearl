@@ -482,7 +482,8 @@ export class Game {
 
     // 摄像机缩放
     ctx.scale(this.scale, this.scale)
-    ctx.translate(-this.camera.position.x, -this.camera.position.y)
+    const renderPos = this.camera.getRenderPosition()
+    ctx.translate(-renderPos.x, -renderPos.y)
 
     // 绘制背景网格
     if (this.debug) this.#renderBackgroundGrid(ctx)
@@ -577,8 +578,9 @@ export class Game {
 
     // 计算视差位移量（背景移动速度比摄像机慢）
     const parallaxFactor = 3 // 视差系数，值越小背景移动越慢
-    const offsetX = -this.camera.position.x * parallaxFactor
-    const offsetY = -this.camera.position.y * parallaxFactor
+    const renderPos = this.camera.getRenderPosition()
+    const offsetX = -renderPos.x * parallaxFactor
+    const offsetY = -renderPos.y * parallaxFactor
 
     // 限制位移范围，防止边缘露出
     const maxOffsetX = this.levelData.width * 5 // 最大偏移为关卡宽度的5%
