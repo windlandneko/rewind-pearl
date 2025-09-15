@@ -17,7 +17,7 @@ export class LevelChanger extends BaseObject {
   }
 
   async handleKeyInteraction(player, game) {
-    if (player.type === 'GhostPlayer') return false
+    if (player.type === 'GhostPlayer' || player.removed) return false
     if (!player.checkCollision(this) || !this.targetLevel) return false
 
     // 开始关卡切换过渡动画

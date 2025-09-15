@@ -26,10 +26,25 @@ export class GhostPlayer extends Player {
 
   update(dt, game) {
     if (!this.stateHistory.has(game.tick)) {
-      this.removed = true
+      if (!this.removed) {
+        this.removed = true
+        game.gameObjects
+          .filter(obj => obj.type === 'Trigger')
+          .forEach(obj => {
+            obj.trigger('leave', this, game)
+          })
+      }
       return
     }
-    this.removed = false
+    if (this.removed) {
+      this.removed = false
+      game.gameObjects
+        .filter(obj => obj.type === 'Trigger')
+        .forEach(obj => {
+          obj.trigger('enter', this, game)
+        })
+    }
+
     const record = this.stateHistory.get(game.tick)
 
     super.update(dt, game)

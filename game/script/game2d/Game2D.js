@@ -478,6 +478,9 @@ export class Game {
     // this.#renderBackgroundGrid(ctx)
 
     // 按优先级渲染游戏对象
+    this.renderGroups.movingPlatforms.forEach(entity =>
+      entity.render(ctx, this.scale)
+    )
     this.renderGroups.collectibles.forEach(entity =>
       entity.render(ctx, this.scale)
     )
@@ -486,9 +489,6 @@ export class Game {
       entity.render(ctx, this.scale)
     )
     this.renderGroups.platforms.forEach(entity =>
-      entity.render(ctx, this.scale)
-    )
-    this.renderGroups.movingPlatforms.forEach(entity =>
       entity.render(ctx, this.scale)
     )
 

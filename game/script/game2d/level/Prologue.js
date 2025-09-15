@@ -57,7 +57,7 @@ export function Prologue(game) {
     new Platform(-16, -16, 56, 224),
     new Platform(40, 144, 296, 64),
     new Platform(104, 136, 232, 8),
-    new LevelChanger(320, 0, 16, 16, 'nextStage', true),
+    new LevelChanger(320, 0, 16, 16, 'Stage1', true),
     new Platform(272, 16, 64, 120),
     new Platform(176, -16, 160, 16),
     new Platform(40, 128, 8, 16),

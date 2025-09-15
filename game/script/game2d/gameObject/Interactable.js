@@ -19,6 +19,7 @@ export class Interactable extends BaseObject {
    * @param {Game} game 游戏实例
    */
   async interactWithPlayer(player, game) {
+    if (player.removed) return
     this.isHighlighted = player.checkCollision(this)
   }
 

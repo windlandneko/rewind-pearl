@@ -5,6 +5,7 @@ export class MovingPlatform extends Platform {
   timer = 0
   target = 0
   deltaPosition = null
+  color = '#666'
 
   /**
    * 移动平台

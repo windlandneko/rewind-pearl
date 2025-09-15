@@ -1,8 +1,8 @@
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
-  color = '#333'
-  shadowColor = '#3335'
+  color = '#444'
+  shadowColor = '#4445'
 
   constructor(x, y, width, height) {
     super(x, y, width, height)
@@ -14,7 +14,7 @@ export class Platform extends BaseObject {
    * @param {Game} game 游戏实例
    */
   interactWithPlayer(player, game) {
-    if (!this.checkCollision(player)) return
+    if (!this.checkCollision(player) || player.removed) return
 
     if (this.checkCollision(player.groundCheckBox)) player.onGround = true
 
@@ -61,8 +61,8 @@ export class Platform extends BaseObject {
     ctx.fillRect(x - 1, y + 2, 1, this.height - 1)
     ctx.fillRect(x - 1 + 1, y + 1, this.width + 2, this.height + 1)
     ctx.fillStyle = this.color
-    ctx.fillRect(x - 0.1, y + 0.9, 1.2, this.height - 0.8)
-    ctx.fillRect(x + this.width + 2.9, y + 0.9, 1.2, this.height - 0.8)
-    ctx.fillRect(x + 0.9, y, this.width + 2.2, this.height + 1)
+    ctx.fillRect(x - 0, y + 1, 1, this.height - 1)
+    ctx.fillRect(x + this.width + 3, y + 1, 1, this.height - 1)
+    ctx.fillRect(x + 1, y, this.width + 2, this.height + 1)
   }
 }

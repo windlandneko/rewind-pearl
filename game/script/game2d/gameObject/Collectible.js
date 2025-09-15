@@ -15,7 +15,7 @@ export class Collectible extends BaseObject {
   }
 
   interactWithPlayer(player, game) {
-    if (player.checkCollision(this)) {
+    if (player.checkCollision(this) && !player.removed) {
       this.removed = true
       player.score += 1
     }

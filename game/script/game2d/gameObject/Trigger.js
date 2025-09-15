@@ -22,7 +22,16 @@ export class Trigger extends BaseObject {
   }
 
   interactWithPlayer(player, game) {
+    if (player.removed) return
     if (player.checkCollision(this)) {
+      this.trigger('enter', player, game)
+    } else {
+      this.trigger('leave', player, game)
+    }
+  }
+
+  trigger(type, player, game) {
+    if (type === 'enter') {
       if (!this.lastPlayerIn.get(player)) {
         try {
           this.enterCallback?.(game)
@@ -33,7 +42,8 @@ export class Trigger extends BaseObject {
         this.lastPlayerIn.set(player, true)
       }
       if (this.once) this.enterCallback = null
-    } else {
+    }
+    if (type === 'leave') {
       if (this.lastPlayerIn.get(player)) {
         try {
           this.leaveCallback?.(game)

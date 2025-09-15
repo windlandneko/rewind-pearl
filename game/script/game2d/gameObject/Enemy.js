@@ -35,7 +35,7 @@ export class Enemy extends BaseObject {
    * @param {Game} game 游戏实例
    */
   interactWithPlayer(player, game) {
-    if (!player.checkCollision(this)) return
+    if (!player.checkCollision(this) || player.removed) return
 
     // 降落 + 在敌人上方
     if (player.v.y > 0 && player.r.y + player.height < this.r.y + this.height) {

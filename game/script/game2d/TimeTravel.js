@@ -111,7 +111,7 @@ class TimeTravelManager {
     // game.#renderBackgroundGrid(tmpctx)
 
     // 按优先级渲染游戏对象
-    game.renderGroups.platforms.forEach(entity =>
+    game.renderGroups.movingPlatforms.forEach(entity =>
       entity.render(tmpctx, game.scale)
     )
     game.renderGroups.collectibles.forEach(entity =>
@@ -121,6 +121,9 @@ class TimeTravelManager {
       entity.render(tmpctx, game.scale)
     )
     game.renderGroups.interactables.forEach(entity =>
+      entity.render(tmpctx, game.scale)
+    )
+    game.renderGroups.platforms.forEach(entity =>
       entity.render(tmpctx, game.scale)
     )
 
