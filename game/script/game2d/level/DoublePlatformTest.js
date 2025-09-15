@@ -45,14 +45,10 @@ export function DoublePlatformTest(game) {
     new Collectible(210, 42, 'sprite/linggangu'),
     new Platform(368, 176, 72, 24),
     new Interactable(392, 152, 'test_scene', 'character/hajimi/normal', '你过关！'),
-    new Platform(48, 120, 8, 8),
-    new Platform(56, 88, 8, 40),
-    new Hazard(48, 128, 16, 8, 'down'),
     new Hazard(16, 160, 8, 32, 'right'),
     new Platform(16, 192, 24, 8),
     new Platform(16, 144, 8, 8),
     new Platform(16, 152, 16, 8),
-    new Collectible(50, 74, 'sprite/linggangu_stone'),
     new Collectible(26, 178, 'sprite/linggangu'),
     new Hazard(16, 72, 8, 72, 'right'),
     new Platform(16, 56, 8, 16),
@@ -73,20 +69,24 @@ export function DoublePlatformTest(game) {
     new Platform(16, 24, 128, 8),
     new Platform(16, 40, 80, 16),
     new Platform(16, 32, 120, 8),
-    new Trigger(72, 22, 16, 8, false, game => {game.ref('plat1').set(1)
+    new Platform(-17, -80, 16, 104),
+    new LevelChanger(480, -80, 16, 104, 'HazardTest', true),
+    new Platform(0, 24, 16, 192),
+    new Collectible(450, 10, 'sprite/linggangu_stone'),
+    new Collectible(210, 10, 'sprite/linggangu'),
+    new LevelChanger(320, 200, 176, 16, 'Prologue', true),
+    new LevelChanger(480, 112, 16, 88, 'Prologue', true),
+    new Trigger(72, 21, 16, 8, false, game => {game.ref('plat1').set(1)
 game.ref('plat2').set(1)
 game.ref('t1').r.y += 1
 game.sound.play('item00')}, game => {game.ref('plat1').set(0)
 game.ref('plat2').set(0)
 game.ref('t1').r.y -= 1
 game.sound.play('item00')}).ref('t1'),
-    new Platform(-17, -80, 16, 104),
-    new LevelChanger(480, -80, 16, 104, 'HazardTest', true),
-    new Platform(0, 24, 16, 192),
     new Collectible(290, 10, 'sprite/linggangu_stone'),
-    new Collectible(450, 10, 'sprite/linggangu_stone'),
-    new Collectible(210, 10, 'sprite/linggangu'),
-    new LevelChanger(320, 200, 176, 16, 'Prologue', true),
-    new LevelChanger(480, 112, 16, 88, 'Prologue', true)
+    new Collectible(50, 74, 'sprite/linggangu_stone'),
+    new Platform(56, 88, 8, 48),
+    new Platform(48, 120, 8, 16),
+    new Hazard(48, 136, 16, 8, 'down')
   )
 }

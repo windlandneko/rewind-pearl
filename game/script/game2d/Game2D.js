@@ -182,7 +182,7 @@ export class Game {
   /**
    * 加载关卡数据
    */
-  loadLevel(setupFunction) {
+  loadLevel(setupFunction, centerOnTarget = true) {
     this.tick = 0
     this.maxTick = 0
     this.gameObjects = []
@@ -195,7 +195,7 @@ export class Game {
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
-    this.#setupCamera()
+    this.#setupCamera(centerOnTarget)
 
     if (this.levelData.background) {
       this.$backgroundImage.src = Asset.get(
@@ -538,7 +538,7 @@ export class Game {
   /**
    * 设置摄像机
    */
-  #setupCamera() {
+  #setupCamera(centerOnTarget = true) {
     // 计算摄像机视窗尺寸
     const height = this.levelData.cameraHeight ?? this.levelData.height
     const width = height * (this.displayWidth / this.displayHeight)
@@ -564,7 +564,7 @@ export class Game {
     )
 
     // 立即居中到玩家
-    this.camera.centerOnTarget()
+    if (centerOnTarget) this.camera.centerOnTarget()
 
     this.scale = this.displayHeight / this.camera.viewport.height
   }

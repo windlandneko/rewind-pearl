@@ -143,7 +143,7 @@ export class Player extends BaseObject {
       ) {
         // 动画播放完毕，重生
         game.stop()
-        game.loadLevel(Levels[game.levelData.name])
+        game.loadLevel(Levels[game.levelData.name], false)
 
         game.tick = 0
         game.maxTick = 0
@@ -266,7 +266,7 @@ export class Player extends BaseObject {
    * @param {number} dt 时间增量
    */
   onHorizontalInput(direction, dt) {
-    const acceleration = this.onGround ? 20 : 8
+    const acceleration = this.onGround ? 20 : 10
     const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.3
 
     // 祥，移动
@@ -283,7 +283,7 @@ export class Player extends BaseObject {
     } else {
       // 停止移动
       if (this.onGround) this.v.x = 0
-      else this.v.x *= Math.pow(0.1, dt)
+      else this.v.x *= Math.pow(0.1, 1.1 * dt)
     }
   }
 
