@@ -27,8 +27,7 @@ class TimeTravelManager {
   }
 
   endTimeTravelPreview() {
-    if (this.state === 'success') return
-    this.state = null
+    if (this.state !== 'success') this.state = null
   }
 
   update(dt) {
@@ -117,15 +116,11 @@ class TimeTravelManager {
     game.renderGroups.collectibles.forEach(entity =>
       entity.render(tmpctx, game)
     )
-    game.renderGroups.enemies.forEach(entity =>
-      entity.render(tmpctx, game)
-    )
+    game.renderGroups.enemies.forEach(entity => entity.render(tmpctx, game))
     game.renderGroups.interactables.forEach(entity =>
       entity.render(tmpctx, game)
     )
-    game.renderGroups.platforms.forEach(entity =>
-      entity.render(tmpctx, game)
-    )
+    game.renderGroups.platforms.forEach(entity => entity.render(tmpctx, game))
 
     // 渲染玩家
     game.ghostPlayers.forEach(ghost => {

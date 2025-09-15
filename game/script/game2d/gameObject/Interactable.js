@@ -6,11 +6,12 @@ export class Interactable extends BaseObject {
   isHighlighted = false
   spriteId = null
 
-  constructor(x, y, dialogueId, spriteId, hint = '') {
+  constructor(x, y, dialogueId, spriteId, hint = '', autoPlay = false) {
     super(x, y, 16, 16)
     this.dialogueId = dialogueId
     this.spriteId = spriteId
     this.hint = hint
+    this.autoPlay = autoPlay
   }
 
   /**
@@ -21,6 +22,10 @@ export class Interactable extends BaseObject {
   async interactWithPlayer(player, game) {
     if (player.removed) return
     this.isHighlighted = player.checkCollision(this)
+    if (this.autoPlay && this.isHighlighted) {
+      await this.handleKeyInteraction(player, game)
+      this.dialogueId = null
+    }
   }
 
   /**
@@ -40,6 +45,8 @@ export class Interactable extends BaseObject {
   }
 
   render(ctx) {
+    if (this.autoPlay) return
+
     ctx.save()
 
     if (Asset.has(this.spriteId)) {

@@ -220,7 +220,7 @@ function showProperties(obj) {
         onChange: value => (obj.bgm = value),
       })
       addProperty({
-        label: '是否启用世界边界',
+        label: '启用世界边界',
         value: obj.worldBorder || false,
         type: 'checkbox',
         onChange: value => (obj.worldBorder = value),
@@ -241,9 +241,15 @@ function showProperties(obj) {
       })
       addProperty({
         label: '提示文本',
-        value: obj.text || '',
+        value: obj.hint || '',
         type: 'text',
-        onChange: value => (obj.text = value),
+        onChange: value => (obj.hint = value),
+      })
+      addProperty({
+        label: '自动播放对话',
+        value: obj.autoPlay || false,
+        type: 'checkbox',
+        onChange: value => (obj.autoPlay = value),
       })
       break
     case TOOL.movingPlatform:
@@ -357,7 +363,6 @@ function addProperty({
 
   const labelEl = document.createElement('label')
   labelEl.textContent = label
-  div.appendChild(labelEl)
 
   let input
   if (type === 'select') {
@@ -397,7 +402,16 @@ function addProperty({
     })
   }
 
-  div.appendChild(input)
+  if (type === 'checkbox') {
+    div.appendChild(input)
+    div.appendChild(labelEl)
+    div.style.display = 'flex'
+    input.style.width = 'auto'
+    input.style.marginRight = '6px'
+  } else {
+    div.appendChild(labelEl)
+    div.appendChild(input)
+  }
   propertiesContent.appendChild(div)
 }
 
@@ -604,8 +618,8 @@ function drawObject(obj) {
     drawMovingPlatformAnchor(obj)
   }
 
-  ctx.save()
   ctx.fillStyle = TOOL_COLOR[obj.type] || '#000'
+  ctx.save()
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
 
@@ -616,30 +630,62 @@ function drawObject(obj) {
     ctx.arc(obj.x, obj.y, radius, 0, Math.PI * 2)
     ctx.fill()
   } else if (obj.type === TOOL.hazard) {
-    ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
+    ctx.restore()
     const direction = obj.direction || 'up'
-    // 绘制刺的朝向
+
+    const { x, y, width: w, height: h } = obj
+    const _ = 0
+    const a = _ + 3
+    const b = a + 2
     ctx.beginPath()
     if (direction === 'up') {
-      ctx.moveTo(obj.x + obj.width / 2 - 3, obj.y + obj.height)
-      ctx.lineTo(obj.x + obj.width / 2, obj.y + obj.height - 3)
-      ctx.lineTo(obj.x + obj.width / 2 + 3, obj.y + obj.height)
+      for (let i = 0.5; i < w; i += 4) {
+        ctx.moveTo(x + i + 0, y + h - _)
+        ctx.lineTo(x + i + 0, y + h - a)
+        ctx.lineTo(x + i + 1, y + h - a)
+        ctx.lineTo(x + i + 1, y + h - b)
+        ctx.lineTo(x + i + 2, y + h - b)
+        ctx.lineTo(x + i + 2, y + h - a)
+        ctx.lineTo(x + i + 3, y + h - a)
+        ctx.lineTo(x + i + 3, y + h - _)
+      }
     } else if (direction === 'down') {
-      ctx.moveTo(obj.x + obj.width / 2 - 3, obj.y)
-      ctx.lineTo(obj.x + obj.width / 2, obj.y + 3)
-      ctx.lineTo(obj.x + obj.width / 2 + 3, obj.y)
+      for (let i = 0.5; i < w; i += 4) {
+        ctx.moveTo(x + i + 0, y + _)
+        ctx.lineTo(x + i + 0, y + a)
+        ctx.lineTo(x + i + 1, y + a)
+        ctx.lineTo(x + i + 1, y + b)
+        ctx.lineTo(x + i + 2, y + b)
+        ctx.lineTo(x + i + 2, y + a)
+        ctx.lineTo(x + i + 3, y + a)
+        ctx.lineTo(x + i + 3, y + _)
+      }
     } else if (direction === 'left') {
-      ctx.moveTo(obj.x + obj.width, obj.y + obj.height / 2 - 3)
-      ctx.lineTo(obj.x + obj.width - 3, obj.y + obj.height / 2)
-      ctx.lineTo(obj.x + obj.width, obj.y + obj.height / 2 + 3)
+      for (let i = 0.5; i < h; i += 4) {
+        ctx.moveTo(x + w - _, y + i + 0)
+        ctx.lineTo(x + w - a, y + i + 0)
+        ctx.lineTo(x + w - a, y + i + 1)
+        ctx.lineTo(x + w - b, y + i + 1)
+        ctx.lineTo(x + w - b, y + i + 2)
+        ctx.lineTo(x + w - a, y + i + 2)
+        ctx.lineTo(x + w - a, y + i + 3)
+        ctx.lineTo(x + w - _, y + i + 3)
+      }
     } else if (direction === 'right') {
-      ctx.moveTo(obj.x, obj.y + obj.height / 2 - 3)
-      ctx.lineTo(obj.x + 3, obj.y + obj.height / 2)
-      ctx.lineTo(obj.x, obj.y + obj.height / 2 + 3)
+      for (let i = 0.5; i < h; i += 4) {
+        ctx.moveTo(x + _, y + i + 0)
+        ctx.lineTo(x + a, y + i + 0)
+        ctx.lineTo(x + a, y + i + 1)
+        ctx.lineTo(x + b, y + i + 1)
+        ctx.lineTo(x + b, y + i + 2)
+        ctx.lineTo(x + a, y + i + 2)
+        ctx.lineTo(x + a, y + i + 3)
+        ctx.lineTo(x + _, y + i + 3)
+      }
     }
     ctx.closePath()
-    ctx.fillStyle = '#fff'
     ctx.fill()
+    ctx.save()
   } else {
     // 其他物体绘制为矩形
     ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
@@ -1460,7 +1506,8 @@ function createObject(type, pos) {
         ...obj,
         dialogue: 'dialogue',
         spriteId: 'sprite/linggangu',
-        text: 'text',
+        hint: '提示文本',
+        autoPlay: false,
       }
       break
     case TOOL.movingPlatform:
@@ -1663,7 +1710,7 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
         code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.interactable:
-        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.text}')`
+        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
         break
       case TOOL.movingPlatform:
         code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
@@ -1679,7 +1726,9 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
         code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.collectible:
-        code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}')`
+        code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${
+          obj.spriteId
+        }')`
         break
       case TOOL.hazard:
         code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`

@@ -39,9 +39,9 @@ export class Hazard extends BaseObject {
     const b = a + 2
 
     ctx.fillStyle = '#fff'
+    ctx.beginPath()
     if (this.direction === 'up') {
       for (let i = 0.5; i < width; i += 4) {
-        ctx.beginPath()
         ctx.moveTo(x + i + 0, y + height - _)
         ctx.lineTo(x + i + 0, y + height - a)
         ctx.lineTo(x + i + 1, y + height - a)
@@ -50,12 +50,9 @@ export class Hazard extends BaseObject {
         ctx.lineTo(x + i + 2, y + height - a)
         ctx.lineTo(x + i + 3, y + height - a)
         ctx.lineTo(x + i + 3, y + height - _)
-        ctx.closePath()
-        ctx.fill()
       }
     } else if (this.direction === 'down') {
       for (let i = 0.5; i < width; i += 4) {
-        ctx.beginPath()
         ctx.moveTo(x + i + 0, y + _)
         ctx.lineTo(x + i + 0, y + a)
         ctx.lineTo(x + i + 1, y + a)
@@ -64,12 +61,9 @@ export class Hazard extends BaseObject {
         ctx.lineTo(x + i + 2, y + a)
         ctx.lineTo(x + i + 3, y + a)
         ctx.lineTo(x + i + 3, y + _)
-        ctx.closePath()
-        ctx.fill()
       }
     } else if (this.direction === 'left') {
       for (let i = 0.5; i < height; i += 4) {
-        ctx.beginPath()
         ctx.moveTo(x + width - _, y + i + 0)
         ctx.lineTo(x + width - a, y + i + 0)
         ctx.lineTo(x + width - a, y + i + 1)
@@ -78,12 +72,9 @@ export class Hazard extends BaseObject {
         ctx.lineTo(x + width - a, y + i + 2)
         ctx.lineTo(x + width - a, y + i + 3)
         ctx.lineTo(x + width - _, y + i + 3)
-        ctx.closePath()
-        ctx.fill()
       }
     } else if (this.direction === 'right') {
       for (let i = 0.5; i < height; i += 4) {
-        ctx.beginPath()
         ctx.moveTo(x + _, y + i + 0)
         ctx.lineTo(x + a, y + i + 0)
         ctx.lineTo(x + a, y + i + 1)
@@ -92,10 +83,10 @@ export class Hazard extends BaseObject {
         ctx.lineTo(x + a, y + i + 2)
         ctx.lineTo(x + a, y + i + 3)
         ctx.lineTo(x + _, y + i + 3)
-        ctx.closePath()
-        ctx.fill()
       }
     }
+    ctx.closePath()
+    ctx.fill()
 
     if (debug) {
       ctx.strokeStyle = '#ff0000ff'
