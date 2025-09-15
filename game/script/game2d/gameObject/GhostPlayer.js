@@ -7,6 +7,7 @@ import { Player, InputEnum } from './Player.js'
  */
 export class GhostPlayer extends Player {
   unstable = 0
+  removed = true
 
   async processInputEvents(dt, game) {
     const state = this.stateHistory.get(game.tick)?.inputState
