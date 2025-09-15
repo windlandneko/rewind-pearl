@@ -6,7 +6,7 @@ export class Collectible extends BaseObject {
   bobOffset = 0
 
   constructor(x, y, spriteId) {
-    super(x, y, 10, 10)
+    super(x, y, 12, 12)
     this.spriteId = spriteId
   }
 
@@ -22,7 +22,7 @@ export class Collectible extends BaseObject {
     }
   }
 
-  render(ctx, { scale, tick }) {
+  render(ctx, { scale, debug }) {
     if (this.collected) return
 
     const x = Math.round(this.r.x * scale) / scale
@@ -32,14 +32,8 @@ export class Collectible extends BaseObject {
       const sprite = Asset.get(this.spriteId)
       const width = this.width
       const height = (sprite.height / sprite.width) * width
-      const dy = Math.sin(this.bobOffset * 3) - 1
-      ctx.drawImage(
-        sprite,
-        x - width / 2,
-        y + dy + this.height - height,
-        width,
-        height
-      )
+      const dy = Math.sin(this.bobOffset * 3)
+      ctx.drawImage(sprite, x, y + dy, width, height)
     } else {
       ctx.save()
       ctx.fillStyle = '#0ff'
@@ -48,9 +42,14 @@ export class Collectible extends BaseObject {
 
       const radius = 6
       ctx.beginPath()
-      ctx.arc(x + this.width / 2, y + this.height / 2, radius, 0, Math.PI * 2)
+      ctx.arc(x, y, radius, 0, Math.PI * 2)
       ctx.fill()
       ctx.restore()
+    }
+
+    if (debug) {
+      ctx.strokeStyle = '#ff00ffff'
+      ctx.strokeRect(x, y, this.width, this.height)
     }
   }
 

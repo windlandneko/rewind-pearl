@@ -113,7 +113,7 @@ class Keyboard {
     ['NumpadSubtract', 'Sub'],
     ['NumpadDecimal', 'Dec'],
     ['NumpadDivide', 'Div'],
-    ['NumpadEnter', 'Enter'],
+    ['NumpadEnter', 'NumpadEnter'],
 
     // Miscellaneous
     ['ContextMenu', 'Apps'],

@@ -50,6 +50,7 @@ export class Game {
   #keyboardListeners = []
 
   sound = SoundManager
+  debug = false
 
   constructor() {
     const main = document.querySelector('main')
@@ -144,8 +145,12 @@ export class Game {
         TimeTravel.endTimeTravelPreview(this)
       }),
 
-      Keyboard.onKeyup(['C'], () => {
-        this.changeLevel(prompt('[Debug] 输入关卡名称', 'Prologue') || 'Prologue')
+      Keyboard.onKeydown(['NumpadEnter'], () => {
+        const level = prompt('[Debug] 输入关卡名称')
+        if (level) this.changeLevel(level)
+      }),
+      Keyboard.onKeydown(['RCtrl'], () => {
+        this.debug = !this.debug
       })
     )
   }
@@ -229,7 +234,8 @@ export class Game {
       this.render(this.ctx)
       TimeTravel.render(this)
 
-      // this.#renderTimeline(this.ctx)
+      if (this.debug) this.#renderTimeline(this.ctx)
+
       // 渲染关卡过渡效果
       if (this.transitionOpacity) {
         this.ctx.fillStyle = `rgba(0, 0, 0, ${this.transitionOpacity})`
@@ -479,22 +485,16 @@ export class Game {
     ctx.translate(-this.camera.position.x, -this.camera.position.y)
 
     // 绘制背景网格
-    // this.#renderBackgroundGrid(ctx)
+    if (this.debug) this.#renderBackgroundGrid(ctx)
 
     // 按优先级渲染游戏对象
     this.renderGroups.movingPlatforms.forEach(entity =>
       entity.render(ctx, this)
     )
-    this.renderGroups.collectibles.forEach(entity =>
-      entity.render(ctx, this)
-    )
+    this.renderGroups.collectibles.forEach(entity => entity.render(ctx, this))
     this.renderGroups.enemies.forEach(entity => entity.render(ctx, this))
-    this.renderGroups.interactables.forEach(entity =>
-      entity.render(ctx, this)
-    )
-    this.renderGroups.platforms.forEach(entity =>
-      entity.render(ctx, this)
-    )
+    this.renderGroups.interactables.forEach(entity => entity.render(ctx, this))
+    this.renderGroups.platforms.forEach(entity => entity.render(ctx, this))
 
     // 渲染玩家
     this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))
@@ -503,7 +503,7 @@ export class Game {
     ctx.restore()
 
     // 调试数据
-    // this.#renderDebugUI(ctx)
+    if (this.debug) this.#renderDebugUI(ctx)
   }
 
   /**

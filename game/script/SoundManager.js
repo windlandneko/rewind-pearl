@@ -9,11 +9,15 @@ class SoundManager {
   /** @type {Map<string, Audio[]>} */
   sounds = new Map()
   BGM = null
+  currentBGMName = null
 
   playBGM(
     name,
     { loop = true, volume = 0.3, fadeIn = true, fadeTime = 3000 } = {}
   ) {
+    if (this.currentBGMName === name) return
+    this.currentBGMName = name
+
     this.stopBGM({ fadeIn, fadeTime })
     const bgm = Asset.get('audio/' + name)
 
@@ -62,7 +66,7 @@ class SoundManager {
     bgm = null
   }
 
-  play(name, { single = false, volume = 0.5 } = {}) {
+  play(name, { single = true, volume = 0.5 } = {}) {
     if (single) {
       const instances = this.sounds.get(name) || []
       if (instances.some(audio => !audio.paused && !audio.ended)) {

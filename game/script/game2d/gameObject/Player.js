@@ -18,12 +18,12 @@ export const InputEnum = {
 export class Player extends BaseObject {
   color = 'blue'
 
-  gravity = 500 // 重力加速度
+  gravity = 600 // 重力加速度
   moveSpeed = 72 // 移动速度 (像素/秒)
-  jumpSpeed = 114.514 // 跳跃速度 (像素/秒)
+  jumpSpeed = 130 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
-  maxJumpTime = 0.2 // 跳跃增益时间（秒）
+  maxJumpTime = 0.15 // 跳跃增益时间（秒）
 
   invincibleTime = 1 // 无敌时间 (秒)
 
@@ -57,7 +57,7 @@ export class Player extends BaseObject {
   animationManager = new AnimationManager()
 
   constructor(x, y) {
-    super(x, y, 8, 18)
+    super(x, y, 8, 16)
     this.previousPosition = new Vec2(x, y)
     this.groundCheckBox = {
       r: this.r.add(1, this.height),
@@ -187,7 +187,7 @@ export class Player extends BaseObject {
     const acceleration = new Vec2()
 
     // 重力
-    acceleration.y += this.jumpKeyPressed ? this.gravity * 0.4 : this.gravity
+    acceleration.y += this.jumpKeyPressed ? this.gravity * 0.5 : this.gravity
 
     // 速度
     this.v.addTo(acceleration.mul(dt))
@@ -323,7 +323,7 @@ export class Player extends BaseObject {
     }
   }
 
-  render(ctx, { scale }) {
+  render(ctx, { scale, debug }) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 
@@ -359,6 +359,11 @@ export class Player extends BaseObject {
       spriteHeight
     )
     ctx.globalAlpha = 1.0
+
+    if (debug) {
+      ctx.strokeStyle = '#00ff00ff'
+      ctx.strokeRect(this.r.x, this.r.y, this.width, this.height)
+    }
   }
 
   get state() {

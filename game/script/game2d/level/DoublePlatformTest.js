@@ -13,7 +13,7 @@ import Vec2 from '../Vector.js'
 import SoundManager from '../../SoundManager.js'
 
 export function DoublePlatformTest(game) {
-  const height = 240
+  const height = 216
   const width = 480
 
   game.levelData = {
@@ -22,67 +22,71 @@ export function DoublePlatformTest(game) {
     height,
     width,
     worldBorder: false,
-    spawnpoint: new Vec2(32, 16),
-    cameraHeight: 240,
+    spawnpoint: new Vec2(32, 8),
+    cameraHeight: 216,
   }
 
   SoundManager.playBGM('Memories of Memories')
 
   game.gameObjects.push(
-      new Hazard(24, 216, 296, 8, 'up'),
-    new MovingPlatform(new Vec2(200, 96), new Vec2(200, 48), 32, 8, 1, 'still').ref('plat1'),
-    new MovingPlatform(new Vec2(360, 48), new Vec2(360, 96), 32, 8, 1, 'still').ref('plat2'),
-    new Platform(16, 224, 304, 16),
-    new Platform(280, 216, 8, 8),
-    new Platform(272, 32, 48, 96),
-    new Platform(152, 128, 168, 8),
-    new Platform(80, 216, 8, 8),
-    new Platform(16, 48, 80, 16),
-    new Platform(96, 48, 16, 88),
-    new Platform(0, 32, 16, 208),
-    new Platform(288, 208, 32, 16),
-    new Platform(48, 144, 8, 8),
-    new Platform(48, 112, 8, 8),
-    new Platform(56, 112, 8, 56),
-    new Platform(72, 200, 24, 24),
-    new Platform(128, 208, 24, 16),
-    new Platform(184, 208, 8, 16),
-    new Platform(192, 200, 16, 24),
-    new Hazard(56, 168, 8, 8, 'down'),
-    new Platform(232, 216, 16, 8),
-    new Platform(64, 64, 32, 8),
-    new Hazard(24, 64, 40, 8, 'down'),
-    new Platform(16, 64, 8, 16),
-    new Hazard(112, 104, 8, 32, 'right'),
-    new Hazard(64, 112, 8, 48, 'right'),
-    new Hazard(264, 32, 8, 32, 'left'),
-    new Collectible(53, 93, 'sprite/linggangu'),
-    new Hazard(88, 72, 8, 24, 'left'),
-    new Trigger(72, 28, 16, 4, false, game => {game.ref('plat1').set(1)
+      new Hazard(24, 192, 296, 8, 'up'),
+    new MovingPlatform(new Vec2(200, 72), new Vec2(200, 24), 32, 8, 1, 'still').ref('plat1'),
+    new MovingPlatform(new Vec2(360, 24), new Vec2(360, 72), 32, 8, 1, 'still').ref('plat2'),
+    new Platform(16, 200, 304, 16),
+    new Platform(280, 192, 8, 8),
+    new Platform(152, 104, 168, 8),
+    new Platform(80, 192, 8, 8),
+    new Platform(288, 184, 32, 16),
+    new Platform(48, 88, 8, 8),
+    new Platform(72, 176, 24, 24),
+    new Platform(128, 184, 24, 16),
+    new Platform(232, 192, 16, 8),
+    new Collectible(298, 170, 'sprite/linggangu'),
+    new Collectible(210, 42, 'sprite/linggangu'),
+    new Platform(368, 176, 72, 24),
+    new Interactable(392, 152, 'test_scene', 'character/hajimi/normal', '你过关！'),
+    new Platform(48, 120, 8, 8),
+    new Platform(56, 88, 8, 40),
+    new Hazard(48, 128, 16, 8, 'down'),
+    new Hazard(16, 160, 8, 32, 'right'),
+    new Platform(16, 192, 24, 8),
+    new Platform(16, 144, 8, 8),
+    new Platform(16, 152, 16, 8),
+    new Collectible(50, 74, 'sprite/linggangu_stone'),
+    new Collectible(26, 178, 'sprite/linggangu'),
+    new Hazard(16, 72, 8, 72, 'right'),
+    new Platform(16, 56, 8, 16),
+    new Hazard(24, 56, 32, 8, 'down'),
+    new Hazard(56, 64, 40, 8, 'down'),
+    new Platform(56, 56, 40, 8),
+    new Hazard(184, 168, 8, 8, 'up'),
+    new Hazard(280, 184, 8, 8, 'up'),
+    new Platform(184, 176, 8, 24),
+    new Platform(192, 168, 16, 32),
+    new Platform(96, 112, 8, 16),
+    new Hazard(88, 104, 8, 24, 'left'),
+    new Hazard(112, 88, 8, 24, 'right'),
+    new Platform(96, 40, 16, 72),
+    new Platform(272, 24, 48, 80),
+    new Hazard(264, 24, 8, 32, 'left'),
+    new Platform(432, 24, 48, 88),
+    new Platform(16, 24, 128, 8),
+    new Platform(16, 40, 80, 16),
+    new Platform(16, 32, 120, 8),
+    new Trigger(72, 22, 16, 8, false, game => {game.ref('plat1').set(1)
 game.ref('plat2').set(1)
-game.ref('t1').r.y += 2
+game.ref('t1').r.y += 1
 game.sound.play('item00')}, game => {game.ref('plat1').set(0)
 game.ref('plat2').set(0)
-game.ref('t1').r.y -= 2
+game.ref('t1').r.y -= 1
 game.sound.play('item00')}).ref('t1'),
-    new Platform(16, 208, 16, 16),
-    new Platform(32, 216, 16, 8),
-    new Hazard(16, 80, 8, 128, 'right'),
-    new Platform(16, 168, 16, 8),
-    new Platform(16, 32, 128, 8),
-    new Platform(16, 40, 120, 8),
-    new Collectible(301, 197, 'sprite/linggangu'),
-    new Collectible(37, 205, 'sprite/linggangu'),
-    new Collectible(213, 29, 'sprite/linggangu'),
-    new Collectible(213, 69, 'sprite/linggangu'),
-    new Platform(344, 200, 80, 24),
-    new Interactable(376, 176, 'test_scene', 'character/hajimi/normal', '你过关！'),
-    new Collectible(293, 13, 'sprite/linggangu_stone'),
-    new Collectible(453, 13, 'sprite/linggangu_stone'),
-    new LevelChanger(320, 240, 176, 16, 'Prologue', true),
-    new LevelChanger(480, -72, 16, 104, 'HazardTest', true),
-    new Platform(432, 32, 48, 104),
-    new LevelChanger(480, 136, 16, 104, 'Prologue', true),
-    new Platform(-17, -72, 16, 104)
+    new Platform(-17, -80, 16, 104),
+    new LevelChanger(480, -80, 16, 104, 'HazardTest', true),
+    new Platform(0, 24, 16, 192),
+    new Collectible(290, 10, 'sprite/linggangu_stone'),
+    new Collectible(450, 10, 'sprite/linggangu_stone'),
+    new Collectible(210, 10, 'sprite/linggangu'),
+    new LevelChanger(320, 200, 176, 16, 'Prologue', true),
+    new LevelChanger(480, 112, 16, 88, 'Prologue', true)
   )
 }

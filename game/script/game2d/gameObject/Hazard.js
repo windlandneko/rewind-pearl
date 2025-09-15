@@ -19,16 +19,6 @@ export class Hazard extends BaseObject {
       width: this.width - 4,
       height: this.height - 4,
     }
-    if (direction === 'up') {
-      this.hitbox.height += 2
-    } else if (direction === 'down') {
-      this.hitbox.r.y -= 2
-    } else if (direction === 'left') {
-      this.hitbox.r.x -= 2
-      this.hitbox.width += 2
-    } else if (direction === 'right') {
-      this.hitbox.width += 2
-    }
   }
 
   interactWithPlayer(player, game) {
@@ -38,7 +28,7 @@ export class Hazard extends BaseObject {
     }
   }
 
-  render(ctx, { scale }) {
+  render(ctx, { scale, debug }) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
     const width = Math.round(this.width * scale) / scale
@@ -106,6 +96,16 @@ export class Hazard extends BaseObject {
         ctx.fill()
       }
     }
+
+    if (debug) {
+      ctx.strokeStyle = '#ff0000ff'
+      ctx.strokeRect(
+        this.hitbox.r.x,
+        this.hitbox.r.y,
+        this.hitbox.width,
+        this.hitbox.height
+      )
+    }
   }
 
   get state() {
@@ -122,16 +122,6 @@ export class Hazard extends BaseObject {
       r: this.r.add(2, 2),
       width: this.width - 4,
       height: this.height - 4,
-    }
-    if (this.direction === 'up') {
-      this.hitbox.height += 2
-    } else if (this.direction === 'down') {
-      this.hitbox.r.y -= 2
-    } else if (this.direction === 'left') {
-      this.hitbox.r.x -= 2
-      this.hitbox.width += 2
-    } else if (this.direction === 'right') {
-      this.hitbox.width += 2
     }
   }
 }

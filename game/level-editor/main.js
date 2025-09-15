@@ -800,7 +800,7 @@ function drawElementIcon(obj) {
 
     case TOOL.hazard:
       // 危险图标 - 使用感叹号三角形
-      ctx.fillText('⚠', centerX, centerY)
+      // ctx.fillText('⚠', centerX, centerY)
       break
 
     case TOOL.movingPlatform:
@@ -1679,7 +1679,7 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
         code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.collectible:
-        code += `    new Collectible(${obj.x - 3}, ${obj.y - 3}, '${obj.spriteId}')`
+        code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}')`
         break
       case TOOL.hazard:
         code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
