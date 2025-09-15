@@ -15,9 +15,9 @@ export class Hazard extends BaseObject {
     this.direction = direction
 
     this.hitbox = {
-      r: this.r.add(2, 2),
-      width: this.width - 4,
-      height: this.height - 4,
+      r: this.r.add(3, 3),
+      width: this.width - 6,
+      height: this.height - 6,
     }
   }
 
@@ -119,9 +119,9 @@ export class Hazard extends BaseObject {
     super.state = state
     this.direction = state.direction
     this.hitbox = {
-      r: this.r.add(2, 2),
-      width: this.width - 4,
-      height: this.height - 4,
+      r: this.r.add(3, 3),
+      width: this.width - 6,
+      height: this.height - 6,
     }
   }
 }
