@@ -39,8 +39,9 @@ export class BaseObject {
    * 渲染对象
    * @abstract
    * @param {CanvasRenderingContext2D} ctx
+   * @param {import('../Game2D.js').Game} game 游戏实例
    */
-  render(ctx) {
+  render(ctx, game) {
     // missing texture
     const tileSize = 16
     const cols = Math.ceil(this.width / tileSize)

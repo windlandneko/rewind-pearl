@@ -45,6 +45,7 @@ export class PauseManager {
   pause() {
     if (this.isPaused) return
 
+    SoundManager.pauseBGM()
     SoundManager.play('pause', {
       volume: 0.3
     })
@@ -67,6 +68,8 @@ export class PauseManager {
 
     this.isPaused = false
     this.$pauseOverlay.classList.remove('show')
+
+    SoundManager.resumeBGM()
 
     // 通知游戏恢复
     this.#listener.emit('resume')

@@ -34,6 +34,20 @@ class SoundManager {
     this.BGM = bgm
   }
 
+  pauseBGM() {
+    const bgm = this.BGM
+    if (!bgm) return
+    bgm.pause()
+  }
+
+  resumeBGM() {
+    const bgm = this.BGM
+    if (!bgm) return
+    bgm.play().catch(() => {
+      console.warn(`Failed to resume bgm: ${bgm.src}`)
+    })
+  }
+
   stopBGM({ fadeOut = true, fadeTime = 1000 } = {}) {
     const bgm = this.BGM
     if (!bgm) return

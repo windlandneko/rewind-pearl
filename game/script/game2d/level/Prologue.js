@@ -1,11 +1,12 @@
 import {
+  BaseObject,
+  Collectible,
   Enemy,
   Interactable,
-  Collectible,
   LevelChanger,
+  MovingPlatform,
   Platform,
   Trigger,
-  MovingPlatform,
 } from '../gameObject/index.js'
 import Vec2 from '../Vector.js'
 import SoundManager from '../../SoundManager.js'
@@ -57,7 +58,7 @@ export function Prologue(game) {
     new Platform(-16, -16, 56, 224),
     new Platform(40, 144, 296, 64),
     new Platform(104, 136, 232, 8),
-    new LevelChanger(320, 0, 16, 16, 'Stage1', true),
+    new LevelChanger(320, 0, 16, 16, 'DoublePlatformTest', true),
     new Platform(272, 16, 64, 120),
     new Platform(176, -16, 160, 16),
     new Platform(40, 128, 8, 16),

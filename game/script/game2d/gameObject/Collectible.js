@@ -6,7 +6,7 @@ export class Collectible extends BaseObject {
   bobOffset = 0
 
   constructor(x, y, spriteId) {
-    super(x, y, 8, 8)
+    super(x, y, 10, 10)
     this.spriteId = spriteId
   }
 
@@ -15,26 +15,42 @@ export class Collectible extends BaseObject {
   }
 
   interactWithPlayer(player, game) {
+    if (this.collected) return
     if (player.checkCollision(this) && !player.removed) {
-      this.removed = true
-      player.score += 1
+      this.collected = true
+      game.sound.play('lgods' + Math.ceil(Math.random() * 4))
     }
   }
 
-  render(ctx) {
+  render(ctx, { scale, tick }) {
+    if (this.collected) return
+
+    const x = Math.round(this.r.x * scale) / scale
+    const y = Math.round(this.r.y * scale) / scale
+
     if (Asset.has(this.spriteId)) {
       const sprite = Asset.get(this.spriteId)
-      const dy = this.height + Math.sin(this.bobOffset) * 2
+      const width = this.width
+      const height = (sprite.height / sprite.width) * width
+      const dy = Math.sin(this.bobOffset * 3) - 1
       ctx.drawImage(
         sprite,
-        this.r.x,
-        this.r.y + dy,
-        this.width,
-        this.height + dy
+        x - width / 2,
+        y + dy + this.height - height,
+        width,
+        height
       )
     } else {
-      ctx.fillStyle = '#ff845eff'
-      ctx.fillRect(this.r.x, this.r.y, this.width, this.height)
+      ctx.save()
+      ctx.fillStyle = '#0ff'
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
+      ctx.shadowBlur = 16
+
+      const radius = 6
+      ctx.beginPath()
+      ctx.arc(x + this.width / 2, y + this.height / 2, radius, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
     }
   }
 
@@ -43,6 +59,7 @@ export class Collectible extends BaseObject {
       ...super.state,
       bobOffset: this.bobOffset,
       spriteId: this.spriteId,
+      collected: this.collected,
     }
   }
 
@@ -50,5 +67,6 @@ export class Collectible extends BaseObject {
     super.state = state
     this.bobOffset = state.bobOffset
     this.spriteId = state.spriteId
+    this.collected = state.collected
   }
 }

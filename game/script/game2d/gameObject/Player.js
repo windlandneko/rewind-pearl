@@ -5,6 +5,7 @@ import SpriteAnimation from '../Sprite.js'
 import Asset from '../../Asset.js'
 import Keyboard from '../../Keyboard.js'
 import { MAX_SNAPSHOTS_COUNT } from '../GameConfig.js'
+import * as Levels from '../level/index.js'
 
 export const InputEnum = {
   INTERACT: 1 << 0,
@@ -27,7 +28,8 @@ export class Player extends BaseObject {
   invincibleTime = 1 // 无敌时间 (秒)
 
   onGround = false
-  health = 5
+  maxHealth = 1
+  health = 1
   score = 0
   damageTimer = 0
 
@@ -55,10 +57,10 @@ export class Player extends BaseObject {
   animationManager = new AnimationManager()
 
   constructor(x, y) {
-    super(x, y, 10, 16)
+    super(x, y, 8, 16)
     this.previousPosition = new Vec2(x, y)
     this.groundCheckBox = {
-      r: { x: this.r.x + 1, y: this.r.y + this.height },
+      r: this.r.add(1, this.height),
       width: this.width - 2,
       height: 1,
     }
@@ -96,10 +98,6 @@ export class Player extends BaseObject {
         this.v.x > 0 ? 'walk_right' : 'walk_left'
       )
     } else {
-      this.animationManager.playAnimation(
-        direction > 0 ? 'walk_right' : 'walk_left',
-        true
-      )
     }
   }
 
@@ -128,7 +126,57 @@ export class Player extends BaseObject {
     else this.onHorizontalInput(0, dt)
   }
 
+  // 死亡动画相关
+  isExploding = false
+  explodeAnim = null
+  explodeAnimTime = 0
+  explodeAnimDuration = (1000 / 60) * 79
+
   update(dt, game) {
+    // 死亡动画播放时，暂停输入和物理，仅更新动画
+    if (this.isExploding) {
+      this.explodeAnim.update(dt)
+      this.explodeAnimTime += dt
+      if (
+        this.explodeAnim.isComplete() ||
+        this.explodeAnimTime >= this.explodeAnimDuration
+      ) {
+        // 动画播放完毕，重生
+        game.stop()
+        game.loadLevel(Levels[game.levelData.name])
+
+        game.tick = 0
+        game.maxTick = 0
+
+        game.start()
+      }
+      return
+    }
+    if (this.health <= 0) {
+      // 死亡，播放爆炸动画并暂停游戏
+      if (!this.isExploding) {
+        this.isExploding = true
+
+        game.sound.play('pldead00', {
+          single: true,
+          volume: 0.3,
+        })
+
+        // 加载爆炸动画
+        const img = Asset.get('sprite/explode')
+        this.explodeAnim = new SpriteAnimation(
+          img,
+          79,
+          112,
+          112,
+          1000 / 60,
+          false
+        )
+        this.explodeAnimTime = 0
+      }
+      return
+    }
+
     this.processInputEvents(dt, game)
 
     this.previousPosition.x = this.r.x
@@ -139,7 +187,7 @@ export class Player extends BaseObject {
     const acceleration = new Vec2()
 
     // 重力
-    acceleration.y += this.gravity
+    acceleration.y += this.jumpKeyPressed ? this.gravity * 0.4 : this.gravity
 
     // 速度
     this.v.addTo(acceleration.mul(dt))
@@ -148,8 +196,7 @@ export class Player extends BaseObject {
     this.r.addTo(this.v.mul(dt))
 
     // 更新地面检测框位置
-    this.groundCheckBox.r.x = this.r.x + 1
-    this.groundCheckBox.r.y = this.r.y + this.height
+    this.groundCheckBox.r = this.r.add(1, this.height)
 
     // 无敌时间
     this.damageTimer = Math.max(0, this.damageTimer - dt)
@@ -235,8 +282,8 @@ export class Player extends BaseObject {
       )
     } else {
       // 停止移动
-      const decay = this.onGround ? 11 : 0.8
-      this.v.x *= Math.pow(0.1, decay * dt)
+      if (this.onGround) this.v.x = 0
+      else this.v.x *= Math.pow(0.1, dt)
     }
   }
 
@@ -276,9 +323,21 @@ export class Player extends BaseObject {
     }
   }
 
-  render(ctx, scale) {
+  render(ctx, { scale }) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
+
+    // 死亡爆炸动画优先渲染
+    if (this.isExploding && this.explodeAnim) {
+      this.explodeAnim.render(
+        ctx,
+        x + (this.width - 48) / 2,
+        y + (this.height - 48) / 2,
+        48,
+        48
+      )
+      return
+    }
 
     // 受伤时闪烁效果
     if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.15) % 2 === 0) {
@@ -315,6 +374,7 @@ export class Player extends BaseObject {
       invincibleTime: this.invincibleTime,
 
       onGround: this.onGround,
+      maxHealth: this.maxHealth,
       health: this.health,
       score: this.score,
       damageTimer: this.damageTimer,
@@ -354,6 +414,7 @@ export class Player extends BaseObject {
     this.invincibleTime = state.invincibleTime
 
     this.onGround = state.onGround
+    this.maxHealth = state.maxHealth
     this.health = state.health
     this.score = state.score
     this.damageTimer = state.damageTimer

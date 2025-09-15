@@ -142,6 +142,10 @@ export class Game {
       }),
       Keyboard.onKeyup(['R'], () => {
         TimeTravel.endTimeTravelPreview(this)
+      }),
+
+      Keyboard.onKeyup(['C'], () => {
+        this.changeLevel(prompt('[Debug] 输入关卡名称', 'Prologue') || 'Prologue')
       })
     )
   }
@@ -345,7 +349,7 @@ export class Game {
       localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
     }
 
-    this.showNotification('游戏已保存', true)
+    this.showNotification('已自动保存', true)
     return true
   }
 
@@ -458,7 +462,7 @@ export class Game {
     // 更新摄像机
     this.camera.update(dt)
 
-    if (this.tick % 2000 === 0) this.saveGame('自动保存', true)
+    if (this.tick % 6000 === 5000) this.saveGame('自动保存', true)
   }
 
   /**
@@ -479,22 +483,22 @@ export class Game {
 
     // 按优先级渲染游戏对象
     this.renderGroups.movingPlatforms.forEach(entity =>
-      entity.render(ctx, this.scale)
+      entity.render(ctx, this)
     )
     this.renderGroups.collectibles.forEach(entity =>
-      entity.render(ctx, this.scale)
+      entity.render(ctx, this)
     )
-    this.renderGroups.enemies.forEach(entity => entity.render(ctx, this.scale))
+    this.renderGroups.enemies.forEach(entity => entity.render(ctx, this))
     this.renderGroups.interactables.forEach(entity =>
-      entity.render(ctx, this.scale)
+      entity.render(ctx, this)
     )
     this.renderGroups.platforms.forEach(entity =>
-      entity.render(ctx, this.scale)
+      entity.render(ctx, this)
     )
 
     // 渲染玩家
     this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))
-    this.player.render(ctx, this.scale)
+    this.player.render(ctx, this)
 
     ctx.restore()
 
@@ -516,7 +520,7 @@ export class Game {
       obj => obj.type === 'Collectible'
     )
     this.renderGroups.enemies = this.gameObjects.filter(
-      obj => obj.type === 'Enemy'
+      obj => obj.type === 'Enemy' || obj.type === 'Hazard'
     )
     this.renderGroups.interactables = this.gameObjects.filter(
       obj =>
@@ -544,12 +548,12 @@ export class Game {
     this.camera.target = this.player
 
     // 设置跟随边距
-    const paddingX = width * 0.3
-    const paddingY = height * 0.3
+    const paddingX = width * 0.4
+    const paddingY = height * 0.45
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
 
     // 设置平滑跟随
-    this.camera.smoothFactor = 0.05
+    this.camera.smoothFactor = 0.02
 
     // 设置世界边界
     this.camera.setWorldBounds(

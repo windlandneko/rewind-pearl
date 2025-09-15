@@ -54,7 +54,7 @@
         </button>
         <button id="hazardTool" class="tool">
             <i class="fas fa-exclamation-triangle icon"></i>
-            <span>危险</span>
+            <span>刺儿</span>
         </button>
         <button id="triggerTool" class="tool">
             <i class="fas fa-star icon"></i>
@@ -67,7 +67,16 @@
         </button>
     </div>
     <div id="propertiesPanel">
-        <h3 id="propertiesTitle">属性编辑器</h3>
+        <h3 style="display: flex; align-items: center; justify-content: space-between;">
+            <span id="propertiesTitle">属性编辑器</span>
+            <button id="togglePropertiesPanelBtn"
+                style="background: none; border: none; cursor: pointer; padding: 0; margin-left: 8px; display: flex; align-items: center;">
+                <svg id="toggleArrow" width="16" height="16" viewBox="0 0 16 16" style="transition: transform 0.2s;"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <polyline points="4,6 8,10 12,6" fill="none" stroke="currentColor" stroke-width="2" />
+                </svg>
+            </button>
+        </h3>
         <div id="propertiesContent"></div>
     </div>
     <div class="actions">

@@ -23,7 +23,7 @@ const TOOL_COLOR = {
   platform: '#888',
   interactable: '#0f0',
   movingPlatform: '#520',
-  levelChanger: '#fff',
+  levelChanger: '#be6',
   enemy: '#800',
   collectible: '#0ff',
   hazard: '#f80',
@@ -108,6 +108,21 @@ const GRID_SIZE = 8
 const propertiesPanel = document.getElementById('propertiesPanel')
 const propertiesTitle = document.getElementById('propertiesTitle')
 const propertiesContent = document.getElementById('propertiesContent')
+const toggleBtn = document.getElementById('togglePropertiesPanelBtn')
+const arrow = document.getElementById('toggleArrow')
+let collapsed = false
+if (toggleBtn && arrow) {
+  toggleBtn.addEventListener('click', () => {
+    collapsed = !collapsed
+    if (collapsed) {
+      propertiesPanel.style.maxHeight = '44px'
+      arrow.style.transform = 'rotate(-90deg)'
+    } else {
+      propertiesPanel.style.maxHeight = '600px'
+      arrow.style.transform = 'rotate(0deg)'
+    }
+  })
+}
 
 // 关卡管理
 let levels = {} // 存储关卡数据，键为关卡名称，值为关卡数据
@@ -316,6 +331,14 @@ function showProperties(obj) {
         onChange: value => (obj.leaveCallback = value),
       })
       break
+    case TOOL.hazard:
+      addProperty({
+        label: '刺的显示方向',
+        value: obj.direction || 'up',
+        type: 'select',
+        onChange: value => (obj.direction = value),
+        options: ['up', 'down', 'left', 'right'],
+      })
   }
 }
 showProperties(levelData)
@@ -588,9 +611,34 @@ function drawObject(obj) {
 
   if (obj.type === TOOL.collectible) {
     // 收集品绘制为圆形
-    const radius = 6 // 收集品的半径
+    const radius = 5
     ctx.beginPath()
     ctx.arc(obj.x, obj.y, radius, 0, Math.PI * 2)
+    ctx.fill()
+  } else if (obj.type === TOOL.hazard) {
+    ctx.fillRect(obj.x, obj.y, obj.width, obj.height)
+    const direction = obj.direction || 'up'
+    // 绘制刺的朝向
+    ctx.beginPath()
+    if (direction === 'up') {
+      ctx.moveTo(obj.x + obj.width / 2 - 3, obj.y + obj.height)
+      ctx.lineTo(obj.x + obj.width / 2, obj.y + obj.height - 3)
+      ctx.lineTo(obj.x + obj.width / 2 + 3, obj.y + obj.height)
+    } else if (direction === 'down') {
+      ctx.moveTo(obj.x + obj.width / 2 - 3, obj.y)
+      ctx.lineTo(obj.x + obj.width / 2, obj.y + 3)
+      ctx.lineTo(obj.x + obj.width / 2 + 3, obj.y)
+    } else if (direction === 'left') {
+      ctx.moveTo(obj.x + obj.width, obj.y + obj.height / 2 - 3)
+      ctx.lineTo(obj.x + obj.width - 3, obj.y + obj.height / 2)
+      ctx.lineTo(obj.x + obj.width, obj.y + obj.height / 2 + 3)
+    } else if (direction === 'right') {
+      ctx.moveTo(obj.x, obj.y + obj.height / 2 - 3)
+      ctx.lineTo(obj.x + 3, obj.y + obj.height / 2)
+      ctx.lineTo(obj.x, obj.y + obj.height / 2 + 3)
+    }
+    ctx.closePath()
+    ctx.fillStyle = '#fff'
     ctx.fill()
   } else {
     // 其他物体绘制为矩形
@@ -713,7 +761,7 @@ function drawBoxSelect() {
 
 // 获取收集品的AABB（轴对齐包围盒）
 function getCollectibleAABB(obj) {
-  const radius = 12 // 收集品半径
+  const radius = 6 // 收集品半径
   return {
     x: obj.x - radius,
     y: obj.y - radius,
@@ -832,9 +880,6 @@ function getObjectsInBox() {
   const height = Math.abs(boxSelectEnd.y - boxSelectStart.y)
 
   return objects.filter(obj => {
-    // 排除玩家出生点
-    if (obj.type === 'spawnpoint') return false
-
     // 收集品使用点检测
     if (obj.type === TOOL.collectible) {
       return (
@@ -884,7 +929,7 @@ function removeFromSelection(obj) {
 
 // 全选所有游戏物体
 function selectAllObjects() {
-  selectedObjects = objects.filter(obj => obj.type !== 'spawnpoint') // 选择所有游戏物体，排除spawnpoint
+  selectedObjects = objects.slice() // 选择所有游戏物体，包括spawnpoint
   showProperties(levelData) // 显示关卡属性而不是单个物体属性
   updateCursor(lastMousePos)
   draw()
@@ -1407,14 +1452,14 @@ function createObject(type, pos) {
         type,
         x,
         y,
-        spriteId: 'spriteId',
+        spriteId: 'sprite/linggangu',
       }
       break
     case TOOL.interactable:
       obj = {
         ...obj,
         dialogue: 'dialogue',
-        spriteId: 'spriteId',
+        spriteId: 'sprite/linggangu',
         text: 'text',
       }
       break
@@ -1439,6 +1484,8 @@ function createObject(type, pos) {
         enterCallback:
           "game.player.maxAirJumps = 1\ngame.sound.play('bonus')\n",
       }
+    case TOOL.hazard:
+      obj = { ...obj, direction: 'up' }
   }
   return obj
 }
@@ -1574,7 +1621,24 @@ function updateMovingPlatform(obj, currentTime) {
 
 // 导出代码
 function exportCode() {
+  // 查找 objects 中的 spawnpoint
+  const spawnObj = objects.find(obj => obj.type === 'spawnpoint') || spawnpoint
   let code = `\
+import {
+  BaseObject,
+  Collectible,
+  Enemy,
+  Hazard,
+  Interactable,
+  LevelChanger,
+  MovingPlatform,
+  Platform,
+  Trigger,
+} from '../gameObject/index.js'
+import Vec2 from '../Vector.js'
+import SoundManager from '../../SoundManager.js'
+
+export function ${levelSelect.value || 'UnknownLevelName'}(game) {
   const height = ${levelData.height}
   const width = ${levelData.width}
 
@@ -1584,9 +1648,7 @@ function exportCode() {
     height,
     width,
     worldBorder: ${levelData.worldBorder},
-    spawnpoint: new Vec2(${spawnpoint.x + spawnpoint.width / 2}, ${
-    spawnpoint.y + spawnpoint.height
-  }),
+    spawnpoint: new Vec2(${spawnObj.x}, ${spawnObj.y}),
     cameraHeight: ${levelData.cameraHeight},
   }
 
@@ -1617,10 +1679,10 @@ function exportCode() {
         code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
         break
       case TOOL.collectible:
-        code += `    new Collectible(${obj.x}, ${obj.y}, ${obj.spriteId})`
+        code += `    new Collectible(${obj.x - 3}, ${obj.y - 3}, '${obj.spriteId}')`
         break
       case TOOL.hazard:
-        code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+        code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
         break
       case TOOL.trigger:
         code += `    new Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${
@@ -1635,7 +1697,7 @@ function exportCode() {
     if (obj.ref) code += `.ref('${obj.ref}')`
     code += ',\n'
   })
-  code = code.slice(0, -2) + '\n  )\n'
+  code = code.slice(0, -2) + '\n  )\n}\n'
   navigator.clipboard.writeText(code).then(() => {
     document.getElementById('exportBtn').innerHTML =
       '<i class="fas fa-check"></i> 已复制到剪贴板'
@@ -1936,6 +1998,7 @@ function pasteObjects() {
   }
 
   console.log(`已粘贴 ${newObjects.length} 个对象`)
+  draw()
 }
 
 addEventListener('keydown', event => {

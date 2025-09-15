@@ -39,10 +39,6 @@ export class Interactable extends BaseObject {
     return true
   }
 
-  /**
-   * 渲染可交互物体
-   * @param {CanvasRenderingContext2D} ctx
-   */
   render(ctx) {
     ctx.save()
 

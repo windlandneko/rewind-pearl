@@ -10,6 +10,14 @@ export default class Vec2 {
   }
 
   /**
+   * Creates a copy of this vector.
+   * @returns {Vec2} A new vector with the same components as this one.
+   */
+  clone() {
+    return new Vec2(this.x, this.y)
+  }
+
+  /**
    * Returns a new vector adding another vector or coordinates together.
    *
    * @overload

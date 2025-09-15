@@ -5,7 +5,7 @@ export class MovingPlatform extends Platform {
   timer = 0
   target = 0
   deltaPosition = null
-  color = '#666'
+  color = '#fafafa'
 
   /**
    * 移动平台
@@ -53,7 +53,7 @@ export class MovingPlatform extends Platform {
     if (this.moveType === 'still') {
       let k = this.r.sub(this.from).len() / this.to.sub(this.from).len()
       if (k < this.target) k = Math.min(1, k + dt / this.interval)
-      else k = Math.max(0, k - dt / this.interval)
+      if (k > this.target) k = Math.max(0, k - dt / this.interval)
 
       this.r = this.to.sub(this.from).mul(k).add(this.from)
     } else {

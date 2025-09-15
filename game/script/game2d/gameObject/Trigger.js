@@ -57,6 +57,14 @@ export class Trigger extends BaseObject {
     }
   }
 
+  render(ctx, { scale }) {
+    const x = Math.round(this.r.x * scale) / scale
+    const y = Math.round(this.r.y * scale) / scale
+
+    ctx.fillStyle = '#f2de32'
+    ctx.fillRect(x, y, this.width, this.height)
+  }
+
   get state() {
     return {
       ...super.state,

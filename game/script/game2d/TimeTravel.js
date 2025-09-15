@@ -112,19 +112,19 @@ class TimeTravelManager {
 
     // 按优先级渲染游戏对象
     game.renderGroups.movingPlatforms.forEach(entity =>
-      entity.render(tmpctx, game.scale)
+      entity.render(tmpctx, game)
     )
     game.renderGroups.collectibles.forEach(entity =>
-      entity.render(tmpctx, game.scale)
+      entity.render(tmpctx, game)
     )
     game.renderGroups.enemies.forEach(entity =>
-      entity.render(tmpctx, game.scale)
+      entity.render(tmpctx, game)
     )
     game.renderGroups.interactables.forEach(entity =>
-      entity.render(tmpctx, game.scale)
+      entity.render(tmpctx, game)
     )
     game.renderGroups.platforms.forEach(entity =>
-      entity.render(tmpctx, game.scale)
+      entity.render(tmpctx, game)
     )
 
     // 渲染玩家
@@ -140,7 +140,7 @@ class TimeTravelManager {
       ghost.state = game.player.stateHistory.get(tick)
       ghost.render(tmpctx, game)
     }
-    game.player.render(tmpctx, game.scale)
+    game.player.render(tmpctx, game)
     tmpctx.restore()
 
     game.importGameObjects(state)

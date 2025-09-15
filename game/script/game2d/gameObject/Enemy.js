@@ -41,14 +41,13 @@ export class Enemy extends BaseObject {
     if (player.v.y > 0 && player.r.y + player.height < this.r.y + this.height) {
       this.removed = true
       player.v.y = -player.jumpSpeed * 0.6 // 小跳跃
-      player.score += 100
     } else {
       // 玩家受伤
       player.onDamage()
     }
   }
 
-  render(ctx, scale) {
+  render(ctx, { scale }) {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 

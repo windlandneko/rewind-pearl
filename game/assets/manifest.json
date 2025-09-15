@@ -58,6 +58,7 @@
   },
 
   "dialogue": {
+    "test_scene": "dialogue/test_scene.json",
     "prologue": "dialogue/prologue.json",
     "chapter1_end": "dialogue/chapter1_end.json",
     "chapter1_start": "dialogue/chapter1_start.json",
@@ -81,7 +82,7 @@
     "intro": "background/intro.jpg",
     "litang": "background/litang.png",
     "magic": "background/magic.jpg",
-    "test": "background/test.png",
+    "test": "background/01.data.png",
     "underground": "background/underground.png"
   },
 
@@ -93,7 +94,8 @@
       "walk_right": "sprite/walk_right.png"
     },
     "linggangu": "sprite/linggangu.png",
-    "linggangu_stone": "sprite/linggangu_stone.png"
+    "linggangu_stone": "sprite/linggangu_stone.png",
+    "explode": "sprite/explode.png"
   },
 
   "soundEffects": {
