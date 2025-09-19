@@ -32,8 +32,9 @@ class TimeTravelManager {
 
   get canTimeTravel() {
     return (
-      this.#game.tick < TIME_TRAVEL_DISTANCE ||
-      this.#game.player.timeTravelUsed > this.#game.player.timeTravelMax
+      this.#game.tick >= TIME_TRAVEL_DISTANCE &&
+      this.#game.globalState.timeTravelUsed <
+        this.#game.globalState.timeTravelMax
     )
   }
 
@@ -42,10 +43,10 @@ class TimeTravelManager {
       const holdTime = performance.now() - this.startTime
       if (holdTime >= TIME_TRAVEL_CHARGE_TIME) {
         if (this.canTimeTravel) {
-          this.state = null
-        } else {
           this.state = 'success'
           this.#game.player.timeTravelUsed++
+        } else {
+          this.state = null
         }
       } else {
         this.radius = (12 + holdTime / 200) * 0.1 + this.radius * 0.9
@@ -121,19 +122,19 @@ class TimeTravelManager {
 
     // 按优先级渲染游戏对象
     game.renderGroups.interactables.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, game)
+      if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.collectibles.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, game)
+      if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.enemies.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, game)
+      if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.movingPlatforms.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, game)
+      if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.platforms.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, game)
+      if (!obj.hidden) obj.render(tmpctx, game)
     })
 
     // 渲染玩家
@@ -173,8 +174,8 @@ class TimeTravelManager {
       this.state === 'success'
         ? 'rgba(255, 255, 255, 0.5)'
         : this.canTimeTravel
-        ? 'rgba(255, 0, 0, 0.5)'
-        : 'rgba(87, 87, 200, 0.5)'
+        ? 'rgba(87, 87, 200, 0.5)'
+        : 'rgba(255, 0, 0, 0.5)'
     )
     tmpctx.fillStyle = gradient
     tmpctx.beginPath()
@@ -223,8 +224,8 @@ class TimeTravelManager {
       this.state === 'success'
         ? '#ffffff'
         : this.canTimeTravel
-        ? '#ff0000'
-        : '#aaaaaa'
+        ? '#aaaaaa'
+        : '#ff0000'
     ctx.lineWidth = 5
     ctx.beginPath()
     ctx.arc(

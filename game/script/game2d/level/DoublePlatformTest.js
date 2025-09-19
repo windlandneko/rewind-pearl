@@ -35,12 +35,12 @@ export function DoublePlatformTest(game) {
   SoundManager.playBGM('Memories of Memories')
 
   game.gameObjects.push(
-    new Collectible(26, 154, 'sprite/linggangu'),
-    new Collectible(74, 82, 'sprite/linggangu_stone'),
-    new Collectible(194, 50, 'sprite/linggangu'),
-    new Collectible(234, 106, 'sprite/linggangu'),
-    new Collectible(306, 10, 'sprite/linggangu_stone'),
-    new Collectible(306, 146, 'sprite/linggangu'),
+    new Collectible(26, 154, 'sprite/linggangu', undefined),
+    new Collectible(74, 82, 'sprite/linggangu_stone', undefined),
+    new Collectible(194, 50, 'sprite/linggangu', undefined),
+    new Collectible(234, 106, 'sprite/linggangu', undefined),
+    new Collectible(306, 10, 'sprite/linggangu_stone', undefined),
+    new Collectible(306, 146, 'sprite/linggangu', undefined),
     new Hazard(16, 48, 24, 8, 'down'),
     new Hazard(16, 112, 8, 8, 'up'),
     new Hazard(16, 136, 16, 8, 'down'),
@@ -74,7 +74,7 @@ export function DoublePlatformTest(game) {
     new Platform(16, 120, 8, 8),
     new Platform(16, 128, 16, 8),
     new Platform(16, 168, 24, 8),
-    new Platform(16, 176, 312, 16),
+    new Platform(16, 176, 320, 16),
     new Platform(40, 32, 56, 8),
     new Platform(48, 64, 8, 8),
     new Platform(48, 96, 8, 16),
@@ -93,10 +93,10 @@ export function DoublePlatformTest(game) {
     new Platform(232, 168, 16, 8),
     new Platform(280, 168, 8, 8),
     new Platform(288, 24, 48, 56),
-    new Platform(288, 160, 56, 16),
-    new Platform(328, 176, 16, 8),
+    new Platform(288, 160, 72, 16),
     new Platform(336, 48, 8, 32),
     new Platform(336, 80, 16, 8),
+    new Platform(336, 176, 16, 8),
     new Platform(360, 104, 8, 8),
     new Platform(400, 160, 24, 8),
     new Platform(424, 104, 8, 16),
@@ -120,10 +120,8 @@ export function DoublePlatformTest(game) {
       game.levelData.cameraBound.x = 320 - 16
     }, null).hide(),
     new Trigger(320, 80, 8, 88, true, (game, $) => {
-      game.levelData.spawnpoint = new Vec2(296, 168)
+      game.levelData.spawnpoint = new Vec2(336, 144)
       game.sound.play('heal')
-      console.log($('airWall1'))
-      $('airWall1').remove()
     }, null).hide()
   )
 }

@@ -22,6 +22,12 @@ export class Game {
   /** @type {GameObjects.BaseObject[]} */
   gameObjects = []
 
+  // 全局数据
+  globalState = {
+    timeTravelUsed: 0,
+    timeTravelMax: 1,
+  }
+
   // 渲染缓存（避免每帧重复过滤）
   renderGroups = {
     platforms: [],
@@ -291,7 +297,7 @@ export class Game {
     })
   }
 
-  loadGame({ levelData, gameObjects, player }) {
+  loadGame({ levelData, gameObjects, player, globalState }) {
     this.stop()
 
     const levelName = levelData.name || 'Level1'
@@ -304,6 +310,8 @@ export class Game {
     this.tick = 0
     this.maxTick = 0
     this.importGameObjects(gameObjects)
+
+    this.globalState = globalState || {}
 
     this.start(true)
   }
@@ -321,6 +329,7 @@ export class Game {
       player: this.player?.state || {},
       gameObjects: this.exportGameObjects(),
       levelData: this.levelData,
+      globalState: this.globalState,
     }
 
     if (autosave) {

@@ -33,10 +33,6 @@ export class Player extends BaseObject {
   score = 0
   damageTimer = 0
 
-  // 时间回溯
-  timeTravelUsed = 0
-  timeTravelMax = 1
-
   // 狼跳
   coyote = 0.15 // 土狼时间：离开地面后还能跳跃的时间(秒)
   coyoteTimer = 0 // 计时器
@@ -150,6 +146,7 @@ export class Player extends BaseObject {
         game.maxTick = 0
         game.history = new Map()
         game.ghostPlayers = []
+        game.globalState.timeTravelUsed = 0
 
         game.player = new Player(
           game.levelData.spawnpoint.x,
@@ -410,9 +407,6 @@ export class Player extends BaseObject {
       score: this.score,
       damageTimer: this.damageTimer,
 
-      timeTravelUsed: this.timeTravelUsed,
-      timeTravelMax: this.timeTravelMax,
-
       coyote: this.coyote,
       coyoteTimer: this.coyoteTimer,
 
@@ -452,9 +446,6 @@ export class Player extends BaseObject {
     this.health = state.health
     this.score = state.score
     this.damageTimer = state.damageTimer
-
-    this.timeTravelUsed = state.timeTravelUsed
-    this.timeTravelMax = state.timeTravelMax
 
     this.coyote = state.coyote
     this.coyoteTimer = state.coyoteTimer
