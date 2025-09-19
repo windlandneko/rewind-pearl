@@ -62,11 +62,29 @@ export class BaseObject {
 
   /**
    * 设置引用名称，可供回调函数使用
-   * @param {*} name
-   * @returns
+   * @param {string} name
+   * @returns {BaseObject}
    */
   ref(name) {
     this._ref = name
+    return this
+  }
+
+  /**
+   * 隐藏对象
+   * @returns {BaseObject}
+   */
+  hide() {
+    this.hidden = true
+    return this
+  }
+
+  /**
+   * 移除对象
+   * @returns {BaseObject}
+   */
+  remove() {
+    this.removed = true
     return this
   }
 
@@ -83,6 +101,7 @@ export class BaseObject {
       width: this.width,
       height: this.height,
       color: this.color,
+      hidden: this.hidden,
       removed: this.removed,
       _ref: this._ref,
     }
@@ -99,6 +118,7 @@ export class BaseObject {
     this.width = state.width
     this.height = state.height
     this.color = state.color
+    this.hidden = state.hidden
     this.removed = state.removed
     this._ref = state._ref
   }

@@ -5,9 +5,10 @@ export class Collectible extends BaseObject {
   color = '#FFC107'
   bobOffset = 0
 
-  constructor(x, y, spriteId) {
+  constructor(x, y, spriteId, onlyGhostCanCollect = false) {
     super(x, y, 12, 12)
     this.spriteId = spriteId
+    this.onlyGhostCanCollect = onlyGhostCanCollect
   }
 
   update(dt) {
@@ -17,6 +18,7 @@ export class Collectible extends BaseObject {
   interactWithPlayer(player, game) {
     if (this.collected) return
     if (player.checkCollision(this) && !player.removed) {
+      if (this.onlyGhostCanCollect && player.type !== 'GhostPlayer') return
       this.collected = true
       game.sound.play('lgods' + Math.ceil(Math.random() * 4))
     }
@@ -59,6 +61,7 @@ export class Collectible extends BaseObject {
       bobOffset: this.bobOffset,
       spriteId: this.spriteId,
       collected: this.collected,
+      onlyGhostCanCollect: this.onlyGhostCanCollect,
     }
   }
 
@@ -67,5 +70,6 @@ export class Collectible extends BaseObject {
     this.bobOffset = state.bobOffset
     this.spriteId = state.spriteId
     this.collected = state.collected
+    this.onlyGhostCanCollect = state.onlyGhostCanCollect
   }
 }

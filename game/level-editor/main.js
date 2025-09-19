@@ -144,6 +144,12 @@ function showProperties(obj) {
   // 通用属性
   if (obj.type !== 'levelData') {
     addProperty({
+      label: '隐藏对象',
+      value: obj.hidden || false,
+      type: 'checkbox',
+      onChange: value => (obj.hidden = value),
+    })
+    addProperty({
       label: '# ref',
       value: obj.ref || '',
       type: 'text',
@@ -315,6 +321,12 @@ function showProperties(obj) {
         value: obj.spriteId || '',
         type: 'text',
         onChange: value => (obj.spriteId = value),
+      })
+      addProperty({
+        label: '仅幽灵玩家可收集',
+        value: obj.onlyGhostCanCollect || false,
+        type: 'checkbox',
+        onChange: value => (obj.onlyGhostCanCollect = value),
       })
       break
     case TOOL.trigger:
@@ -618,7 +630,7 @@ function drawObject(obj) {
     drawMovingPlatformAnchor(obj)
   }
 
-  ctx.fillStyle = TOOL_COLOR[obj.type] || '#000'
+  ctx.fillStyle = TOOL_COLOR[obj.type] + (obj.hidden ? '4' : 'f')
   ctx.save()
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
@@ -1499,6 +1511,7 @@ function createObject(type, pos) {
         x,
         y,
         spriteId: 'sprite/linggangu',
+        onlyGhostCanCollect: false,
       }
       break
     case TOOL.interactable:
@@ -1522,12 +1535,13 @@ function createObject(type, pos) {
       }
       break
     case TOOL.levelChanger:
-      obj = { ...obj, nextStage: 'nextStage', force: true }
+      obj = { ...obj, nextStage: 'nextStage', force: true, hidden: true }
       break
     case TOOL.trigger:
       obj = {
         ...obj,
         once: true,
+        hidden: true,
         enterCallback:
           "game.player.maxAirJumps = 1\ngame.sound.play('bonus')\n",
       }
@@ -1734,7 +1748,7 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
         case TOOL.collectible:
           code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${
             obj.spriteId
-          }')`
+          }', ${obj.onlyGhostCanCollect})`
           break
         case TOOL.hazard:
           code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
@@ -1762,6 +1776,7 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
           console.warn('未知对象类型，无法导出代码:', obj)
       }
       if (obj.ref) code += `.ref('${obj.ref}')`
+      if (obj.hidden) code += `.hide()`
       code += ',\n'
     })
   code = code.slice(0, -2) + '\n  )\n}\n'
