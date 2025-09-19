@@ -183,7 +183,7 @@ export class Game {
   /**
    * 加载关卡数据
    */
-  loadLevel(setupFunction, centerOnTarget = true) {
+  loadLevel(setupFunction) {
     this.tick = 0
     this.maxTick = 0
     this.gameObjects = []
@@ -197,7 +197,7 @@ export class Game {
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
-    this.#setupCamera(centerOnTarget)
+    this.#setupCamera(this.levelData)
 
     if (this.levelData.background) {
       this.$backgroundImage.src = Asset.get(
@@ -297,7 +297,7 @@ export class Game {
     const levelName = levelData.name || 'Level1'
 
     this.loadLevel(Levels[levelName])
-    this.levelData.introDialogue = levelData.introDialogue
+    Object.assign(this.levelData, levelData)
 
     this.player.state = player
 
@@ -468,6 +468,12 @@ export class Game {
     })
 
     // 更新摄像机
+    this.camera.setWorldBounds(
+      this.levelData.cameraBound?.x,
+      this.levelData.cameraBound?.y,
+      this.levelData.cameraBound?.width,
+      this.levelData.cameraBound?.height
+    )
     this.camera.update(dt)
 
     if (this.tick % 6000 === 5000) this.saveGame('自动保存', true)
@@ -549,9 +555,9 @@ export class Game {
   /**
    * 设置摄像机
    */
-  #setupCamera(centerOnTarget = true) {
+  #setupCamera(levelData) {
     // 计算摄像机视窗尺寸
-    const height = this.levelData.cameraHeight ?? this.levelData.height
+    const height = levelData.cameraHeight
     const width = height * (this.displayWidth / this.displayHeight)
 
     // 设置摄像机参数
@@ -564,18 +570,18 @@ export class Game {
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
 
     // 设置平滑跟随
-    this.camera.smoothFactor = 0.02
+    this.camera.smoothFactor = 0.05
 
     // 设置世界边界
     this.camera.setWorldBounds(
-      0,
-      0,
-      this.levelData.width,
-      this.levelData.height
+      levelData.cameraBound?.x,
+      levelData.cameraBound?.y,
+      levelData.cameraBound?.width,
+      levelData.cameraBound?.height
     )
 
     // 立即居中到玩家
-    if (centerOnTarget) this.camera.centerOnTarget()
+    this.camera.centerOnTarget()
 
     this.scale = this.displayHeight / this.camera.viewport.height
   }

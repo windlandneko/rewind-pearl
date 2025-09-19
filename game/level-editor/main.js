@@ -89,6 +89,7 @@ let levelData = {
   worldBorder: false,
   cameraHeight: 192,
   cameraWidth: 320,
+  cameraBound: { x: 0, y: 0, width: 320, height: 192 },
 }
 
 // 玩家出生点
@@ -211,6 +212,34 @@ function showProperties(obj) {
               `input[type="number"][data-ref="cameraWidth"]`
             ).value = obj.cameraWidth
           },
+        }
+      )
+      addPropertyPair(
+        {
+          label: '摄像机限制 X',
+          value: obj.cameraBound?.x || 0,
+          type: 'number',
+          onChange: value => (obj.cameraBound.x = parseFloat(value)),
+        },
+        {
+          label: '摄像机限制 Y',
+          value: obj.cameraBound?.y || 0,
+          type: 'number',
+          onChange: value => (obj.cameraBound.y = parseFloat(value)),
+        }
+      )
+      addPropertyPair(
+        {
+          label: '↔ 限制宽度',
+          value: obj.cameraBound?.width || 0,
+          type: 'number',
+          onChange: value => (obj.cameraBound.width = parseFloat(value)),
+        },
+        {
+          label: '↕ 限制高度',
+          value: obj.cameraBound?.height || 0,
+          type: 'number',
+          onChange: value => (obj.cameraBound.height = parseFloat(value)),
         }
       )
       addProperty({
@@ -614,9 +643,19 @@ function drawGrid() {
 
 // 绘制关卡边界
 function drawLevelBounds() {
-  ctx.strokeStyle = '#f00'
-  ctx.lineWidth = 2 / zoom
+  ctx.strokeStyle = 'rgba(153, 153, 153, 0.4)'
+  ctx.lineWidth = 4 / zoom
   ctx.strokeRect(0, 0, levelData.width, levelData.height)
+
+  ctx.strokeStyle = 'rgba(0, 170, 255, 1)'
+  ctx.setLineDash([12 / zoom, 8 / zoom])
+  ctx.lineWidth = 2 / zoom
+  ctx.strokeRect(
+    levelData.cameraBound?.x,
+    levelData.cameraBound?.y,
+    levelData.cameraBound?.width,
+    levelData.cameraBound?.height
+  )
 }
 
 // 绘制对象
@@ -1711,6 +1750,12 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
     worldBorder: ${levelData.worldBorder},
     spawnpoint: new Vec2(${spawnObj.x}, ${spawnObj.y}),
     cameraHeight: ${levelData.cameraHeight},
+    cameraBound: {
+      x: ${levelData.cameraBound.x},
+      y: ${levelData.cameraBound.y},
+      width: ${levelData.cameraBound.width},
+      height: ${levelData.cameraBound.height},
+    },
   }
 
   SoundManager.playBGM('${levelData.bgm}')
@@ -2149,6 +2194,7 @@ levelSelect.addEventListener('change', () => {
       worldBorder: false,
       cameraHeight: 192,
       cameraWidth: 320,
+      cameraBound: { x: 0, y: 0, width: 320, height: 192 },
     }
     objects = []
     spawnpoint = {
@@ -2200,6 +2246,13 @@ function loadLevelByName(name) {
   const level = levels[name]
   if (!level) return
   levelData = level.levelData
+  if (!levelData.cameraBound)
+    levelData.cameraBound = {
+      x: 0,
+      y: 0,
+      width: levelData.width,
+      height: levelData.height,
+    }
   objects = level.objects
   spawnpoint = level.spawnpoint
   panOffset = level.panOffset || { x: 0, y: 0 }
@@ -2290,6 +2343,7 @@ if (!loaded) {
       worldBorder: false,
       cameraHeight: 192,
       cameraWidth: 320,
+      cameraBound: { x: 0, y: 0, width: 320, height: 192 },
     }
     objects = []
     spawnpoint = {

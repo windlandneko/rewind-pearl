@@ -69,11 +69,16 @@ export class Camera {
    * 设置世界边界
    * @param {number} minX - 世界最小X坐标
    * @param {number} minY - 世界最小Y坐标
-   * @param {number} maxX - 世界最大X坐标
-   * @param {number} maxY - 世界最大Y坐标
+   * @param {number} width - 世界宽度
+   * @param {number} height - 世界高度
    */
-  setWorldBounds(minX, minY, maxX, maxY) {
-    this.#worldBounds = { minX, minY, maxX, maxY }
+  setWorldBounds(
+    minX,
+    minY,
+    width = this.#worldBounds?.maxX - this.#worldBounds?.minX,
+    height = this.#worldBounds?.maxY - this.#worldBounds?.minY
+  ) {
+    this.#worldBounds = { minX, minY, maxX: minX + width, maxY: minY + height }
   }
 
   /**
