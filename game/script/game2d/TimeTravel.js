@@ -30,11 +30,23 @@ class TimeTravelManager {
     if (this.state !== 'success') this.state = null
   }
 
+  get canTimeTravel() {
+    return (
+      this.#game.tick < TIME_TRAVEL_DISTANCE ||
+      this.#game.player.timeTravelUsed > this.#game.player.timeTravelMax
+    )
+  }
+
   update(dt) {
     if (this.state === 'pending') {
       const holdTime = performance.now() - this.startTime
       if (holdTime >= TIME_TRAVEL_CHARGE_TIME) {
-        this.state = this.#game.tick < TIME_TRAVEL_DISTANCE ? null : 'success'
+        if (this.canTimeTravel) {
+          this.state = null
+        } else {
+          this.state = 'success'
+          this.#game.player.timeTravelUsed++
+        }
       } else {
         this.radius = (12 + holdTime / 200) * 0.1 + this.radius * 0.9
       }
@@ -161,7 +173,7 @@ class TimeTravelManager {
       1,
       this.state === 'success'
         ? 'rgba(255, 255, 255, 0.5)'
-        : game.tick < TIME_TRAVEL_DISTANCE
+        : this.canTimeTravel
         ? 'rgba(255, 0, 0, 0.5)'
         : 'rgba(87, 87, 200, 0.5)'
     )
@@ -211,7 +223,7 @@ class TimeTravelManager {
     ctx.strokeStyle =
       this.state === 'success'
         ? '#ffffff'
-        : game.tick < TIME_TRAVEL_DISTANCE
+        : this.canTimeTravel
         ? '#ff0000'
         : '#aaaaaa'
     ctx.lineWidth = 5
