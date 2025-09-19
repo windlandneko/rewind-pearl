@@ -137,7 +137,10 @@ class TimeTravelManager {
       if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.platforms.forEach(obj => {
-      if (!obj.hidden) obj.render(tmpctx, game)
+      if (!obj.hidden) if (!obj.ladder) obj.render(tmpctx, game)
+    })
+    game.renderGroups.platforms.forEach(obj => {
+      if (!obj.hidden) if (obj.ladder) obj.render(tmpctx, game)
     })
 
     // 渲染玩家

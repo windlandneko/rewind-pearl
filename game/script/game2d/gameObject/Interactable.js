@@ -22,7 +22,7 @@ export class Interactable extends BaseObject {
   async interactWithPlayer(player, game) {
     if (player.removed) return
     this.isHighlighted = player.checkCollision(this)
-    if (this.autoPlay && this.isHighlighted) {
+    if (this.autoPlay && this.isHighlighted && player.onGround) {
       await this.handleKeyInteraction(player, game)
       this.dialogueId = null
     }
@@ -45,8 +45,6 @@ export class Interactable extends BaseObject {
   }
 
   render(ctx) {
-    if (this.autoPlay) return
-
     ctx.save()
 
     if (Asset.has(this.spriteId)) {

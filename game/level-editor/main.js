@@ -428,6 +428,7 @@ function addProperty({
     input = document.createElement('input')
     input.type = 'checkbox'
     input.checked = value
+    labelEl.onclick = () => input.click()
   } else if (type === 'textarea') {
     input = document.createElement('textarea')
     input.value = value

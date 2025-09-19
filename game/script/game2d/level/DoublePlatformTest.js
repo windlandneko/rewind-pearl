@@ -14,7 +14,7 @@ import SoundManager from '../../SoundManager.js'
 
 export function DoublePlatformTest(game) {
   const height = 192
-  const width = 320
+  const width = 640
 
   game.levelData = {
     introDialogue: 'null',
@@ -22,7 +22,7 @@ export function DoublePlatformTest(game) {
     height,
     width,
     worldBorder: false,
-    spawnpoint: new Vec2(32, 16),
+    spawnpoint: new Vec2(16, 16),
     cameraHeight: 192,
     cameraBound: {
       x: 0,
@@ -36,7 +36,7 @@ export function DoublePlatformTest(game) {
 
   game.gameObjects.push(
     new Collectible(26, 154, 'sprite/linggangu', undefined),
-    new Collectible(74, 82, 'sprite/linggangu_stone', undefined),
+    new Collectible(70, 82, 'sprite/linggangu_stone', undefined),
     new Collectible(210, 50, 'sprite/linggangu', undefined),
     new Collectible(234, 106, 'sprite/linggangu', undefined),
     new Collectible(306, 10, 'sprite/linggangu_stone', undefined),
@@ -63,9 +63,10 @@ export function DoublePlatformTest(game) {
     new Hazard(504, 144, 8, 8, 'left'),
     new Hazard(512, 136, 8, 8, 'up'),
     new Interactable(312, 80, 'test_scene', '', 'undefined', true).hide(),
-    new Interactable(520, 104, 'test_scene', 'character/hajimi/normal', '测试', true),
-    new LevelChanger(424, 56, 72, 16, 'Prologue', true).hide(),
-    new MovingPlatform(new Vec2(208, 48), new Vec2(208, 24), 16, 16, true, 2, 'still').ref('plat1'),
+    new Interactable(520, 120, 'test_scene', 'character/hajimi/normal', '测试', true).hide(),
+    new LevelChanger(536, 136, 104, 16, 'Prologue', true).hide(),
+    new MovingPlatform(new Vec2(184, 16), new Vec2(176, 16), 88, 8, true, 2, 'still').ref('plat2'),
+    new MovingPlatform(new Vec2(208, 48), new Vec2(208, 24), 16, 16, false, 2, 'still').ref('plat1'),
     new Platform(-16, -72, 16, 104, false).hide(),
     new Platform(0, 32, 16, 160, false),
     new Platform(16, 32, 40, 16, false),
@@ -78,13 +79,12 @@ export function DoublePlatformTest(game) {
     new Platform(56, 32, 40, 8, false),
     new Platform(56, 64, 8, 48, false),
     new Platform(72, 152, 16, 24, false),
-    new Platform(80, 168, 8, 8, false),
     new Platform(88, 160, 8, 16, false),
     new Platform(96, 32, 16, 56, false),
     new Platform(96, 88, 8, 16, false),
     new Platform(112, 32, 32, 8, false),
     new Platform(112, 40, 48, 8, false),
-    new Platform(112, 112, 96, 8, true),
+    new Platform(112, 88, 40, 8, true),
     new Platform(120, 160, 16, 16, false),
     new Platform(152, 80, 184, 8, false),
     new Platform(184, 152, 8, 24, false),
@@ -104,12 +104,14 @@ export function DoublePlatformTest(game) {
     new Platform(512, 144, 8, 8, false),
     new Platform(520, 136, 16, 16, false),
     new Trigger(168, 77, 16, 8, false, (game, $) => {
-      game.ref('plat1').set(1)
-      game.ref('t1').r.y += 1
+      $('plat1').set(1)
+      $('plat2').set(1)
+      $('t1').r.y += 1
       game.sound.play('item00')
     }, (game, $) => {
-      game.ref('plat1').set(0)
-      game.ref('t1').r.y -= 1
+      $('plat1').set(0)
+      $('plat2').set(0)
+      $('t1').r.y -= 1
       game.sound.play('item00')
     }).ref('t1'),
     new Trigger(288, -72, 16, 288, false, (game, $) => {

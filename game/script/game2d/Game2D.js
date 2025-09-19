@@ -475,15 +475,15 @@ export class Game {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this, dt)
     })
+    this.renderGroups.platforms.forEach(obj => {
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this, dt)
+    })
     this.renderGroups.collectibles.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this, dt)
     })
     this.renderGroups.enemies.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this, dt)
-    })
-    this.renderGroups.interactables.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this, dt)
     })
@@ -493,7 +493,7 @@ export class Game {
       obj.interactWithPlayer(this.player, this, dt)
       obj.trigger(this)
     })
-    this.renderGroups.platforms.forEach(obj => {
+    this.renderGroups.interactables.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this, dt)
     })
@@ -544,7 +544,10 @@ export class Game {
       if (!obj.hidden) obj.render(ctx, this)
     })
     this.renderGroups.platforms.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, this)
+      if (!obj.hidden) if (!obj.ladder) obj.render(ctx, this)
+    })
+    this.renderGroups.platforms.forEach(obj => {
+      if (!obj.hidden) if (obj.ladder) obj.render(ctx, this)
     })
 
     // 渲染玩家
