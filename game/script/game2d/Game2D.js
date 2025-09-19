@@ -146,10 +146,20 @@ export class Game {
       }),
 
       Keyboard.onKeydown(['R'], () => {
-        if (this.player.onGround) TimeTravel.startTimeTravelPreview(this)
+        this.player.onDamage()
       }),
-      Keyboard.onKeyup(['R'], () => {
-        TimeTravel.endTimeTravelPreview(this)
+
+      Keyboard.onKeydown(['Q', 'E'], () => {
+        console.log(
+          Keyboard.allActive('Q', 'E'),
+          Keyboard.isActive('Q'),
+          Keyboard.isActive('E')
+        )
+        if (Keyboard.allActive('Q', 'E') && this.player.onGround)
+          TimeTravel.startTimeTravelPreview(this)
+      }),
+      Keyboard.onKeyup(['Q', 'E'], () => {
+        if (!Keyboard.anyActive('Q', 'E')) TimeTravel.endTimeTravelPreview(this)
       }),
 
       Keyboard.onKeydown(['NumpadEnter'], () => {

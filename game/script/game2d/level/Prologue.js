@@ -21,7 +21,7 @@ export function Prologue(game) {
     height,
     width,
     worldBorder: false,
-    spawnpoint: new Vec2(125, 136),
+    spawnpoint: new Vec2(125, 120),
     cameraHeight: 192,
   }
 

@@ -49,9 +49,7 @@ class Dialogue {
   }
 
   #addKeyboardListeners() {
-    ;['LCtrl', 'RCtrl'].forEach(key => {
-      if (keyboard.isActive(key)) this.#triggerSkip(key, 200)
-    })
+    if (keyboard.anyActive('LCtrl', 'RCtrl')) this.#triggerSkip(key, 200)
 
     this.#keyboardListeners.push(
       keyboard.onKeydown(['Enter', 'Space'], () => {

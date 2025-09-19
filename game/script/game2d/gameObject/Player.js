@@ -103,8 +103,8 @@ export class Player extends BaseObject {
 
   async processInputEvents(dt, game) {
     // 外部输入事件
-    const keyLeft = Keyboard.anyActive(['A', 'ArrowLeft'])
-    const keyRight = Keyboard.anyActive(['D', 'ArrowRight'])
+    const keyLeft = Keyboard.anyActive('A', 'ArrowLeft')
+    const keyRight = Keyboard.anyActive('D', 'ArrowRight')
     if (keyLeft && !keyRight) {
       this.inputState |= InputEnum.WALK_LEFT
     } else if (keyRight && !keyLeft) {

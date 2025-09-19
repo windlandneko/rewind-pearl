@@ -37,7 +37,7 @@ export function DoublePlatformTest(game) {
   game.gameObjects.push(
     new Collectible(26, 154, 'sprite/linggangu', undefined),
     new Collectible(74, 82, 'sprite/linggangu_stone', undefined),
-    new Collectible(194, 50, 'sprite/linggangu', undefined),
+    new Collectible(210, 50, 'sprite/linggangu', undefined),
     new Collectible(234, 106, 'sprite/linggangu', undefined),
     new Collectible(306, 10, 'sprite/linggangu_stone', undefined),
     new Collectible(306, 146, 'sprite/linggangu', undefined),
@@ -67,7 +67,7 @@ export function DoublePlatformTest(game) {
     new Interactable(312, 80, 'test_scene', '', 'undefined', true).hide(),
     new Interactable(520, 104, 'test_scene', 'character/hajimi/normal', 'undefined', false),
     new LevelChanger(424, 56, 72, 16, 'Prologue', true).hide(),
-    new MovingPlatform(new Vec2(192, 48), new Vec2(192, 32), 16, 16, 2, 'still').ref('plat1'),
+    new MovingPlatform(new Vec2(208, 48), new Vec2(208, 24), 16, 16, 2, 'still').ref('plat1'),
     new Platform(-16, -72, 16, 104).hide(),
     new Platform(0, 32, 16, 160),
     new Platform(16, 32, 24, 16),
@@ -119,8 +119,8 @@ export function DoublePlatformTest(game) {
     new Trigger(320, -72, 16, 288, false, (game, $) => {
       game.levelData.cameraBound.x = 320 - 16
     }, null).hide(),
-    new Trigger(320, 80, 8, 88, true, (game, $) => {
-      game.levelData.spawnpoint = new Vec2(336, 144)
+    new Trigger(320, -72, 8, 288, true, (game, $) => {
+      game.levelData.spawnpoint = new Vec2(328, 144)
       game.sound.play('heal')
     }, null).hide()
   )

@@ -136,8 +136,9 @@ class Keyboard {
         return
       }
 
-      if (!this.#record.get(key)) this.listener.emit(`keydown:${key}`)
+      const firstPress = !this.#record.get(key)
       this.#record.set(key, true)
+      if (firstPress) this.listener.emit(`keydown:${key}`)
 
       // Only prevent default for bound keys
       if (!this.listener.isEmpty(`keydown:${key}`)) {
@@ -203,7 +204,7 @@ class Keyboard {
    * Check if all the specified keys are currently pressed.
    * @param {string[]} keys
    */
-  allActive(keys) {
+  allActive(...keys) {
     return keys.reduce((ans, key) => ans & this.isActive(key), true)
   }
 
@@ -211,7 +212,7 @@ class Keyboard {
    * Check if any of the specified keys are currently pressed.
    * @param {string[]} keys
    */
-  anyActive(keys) {
+  anyActive(...keys) {
     return keys.reduce((ans, key) => ans | this.isActive(key), false)
   }
 }
