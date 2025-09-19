@@ -1,11 +1,13 @@
+import { UPDATE_INTERVAL } from '../GameConfig.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
   color = '#666'
   shadowColor = '#6666'
 
-  constructor(x, y, width, height) {
+  constructor(x, y, width, height, ladder = false) {
     super(x, y, width, height)
+    this.ladder = ladder
   }
 
   /**
@@ -13,8 +15,21 @@ export class Platform extends BaseObject {
    * @param {Player} player 玩家对象
    * @param {Game} game 游戏实例
    */
-  interactWithPlayer(player, game) {
+  interactWithPlayer(player, game, dt) {
     if (!this.checkCollision(player) || player.removed) return
+
+    if (this.ladder) {
+      if (
+        player.walkDown ||
+        player.r.y + player.height > this.r.y + player.v.y * dt
+      )
+        return
+
+      player.onGround = true
+      player.r.y = this.r.y - player.height
+      player.v.y = 0
+      return
+    }
 
     if (this.checkCollision(player.groundCheckBox)) player.onGround = true
 
@@ -32,7 +47,7 @@ export class Platform extends BaseObject {
       overlapBottom
     )
 
-    if (minOverlap > 4) {
+    if (minOverlap > 4 && !this.ladder) {
       player.onDamage()
     }
 
@@ -46,7 +61,6 @@ export class Platform extends BaseObject {
       // 从下方碰撞（撞头）
       player.r.y = this.r.y + this.height
       player.v.y = -player.v.y * 0.2
-      // todo
     } else if (minOverlap === overlapLeft) {
       // 从左侧碰撞
       player.r.x = this.r.x - player.width
@@ -62,12 +76,26 @@ export class Platform extends BaseObject {
     const x = Math.round(this.r.x * scale) / scale
     const y = Math.round(this.r.y * scale) / scale
 
-    ctx.fillStyle = this.shadowColor
-    ctx.fillRect(x - 2, y + 1, this.width + 2, this.height)
-    ctx.fillRect(x - 1, y, this.width, this.height + 2)
-    ctx.fillStyle = this.color
-    ctx.fillRect(x - 1, y, this.width + 2, this.height)
-    ctx.fillRect(x, y - 1, this.width, this.height + 2)
+    if (this.ladder) {
+      ctx.fillStyle = 'rgb(50, 47, 48)'
+      ctx.fillRect(x, y - 2, this.width, 1)
+      ctx.fillRect(x, y + 1, this.width, 1)
+      ctx.fillStyle = 'rgb(174, 133, 99)'
+      ctx.fillRect(x, y - 1, this.width, 1)
+      ctx.fillStyle = 'rgb(128, 92, 71)'
+      ctx.fillRect(x, y, this.width, 1)
+
+      ctx.fillStyle = 'rgb(50, 47, 48)'
+      ctx.fillRect(x - 1, y - 1, 1, 2)
+      ctx.fillRect(x + this.width, y - 1, 1, 2)
+    } else {
+      ctx.fillStyle = this.shadowColor
+      ctx.fillRect(x - 2, y + 1, this.width + 2, this.height)
+      ctx.fillRect(x - 1, y, this.width, this.height + 2)
+      ctx.fillStyle = this.color
+      ctx.fillRect(x - 1, y, this.width + 2, this.height)
+      ctx.fillRect(x, y - 1, this.width, this.height + 2)
+    }
 
     if (debug) {
       ctx.font = '3px Arial'
@@ -77,5 +105,17 @@ export class Platform extends BaseObject {
         y + 12
       )
     }
+  }
+
+  get state() {
+    return {
+      ...super.state,
+      ladder: this.ladder,
+    }
+  }
+
+  set state(state) {
+    super.state = state
+    this.ladder = state.ladder
   }
 }

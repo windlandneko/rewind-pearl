@@ -473,29 +473,29 @@ export class Game {
     // 更新游戏对象与玩家的互动（碰撞检测等）
     this.renderGroups.movingPlatforms.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
     })
     this.renderGroups.collectibles.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
     })
     this.renderGroups.enemies.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
     })
     this.renderGroups.interactables.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
     })
     this.renderGroups.triggers.forEach(obj => {
       obj.interacting = false
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
       obj.trigger(this)
     })
     this.renderGroups.platforms.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
-      obj.interactWithPlayer(this.player, this)
+      obj.interactWithPlayer(this.player, this, dt)
     })
 
     // 更新摄像机

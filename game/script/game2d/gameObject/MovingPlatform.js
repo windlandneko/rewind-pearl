@@ -15,8 +15,8 @@ export class MovingPlatform extends Platform {
    * @param {number} interval
    * @param {string} moveType
    */
-  constructor(from, to, width, height, interval = 5, moveType = 'still') {
-    super(from?.x ?? 0, from?.y ?? 0, width, height)
+  constructor(from, to, width, height, ladder = false, interval = 5, moveType = 'still') {
+    super(from?.x ?? 0, from?.y ?? 0, width, height, ladder)
     this.r = this.from = from ?? new Vec2()
     this.to = to ?? new Vec2()
     this.interval = interval
@@ -67,8 +67,8 @@ export class MovingPlatform extends Platform {
    * @param {Player} player 玩家对象
    * @param {Game} game 游戏实例
    */
-  interactWithPlayer(player, game) {
-    super.interactWithPlayer(player, game)
+  interactWithPlayer(player, game, dt) {
+    super.interactWithPlayer(player, game, dt)
 
     // 如果玩家站在平台上，让玩家跟随平台移动
     if (this.checkCollision(player.groundCheckBox)) {

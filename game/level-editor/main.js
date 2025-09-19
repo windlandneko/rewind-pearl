@@ -146,13 +146,13 @@ function showProperties(obj) {
   if (obj.type !== 'levelData') {
     addProperty({
       label: '隐藏对象',
-      value: obj.hidden || false,
+      value: obj.hidden ?? false,
       type: 'checkbox',
       onChange: value => (obj.hidden = value),
     })
     addProperty({
       label: '# ref',
-      value: obj.ref || '',
+      value: obj.ref ?? '',
       type: 'text',
       editable: obj.type !== 'spawnpoint',
       onChange: value => (obj.ref = value),
@@ -196,14 +196,14 @@ function showProperties(obj) {
       addPropertyPair(
         {
           label: '↔ 摄像机宽度',
-          value: obj.cameraWidth || 0,
+          value: obj.cameraWidth ?? 0,
           ref: 'cameraWidth',
           type: 'number',
           editable: false,
         },
         {
           label: '↕ 摄像机高度',
-          value: obj.cameraHeight || 0,
+          value: obj.cameraHeight ?? 0,
           type: 'number',
           onChange: value => {
             obj.cameraHeight = parseFloat(value)
@@ -217,13 +217,13 @@ function showProperties(obj) {
       addPropertyPair(
         {
           label: '摄像机限制 X',
-          value: obj.cameraBound?.x || 0,
+          value: obj.cameraBound?.x ?? 0,
           type: 'number',
           onChange: value => (obj.cameraBound.x = parseFloat(value)),
         },
         {
           label: '摄像机限制 Y',
-          value: obj.cameraBound?.y || 0,
+          value: obj.cameraBound?.y ?? 0,
           type: 'number',
           onChange: value => (obj.cameraBound.y = parseFloat(value)),
         }
@@ -231,32 +231,32 @@ function showProperties(obj) {
       addPropertyPair(
         {
           label: '↔ 限制宽度',
-          value: obj.cameraBound?.width || 0,
+          value: obj.cameraBound?.width ?? 0,
           type: 'number',
           onChange: value => (obj.cameraBound.width = parseFloat(value)),
         },
         {
           label: '↕ 限制高度',
-          value: obj.cameraBound?.height || 0,
+          value: obj.cameraBound?.height ?? 0,
           type: 'number',
           onChange: value => (obj.cameraBound.height = parseFloat(value)),
         }
       )
       addProperty({
         label: '背景图片ID',
-        value: obj.background || '',
+        value: obj.background ?? '',
         type: 'text',
         onChange: value => (obj.background = value),
       })
       addProperty({
         label: '背景音乐ID',
-        value: obj.bgm || '',
+        value: obj.bgm ?? '',
         type: 'text',
         onChange: value => (obj.bgm = value),
       })
       addProperty({
         label: '启用世界边界',
-        value: obj.worldBorder || false,
+        value: obj.worldBorder ?? false,
         type: 'checkbox',
         onChange: value => (obj.worldBorder = value),
       })
@@ -264,27 +264,36 @@ function showProperties(obj) {
     case TOOL.interactable:
       addProperty({
         label: '对话',
-        value: obj.dialogue || '',
+        value: obj.dialogue ?? '',
         type: 'text',
         onChange: value => (obj.dialogue = value),
       })
       addProperty({
         label: '精灵ID',
-        value: obj.spriteId || '',
+        value: obj.spriteId ?? '',
         type: 'text',
         onChange: value => (obj.spriteId = value),
       })
       addProperty({
         label: '提示文本',
-        value: obj.hint || '',
+        value: obj.hint ?? '',
         type: 'text',
         onChange: value => (obj.hint = value),
       })
       addProperty({
         label: '自动播放对话',
-        value: obj.autoPlay || false,
+        value: obj.autoPlay ?? false,
         type: 'checkbox',
         onChange: value => (obj.autoPlay = value),
+      })
+      break
+    case TOOL.platform:
+    case TOOL.movingPlatform:
+      addProperty({
+        label: '脚手架（下方可穿过）',
+        value: obj.ladder ?? false,
+        type: 'checkbox',
+        onChange: value => (obj.ladder = value),
       })
       break
     case TOOL.movingPlatform:
@@ -318,13 +327,13 @@ function showProperties(obj) {
       )
       addProperty({
         label: '运动周期（秒）',
-        value: obj.interval || 5,
+        value: obj.interval ?? 5,
         type: 'number',
         onChange: value => (obj.interval = parseFloat(value)),
       })
       addProperty({
         label: '移动方式',
-        value: obj.moveType || 'linear',
+        value: obj.moveType ?? 'linear',
         type: 'select',
         onChange: value => (obj.moveType = value),
         options: ['linear', 'sin', 'still', 'random'],
@@ -333,13 +342,13 @@ function showProperties(obj) {
     case TOOL.levelChanger:
       addProperty({
         label: '下一关卡ID',
-        value: obj.nextStage || '',
+        value: obj.nextStage ?? '',
         type: 'text',
         onChange: value => (obj.nextStage = value),
       })
       addProperty({
         label: '强制传送',
-        value: obj.force || true,
+        value: obj.force ?? true,
         type: 'checkbox',
         onChange: value => (obj.force = value),
       })
@@ -347,13 +356,13 @@ function showProperties(obj) {
     case TOOL.collectible:
       addProperty({
         label: '精灵ID',
-        value: obj.spriteId || '',
+        value: obj.spriteId ?? '',
         type: 'text',
         onChange: value => (obj.spriteId = value),
       })
       addProperty({
         label: '仅幽灵玩家可收集',
-        value: obj.onlyGhostCanCollect || false,
+        value: obj.onlyGhostCanCollect ?? false,
         type: 'checkbox',
         onChange: value => (obj.onlyGhostCanCollect = value),
       })
@@ -361,19 +370,19 @@ function showProperties(obj) {
     case TOOL.trigger:
       addProperty({
         label: '一次性触发器',
-        value: obj.once || false,
+        value: obj.once ?? false,
         type: 'checkbox',
         onChange: value => (obj.once = value),
       })
       addProperty({
         label: '触发函数（进入）',
-        value: obj.enterCallback || '',
+        value: obj.enterCallback ?? '',
         type: 'textarea',
         onChange: value => (obj.enterCallback = value),
       })
       addProperty({
         label: '触发函数（离开）',
-        value: obj.leaveCallback || '',
+        value: obj.leaveCallback ?? '',
         type: 'textarea',
         onChange: value => (obj.leaveCallback = value),
       })
@@ -381,7 +390,7 @@ function showProperties(obj) {
     case TOOL.hazard:
       addProperty({
         label: '刺的显示方向',
-        value: obj.direction || 'up',
+        value: obj.direction ?? 'up',
         type: 'select',
         onChange: value => (obj.direction = value),
         options: ['up', 'down', 'left', 'right'],
@@ -428,7 +437,7 @@ function addProperty({
     input.type = type
     input.value = value
   }
-  input.dataset.ref = ref || ''
+  input.dataset.ref = ref ?? ''
 
   if (editable === false) {
     input.disabled = true
@@ -468,7 +477,7 @@ function addPropertyPair(left, right) {
   const input1 = document.createElement('input')
   input1.type = left.type
   input1.value = left.value
-  input1.dataset.ref = left.ref || ''
+  input1.dataset.ref = left.ref ?? ''
   if (left.editable === false) input1.disabled = true
   else if (left.onChange)
     input1.addEventListener('input', () => {
@@ -486,7 +495,7 @@ function addPropertyPair(left, right) {
   const input2 = document.createElement('input')
   input2.type = right.type
   input2.value = right.value
-  input2.dataset.ref = right.ref || ''
+  input2.dataset.ref = right.ref ?? ''
   if (right.editable === false) input2.disabled = true
   else if (right.onChange)
     input2.addEventListener('input', () => {
@@ -682,7 +691,7 @@ function drawObject(obj) {
     ctx.fill()
   } else if (obj.type === TOOL.hazard) {
     ctx.restore()
-    const direction = obj.direction || 'up'
+    const direction = obj.direction ?? 'up'
 
     const { x, y, width: w, height: h } = obj
     const _ = 0
@@ -1544,7 +1553,6 @@ function createObject(type, pos) {
   }
   switch (type) {
     case TOOL.collectible:
-      // 收集品是单点物体，没有宽度和高度
       obj = {
         type,
         x,
@@ -1562,6 +1570,9 @@ function createObject(type, pos) {
         autoPlay: false,
       }
       break
+    case TOOL.platform:
+      obj = { ...obj, ladder: false }
+      break
     case TOOL.movingPlatform:
       obj = {
         ...obj,
@@ -1569,6 +1580,7 @@ function createObject(type, pos) {
         fromY: y, // 轨迹起点就是平台中心
         toX: x + GRID_SIZE * 2, // 终点在右侧
         toY: y, // 终点在同一水平线
+        ladder: false,
         interval: 5, // 运动周期（秒）
         moveType: 'linear',
       }
@@ -1683,13 +1695,13 @@ function updateMovingPlatform(obj, currentTime) {
   if (!originalPos) return
 
   // 使用interval属性（秒为单位），转换为毫秒
-  const duration = (obj.interval || 5) * 1000
+  const duration = (obj.interval ?? 5) * 1000
   const elapsed = currentTime % duration
   const progress = elapsed / duration
 
   // 根据moveType选择不同的运动函数
   let smoothProgress
-  switch (obj.moveType || 'linear') {
+  switch (obj.moveType ?? 'linear') {
     case 'still':
     case 'linear':
       // 线性运动：在起点和终点之间往复移动
@@ -1722,7 +1734,7 @@ function updateMovingPlatform(obj, currentTime) {
 // 导出代码
 function exportCode() {
   // 查找 objects 中的 spawnpoint
-  const spawnObj = objects.find(obj => obj.type === 'spawnpoint') || spawnpoint
+  const spawnObj = objects.find(obj => obj.type === 'spawnpoint') ?? spawnpoint
   let code = `\
 import {
   BaseObject,
@@ -1738,12 +1750,12 @@ import {
 import Vec2 from '../Vector.js'
 import SoundManager from '../../SoundManager.js'
 
-export function ${levelSelect.value || 'UnknownLevelName'}(game) {
+export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
   const height = ${levelData.height}
   const width = ${levelData.width}
 
   game.levelData = {
-    introDialogue: '${levelData.introDialogue || 'null'}',
+    introDialogue: '${levelData.introDialogue ?? 'null'}',
     background: '${levelData.background}',
     height,
     width,
@@ -1772,7 +1784,9 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
       if (obj.type === 'spawnpoint') return // 跳过玩家出生点
       switch (obj.type) {
         case TOOL.platform:
-          code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+          code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${
+            obj.height
+          }, ${obj.ladder ?? false})`
           break
         case TOOL.interactable:
           code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
@@ -1781,8 +1795,8 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
           code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
             obj.fromY
           }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
-            obj.interval || 5
-          }, '${obj.moveType || 'linear'}')`
+            obj.ladder ?? false
+          }, ${obj.interval ?? 5}, '${obj.moveType ?? 'linear'}')`
           break
         case TOOL.levelChanger:
           code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
@@ -2173,12 +2187,12 @@ levelSelect.addEventListener('change', () => {
     const name = prompt('请输入新关卡名称：')
     if (!name) {
       // 恢复原选项
-      levelSelect.value = currentLevelName || ''
+      levelSelect.value = currentLevelName ?? ''
       return
     }
     if (levels[name]) {
       alert('关卡名已存在！')
-      levelSelect.value = currentLevelName || ''
+      levelSelect.value = currentLevelName ?? ''
       return
     }
     // 自动保存当前关卡
@@ -2255,8 +2269,8 @@ function loadLevelByName(name) {
     }
   objects = level.objects
   spawnpoint = level.spawnpoint
-  panOffset = level.panOffset || { x: 0, y: 0 }
-  zoom = level.zoom || 3
+  panOffset = level.panOffset ?? { x: 0, y: 0 }
+  zoom = level.zoom ?? 3
   targetZoom = zoom
   selectedObjects = []
   undoStack = []

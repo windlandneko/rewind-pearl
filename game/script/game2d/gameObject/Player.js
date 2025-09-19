@@ -13,6 +13,7 @@ export const InputEnum = {
   JUMP_UP: 1 << 2,
   WALK_LEFT: 1 << 3,
   WALK_RIGHT: 1 << 4,
+  WALK_DOWN: 1 << 5,
 }
 
 export class Player extends BaseObject {
@@ -25,13 +26,13 @@ export class Player extends BaseObject {
   jumpTimer = 0
   maxJumpTime = 0.15 // 跳跃增益时间（秒）
 
-  invincibleTime = 1 // 无敌时间 (秒)
+  invincibleTime = 4 // 无敌时间 (秒)
 
   onGround = false
+  walkDown = false
   maxHealth = 1
   health = 1
   score = 0
-  damageTimer = 0
 
   // 狼跳
   coyote = 0.15 // 土狼时间：离开地面后还能跳跃的时间(秒)
@@ -105,10 +106,14 @@ export class Player extends BaseObject {
     // 外部输入事件
     const keyLeft = Keyboard.anyActive('A', 'ArrowLeft')
     const keyRight = Keyboard.anyActive('D', 'ArrowRight')
+    const keyDown = Keyboard.anyActive('S', 'ArrowDown')
     if (keyLeft && !keyRight) {
       this.inputState |= InputEnum.WALK_LEFT
     } else if (keyRight && !keyLeft) {
       this.inputState |= InputEnum.WALK_RIGHT
+    }
+    if (keyDown) {
+      this.inputState |= InputEnum.WALK_DOWN
     }
 
     const state = this.inputState
@@ -121,6 +126,8 @@ export class Player extends BaseObject {
     if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
     if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
 
+    this.walkDown = state & InputEnum.WALK_DOWN
+
     if (state & InputEnum.WALK_LEFT) this.onHorizontalInput(-1, dt)
     else if (state & InputEnum.WALK_RIGHT) this.onHorizontalInput(1, dt)
     else this.onHorizontalInput(0, dt)
@@ -130,7 +137,7 @@ export class Player extends BaseObject {
   isExploding = false
   explodeAnim = null
   explodeAnimTime = 0
-  explodeAnimDuration = (1000 / 60) * 79
+  explodeAnimDuration = (1000 / 120) * 80
 
   update(dt, game) {
     // 死亡动画播放时，暂停输入和物理，仅更新动画
@@ -177,7 +184,7 @@ export class Player extends BaseObject {
           79,
           112,
           112,
-          1000 / 60,
+          1000 / 120,
           false
         )
         this.explodeAnimTime = 0
@@ -205,9 +212,6 @@ export class Player extends BaseObject {
 
     // 更新地面检测框位置
     this.groundCheckBox.r = this.r.add(1, this.height)
-
-    // 无敌时间
-    this.damageTimer = Math.max(0, this.damageTimer - dt)
 
     // 动画
     this.updateAnimation()
@@ -325,10 +329,7 @@ export class Player extends BaseObject {
   }
 
   onDamage() {
-    if (this.damageTimer <= 0) {
-      this.health--
-      this.damageTimer = this.invincibleTime
-    }
+    this.health--
   }
 
   render(ctx, { scale, debug }) {
@@ -345,13 +346,6 @@ export class Player extends BaseObject {
         48
       )
       return
-    }
-
-    // 受伤时闪烁效果
-    if (this.damageTimer > 0 && Math.floor(this.damageTimer / 0.15) % 2 === 0) {
-      ctx.globalAlpha = 0.5
-    } else {
-      ctx.globalAlpha = 1.0
     }
 
     const spriteWidth = 32
@@ -403,10 +397,10 @@ export class Player extends BaseObject {
       invincibleTime: this.invincibleTime,
 
       onGround: this.onGround,
+      walkDown: this.walkDown,
       maxHealth: this.maxHealth,
       health: this.health,
       score: this.score,
-      damageTimer: this.damageTimer,
 
       coyote: this.coyote,
       coyoteTimer: this.coyoteTimer,
@@ -443,10 +437,10 @@ export class Player extends BaseObject {
     this.invincibleTime = state.invincibleTime
 
     this.onGround = state.onGround
+    this.walkDown = state.walkDown
     this.maxHealth = state.maxHealth
     this.health = state.health
     this.score = state.score
-    this.damageTimer = state.damageTimer
 
     this.coyote = state.coyote
     this.coyoteTimer = state.coyoteTimer
