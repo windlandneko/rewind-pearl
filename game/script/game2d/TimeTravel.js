@@ -120,17 +120,21 @@ class TimeTravelManager {
     tmpctx.translate(-renderPos.x, -renderPos.y)
 
     // 按优先级渲染游戏对象
-    game.renderGroups.movingPlatforms.forEach(entity =>
-      entity.render(tmpctx, game)
-    )
-    game.renderGroups.collectibles.forEach(entity =>
-      entity.render(tmpctx, game)
-    )
-    game.renderGroups.enemies.forEach(entity => entity.render(tmpctx, game))
-    game.renderGroups.interactables.forEach(entity =>
-      entity.render(tmpctx, game)
-    )
-    game.renderGroups.platforms.forEach(entity => entity.render(tmpctx, game))
+    game.renderGroups.interactables.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, game)
+    })
+    game.renderGroups.collectibles.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, game)
+    })
+    game.renderGroups.enemies.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, game)
+    })
+    game.renderGroups.movingPlatforms.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, game)
+    })
+    game.renderGroups.platforms.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, game)
+    })
 
     // 渲染玩家
     game.ghostPlayers.forEach(ghost => {

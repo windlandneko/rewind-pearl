@@ -12,8 +12,8 @@ export class GhostPlayer extends Player {
   async processInputEvents(dt, game) {
     const state = this.stateHistory.get(game.tick)?.inputState
     if (state & InputEnum.INTERACT) {
-      for (const entity of game.renderGroups.interactables) {
-        if (await entity.handleKeyInteraction?.(this, game)) break
+      for (const obj of game.renderGroups.interactables) {
+        if (await obj.handleKeyInteraction?.(this, game)) break
       }
     }
 

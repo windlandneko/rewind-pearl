@@ -163,9 +163,9 @@ export class Game {
 
   importGameObjects(state) {
     this.gameObjects = state.map(state => {
-      const entity = new GameObjects[state.type]()
-      entity.state = state
-      return entity
+      const obj = new GameObjects[state.type]()
+      obj.state = state
+      return obj
     })
 
     // 更新渲染组
@@ -437,7 +437,7 @@ export class Game {
     }
 
     // 更新游戏对象本身
-    this.gameObjects.forEach(entity => entity.update(dt))
+    this.gameObjects.forEach(obj => obj.update(dt))
 
     // 重置落地状态
     this.player.onGround = false
@@ -491,13 +491,21 @@ export class Game {
     if (this.debug) this.#renderBackgroundGrid(ctx)
 
     // 按优先级渲染游戏对象
-    this.renderGroups.movingPlatforms.forEach(entity =>
-      entity.render(ctx, this)
-    )
-    this.renderGroups.collectibles.forEach(entity => entity.render(ctx, this))
-    this.renderGroups.enemies.forEach(entity => entity.render(ctx, this))
-    this.renderGroups.interactables.forEach(entity => entity.render(ctx, this))
-    this.renderGroups.platforms.forEach(entity => entity.render(ctx, this))
+    this.renderGroups.interactables.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
+    this.renderGroups.collectibles.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
+    this.renderGroups.enemies.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
+    this.renderGroups.movingPlatforms.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
+    this.renderGroups.platforms.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
 
     // 渲染玩家
     this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))
@@ -513,19 +521,19 @@ export class Game {
    * 更新渲染组缓存
    */
   #updateRenderGroups() {
-    this.renderGroups.platforms = this.gameObjects.filter(
-      obj => obj.type === 'Platform'
+    const objects = this.gameObjects
+
+    this.renderGroups.platforms = objects.filter(obj => obj.type === 'Platform')
+    this.renderGroups.movingPlatforms = objects.filter(
+      obj => obj.type === 'MovingPlatform'
     )
-    this.renderGroups.movingPlatforms = this.gameObjects.filter(
-      obj => obj.type === 'MovingPlatform' || obj.type === 'CrazyPlatform'
-    )
-    this.renderGroups.collectibles = this.gameObjects.filter(
+    this.renderGroups.collectibles = objects.filter(
       obj => obj.type === 'Collectible'
     )
-    this.renderGroups.enemies = this.gameObjects.filter(
+    this.renderGroups.enemies = objects.filter(
       obj => obj.type === 'Enemy' || obj.type === 'Hazard'
     )
-    this.renderGroups.interactables = this.gameObjects.filter(
+    this.renderGroups.interactables = objects.filter(
       obj =>
         obj.type === 'Interactable' ||
         obj.type === 'LevelChanger' ||
@@ -533,7 +541,7 @@ export class Game {
     )
 
     this.#ref = new Map()
-    this.gameObjects.forEach(obj => {
+    objects.forEach(obj => {
       if (obj._ref) this.#ref.set(obj._ref, obj)
     })
   }

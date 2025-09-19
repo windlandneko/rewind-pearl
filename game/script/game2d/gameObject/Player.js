@@ -117,8 +117,8 @@ export class Player extends BaseObject {
 
     const state = this.inputState
     if (state & InputEnum.INTERACT) {
-      for (const entity of game.renderGroups.interactables) {
-        if (await entity.handleKeyInteraction?.(this, game)) break
+      for (const obj of game.renderGroups.interactables) {
+        if (await obj.handleKeyInteraction?.(this, game)) break
       }
     }
 
