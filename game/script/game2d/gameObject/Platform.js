@@ -21,7 +21,7 @@ export class Platform extends BaseObject {
     if (this.ladder) {
       if (
         player.walkDown ||
-        player.r.y + player.height > this.r.y + player.v.y * dt
+        player.r.y + player.height > this.r.y + player.v.y * dt * 2
       )
         return
 
@@ -47,7 +47,7 @@ export class Platform extends BaseObject {
       overlapBottom
     )
 
-    if (minOverlap > 4 && !this.ladder) {
+    if (minOverlap > 4) {
       player.onDamage()
     }
 
