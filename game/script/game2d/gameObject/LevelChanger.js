@@ -10,7 +10,7 @@ export class LevelChanger extends BaseObject {
   }
 
   interactWithPlayer(player, game) {
-    if (player.type === 'GhostPlayer') return false
+    if (player.type === 'GhostPlayer') return
     if (this.force && player.checkCollision(this) && this.targetLevel) {
       game.changeLevel(this.targetLevel)
     }

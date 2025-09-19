@@ -159,6 +159,7 @@ export class Player extends BaseObject {
     if (this.health <= 0) {
       // 死亡，播放爆炸动画并暂停游戏
       if (!this.isExploding) {
+        this.removed = true
         this.isExploding = true
 
         game.sound.play('pldead00', {

@@ -2,7 +2,7 @@ import { BaseObject } from './BaseObject.js'
 import Vec2 from '../Vector.js'
 
 export class Trigger extends BaseObject {
-  playerInteract = new WeakMap() // 这还是JS吗，给我干哪来了
+  interacting = false
 
   /**
    * 触发器对象
@@ -22,40 +22,28 @@ export class Trigger extends BaseObject {
   }
 
   async interactWithPlayer(player, game) {
-    if (player.removed) return
-    if (player.checkCollision(this)) {
-      await this.trigger(1, player, game)
-    } else {
-      await this.trigger(0, player, game)
-    }
-  }
-
-  async trigger(type, player, game) {
     const $ = name => game.ref(name)
 
-    if (type === 1) {
-      if (!this.playerInteract.get(player)) {
-        try {
-          await this.enterCallback?.(game, $)
-        } catch (e) {
-          console.error(e)
-          this.triggerOnce = true
-        }
-        this.playerInteract.set(player, true)
+    if (player.removed || player.type === 'GhostPlayer') return
+    if (player.checkCollision(this) && !this.interacting) {
+      try {
+        await this.enterCallback?.(game, $)
+      } catch (e) {
+        console.error(e)
+        this.triggerOnce = true
       }
       if (this.triggerOnce) this.enterCallback = null
+      this.interacting = true
     }
-    if (type === 0) {
-      if (this.playerInteract.get(player)) {
-        try {
-          await this.leaveCallback?.(game, $)
-        } catch (e) {
-          console.error(e)
-          this.triggerOnce = true
-        }
-        this.playerInteract.set(player, false)
+    if (!player.checkCollision(this) && this.interacting) {
+      try {
+        await this.leaveCallback?.(game, $)
+      } catch (e) {
+        console.error(e)
+        this.triggerOnce = true
       }
       if (this.triggerOnce) this.leaveCallback = null
+      this.interacting = false
     }
   }
 
@@ -73,6 +61,7 @@ export class Trigger extends BaseObject {
       enterCallback: this.enterCallback?.toString?.(),
       leaveCallback: this.leaveCallback?.toString?.(),
       triggerOnce: this.triggerOnce,
+      interacting: this.interacting,
     }
   }
 
@@ -81,5 +70,6 @@ export class Trigger extends BaseObject {
     this.enterCallback = eval(state.enterCallback)
     this.leaveCallback = eval(state.leaveCallback)
     this.triggerOnce = state.triggerOnce
+    this.interacting = state.interacting
   }
 }

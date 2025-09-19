@@ -14,7 +14,7 @@ export class Platform extends BaseObject {
    * @param {Game} game 游戏实例
    */
   interactWithPlayer(player, game) {
-    if (!this.checkCollision(player) || player.removed || player.isExploding) return
+    if (!this.checkCollision(player) || player.removed) return
 
     if (this.checkCollision(player.groundCheckBox)) player.onGround = true
 
@@ -45,7 +45,7 @@ export class Platform extends BaseObject {
     } else if (minOverlap === overlapBottom) {
       // 从下方碰撞（撞头）
       player.r.y = this.r.y + this.height
-      player.v.y = this.r.y - player.v.y
+      player.v.y = -player.v.y * 0.2
       // todo
     } else if (minOverlap === overlapLeft) {
       // 从左侧碰撞
