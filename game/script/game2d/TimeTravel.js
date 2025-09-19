@@ -119,9 +119,6 @@ class TimeTravelManager {
     const renderPos = game.camera.getRenderPosition()
     tmpctx.translate(-renderPos.x, -renderPos.y)
 
-    // 绘制背景网格
-    // game.#renderBackgroundGrid(tmpctx)
-
     // 按优先级渲染游戏对象
     game.renderGroups.movingPlatforms.forEach(entity =>
       entity.render(tmpctx, game)
@@ -154,11 +151,9 @@ class TimeTravelManager {
     game.importGameObjects(state)
 
     const playerScreenX =
-      (game.player.r.x + game.player.width / 2 - renderPos.x) *
-      game.scale
+      (game.player.r.x + game.player.width / 2 - renderPos.x) * game.scale
     const playerScreenY =
-      (game.player.r.y + game.player.height / 2 - renderPos.y) *
-      game.scale
+      (game.player.r.y + game.player.height / 2 - renderPos.y) * game.scale
 
     const gradient = tmpctx.createRadialGradient(
       playerScreenX,

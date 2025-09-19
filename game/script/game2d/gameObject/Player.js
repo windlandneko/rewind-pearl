@@ -170,7 +170,7 @@ export class Player extends BaseObject {
         })
 
         // 触发相机震动效果
-        game.camera.shake(15, 0.6, 100)
+        game.camera.shake(6, 0.6, 100)
 
         // 加载爆炸动画
         const img = Asset.get('sprite/explode')

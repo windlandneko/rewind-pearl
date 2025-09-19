@@ -19,14 +19,14 @@ export class Camera {
   #lerpFactor
 
   position = new Vec2(0, 0)
-  
+
   // 震动系统
   #shakeIntensity = 0
   #shakeDuration = 0
   #shakeTimer = 0
   #shakeFrequency = 5
   #shakeOffset = new Vec2(0, 0)
-  
+
   // 持续微震动系统
   #microShakeIntensity = 2
   #microShakeFrequency = 0.3
@@ -98,7 +98,7 @@ export class Camera {
    * @param {number} duration - 震动持续时间（秒）
    * @param {number} frequency - 震动频率（每秒震动次数，默认50）
    */
-  shake(intensity = 10, duration = 0.5, frequency = 1000) {
+  shake(intensity = 10, duration = 0.5, frequency = 50) {
     this.#shakeIntensity = Math.max(this.#shakeIntensity, intensity)
     this.#shakeDuration = Math.max(this.#shakeDuration, duration)
     this.#shakeTimer = 0
@@ -161,19 +161,19 @@ export class Camera {
   #updateShake(dt) {
     if (this.#shakeTimer < this.#shakeDuration) {
       this.#shakeTimer += dt
-      
+
       // 计算震动衰减（线性衰减）
       const progress = this.#shakeTimer / this.#shakeDuration
       const currentIntensity = this.#shakeIntensity * (1 - progress)
-      
+
       // 使用噪波生成震动偏移
       const time = this.#shakeTimer * this.#shakeFrequency
       const noiseScale = 1.0 // 进一步提高噪波缩放因子，增加频率
-      
+
       // 为X和Y使用不同的噪波坐标，避免对称
       const noiseX = this.#noise2D(time * noiseScale, 0)
       const noiseY = this.#noise2D(0, time * noiseScale)
-      
+
       // 震动幅度
       const amplitudeMultiplier = 1.0
       this.#shakeOffset.x = noiseX * currentIntensity * amplitudeMultiplier
@@ -194,15 +194,15 @@ export class Camera {
    */
   #updateMicroShake(dt) {
     this.#microShakeTime += dt
-    
+
     // 使用噪波生成微震动偏移
     const time = this.#microShakeTime * this.#microShakeFrequency
     const noiseScale = 1.0
-    
+
     // 为X和Y使用不同的噪波坐标，避免对称
     const noiseX = this.#noise2D(time * noiseScale, 0)
     const noiseY = this.#noise2D(0, time * noiseScale)
-    
+
     // 微震动幅度
     this.#microShakeOffset.x = noiseX * this.#microShakeIntensity
     this.#microShakeOffset.y = noiseY * this.#microShakeIntensity
@@ -215,10 +215,10 @@ export class Camera {
   update(dt) {
     // 更新震动效果
     this.#updateShake(dt)
-    
+
     // 更新微震动效果
     this.#updateMicroShake(dt)
-    
+
     if (!this.#target) return
 
     // 目标在屏幕中的位置
@@ -340,7 +340,7 @@ export class Camera {
   getRenderPosition() {
     return {
       x: this.position.x + this.#shakeOffset.x + this.#microShakeOffset.x,
-      y: this.position.y + this.#shakeOffset.y + this.#microShakeOffset.y
+      y: this.position.y + this.#shakeOffset.y + this.#microShakeOffset.y,
     }
   }
 
