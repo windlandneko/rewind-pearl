@@ -13,7 +13,7 @@ class SoundManager {
 
   playBGM(
     name,
-    { loop = true, volume = 0.3, fadeIn = true, fadeTime = 3000 } = {}
+    { loop = true, volume = 0.8, fadeIn = true, fadeTime = 2000 } = {}
   ) {
     if (this.currentBGMName === name) return
     this.currentBGMName = name

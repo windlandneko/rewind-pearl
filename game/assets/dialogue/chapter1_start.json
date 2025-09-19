@@ -6,18 +6,21 @@
       "action": "add",
       "id": "dingzhen",
       "title": "丁真",
-      "subtitle": "理塘王",
       "key": "dingzhen",
       "emotion": "normal",
       "position": "left"
     },
     {
-      "id": null,
-      "text": "（再次回过神时，已经到了一个异世界。）"
+      "id": "dingzhen",
+      "subtitle": "疑颜丁真",
+      "text": "这还是地球吗？\n这给我干哪来了？"
     },
     {
-      "id": "dingzhen",
-      "text": "（疑惑）芝（这）士（是）哪里？"
+      "action": "sound",
+      "id": "ch02"
+    },
+    {
+      "id": null
     },
     {
       "action": "add",

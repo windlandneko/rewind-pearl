@@ -371,23 +371,23 @@ class Dialogue {
    * @param {Object} event - 背景事件
    */
   #onBackground(event) {
-    const { src } = event
-    if (Asset.has('background/' + src)) {
+    const { id } = event
+    if (Asset.has('background/' + id)) {
       this.$background.childNodes.forEach(child => {
         child.classList.remove('visible')
         setTimeout(() => child.remove(), 500)
       })
 
-      const image = Asset.get('background/' + src)
+      const image = Asset.get('background/' + id)
       setTimeout(() => image.classList.add('visible'), 0)
       this.$background.appendChild(image)
-    } else if (src === null) {
+    } else if (id === null) {
       this.$background.childNodes.forEach(child => {
         child.classList.remove('visible')
         setTimeout(() => child.remove(), 500)
       })
     } else {
-      console.warn('[Dialogue] (action: background) 背景图片不存在:', src)
+      console.warn('[Dialogue] (action: background) 背景图片不存在:', id)
     }
     this.next()
   }
@@ -397,7 +397,7 @@ class Dialogue {
    * @param {Object} event - BGM事件
    */
   #onBGM(event) {
-    SoundManager.playBGM(event.name, event)
+    SoundManager.playBGM(event.id, event)
     this.next()
   }
 
@@ -406,7 +406,7 @@ class Dialogue {
    * @param {Object} event - BGM事件
    */
   #onSoundEffect(event) {
-    SoundManager.play(event.name, event)
+    SoundManager.play(event.id, event)
     this.next()
   }
 

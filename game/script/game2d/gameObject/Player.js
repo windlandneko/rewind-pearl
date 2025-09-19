@@ -142,13 +142,16 @@ export class Player extends BaseObject {
         this.explodeAnimTime >= this.explodeAnimDuration
       ) {
         // 动画播放完毕，重生
-        game.stop()
-        game.loadLevel(Levels[game.levelData.name], false)
-
         game.tick = 0
         game.maxTick = 0
+        game.history = new Map()
+        game.ghostPlayers = []
 
-        game.start()
+        game.player = new Player(
+          game.levelData.spawnpoint.x,
+          game.levelData.spawnpoint.y
+        )
+        game.camera.target = game.player
       }
       return
     }
@@ -269,7 +272,7 @@ export class Player extends BaseObject {
    * @param {number} dt 时间增量
    */
   onHorizontalInput(direction, dt) {
-    const acceleration = this.onGround ? 20 : 10
+    const acceleration = this.onGround ? 20 : 15
     const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.3
 
     // 祥，移动
@@ -366,6 +369,22 @@ export class Player extends BaseObject {
     if (debug) {
       ctx.strokeStyle = '#00ff00ff'
       ctx.strokeRect(this.r.x, this.r.y, this.width, this.height)
+      ctx.strokeStyle = 'red'
+      ctx.fillStyle = 'red'
+      if (this.onGround)
+        ctx.fillRect(
+          this.groundCheckBox.r.x,
+          this.groundCheckBox.r.y,
+          this.groundCheckBox.width,
+          this.groundCheckBox.height
+        )
+      else
+        ctx.strokeRect(
+          this.groundCheckBox.r.x,
+          this.groundCheckBox.r.y,
+          this.groundCheckBox.width,
+          this.groundCheckBox.height
+        )
     }
   }
 

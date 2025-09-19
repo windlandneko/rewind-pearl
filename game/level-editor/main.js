@@ -1702,50 +1702,68 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
   SoundManager.playBGM('${levelData.bgm}')
 
   game.gameObjects.push(
-  `
-  objects.forEach(obj => {
-    if (obj.type === 'spawnpoint') return // 跳过玩家出生点
-    switch (obj.type) {
-      case TOOL.platform:
-        code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
-        break
-      case TOOL.interactable:
-        code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
-        break
-      case TOOL.movingPlatform:
-        code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
-          obj.fromY
-        }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
-          obj.interval || 5
-        }, '${obj.moveType || 'linear'}')`
-        break
-      case TOOL.levelChanger:
-        code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
-        break
-      case TOOL.enemy:
-        code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
-        break
-      case TOOL.collectible:
-        code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${
-          obj.spriteId
-        }')`
-        break
-      case TOOL.hazard:
-        code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
-        break
-      case TOOL.trigger:
-        code += `    new Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${
-          obj.height
-        }, ${obj.once}, ${
-          obj.enterCallback ? `game => {${obj.enterCallback}}` : 'null'
-        }, ${obj.leaveCallback ? `game => {${obj.leaveCallback}}` : 'null'})`
-        break
-      default:
-        console.warn('未知对象类型，无法导出代码:', obj)
-    }
-    if (obj.ref) code += `.ref('${obj.ref}')`
-    code += ',\n'
-  })
+`
+  objects
+    .sort((a, b) => {
+      const type = a.type.localeCompare(b.type)
+      if (type !== 0) return type
+      return a.x === b.x ? a.y - b.y : a.x - b.x
+    })
+    .forEach(obj => {
+      if (obj.type === 'spawnpoint') return // 跳过玩家出生点
+      switch (obj.type) {
+        case TOOL.platform:
+          code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+          break
+        case TOOL.interactable:
+          code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
+          break
+        case TOOL.movingPlatform:
+          code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
+            obj.fromY
+          }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
+            obj.interval || 5
+          }, '${obj.moveType || 'linear'}')`
+          break
+        case TOOL.levelChanger:
+          code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
+          break
+        case TOOL.enemy:
+          code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+          break
+        case TOOL.collectible:
+          code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${
+            obj.spriteId
+          }')`
+          break
+        case TOOL.hazard:
+          code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
+          break
+        case TOOL.trigger:
+          code += `    new Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${
+            obj.height
+          }, ${obj.once}, ${
+            obj.enterCallback
+              ? `game => {\n${obj.enterCallback
+                  .split('\n')
+                  .map(line => '      ' + line)
+                  .join('\n')}\n    }`
+              : 'null'
+          }, ${
+            obj.leaveCallback
+              ? `game => {\n${obj.leaveCallback
+                  .split('\n')
+                  .map(line => '      ' + line)
+                  .join('\n')}\n    }`
+              : 'null'
+          })`
+          break
+        default:
+          console.warn('未知对象类型，无法导出代码:', obj)
+      }
+      if (obj.ref) code += `.ref('${obj.ref}')`
+      code += ',\n'
+    })
   code = code.slice(0, -2) + '\n  )\n}\n'
   navigator.clipboard.writeText(code).then(() => {
     document.getElementById('exportBtn').innerHTML =
@@ -1880,7 +1898,7 @@ document.addEventListener('keydown', event => {
     if (index > 0) {
       saveState() // 保存状态到历史栈
       objects.splice(index, 1)
-      objects.splice(index - 1, 0, selectedObj)
+      objects.unshift(selectedObj)
       draw()
     }
     event.preventDefault()
@@ -1891,7 +1909,7 @@ document.addEventListener('keydown', event => {
     if (index < objects.length - 1) {
       saveState() // 保存状态到历史栈
       objects.splice(index, 1)
-      objects.splice(index + 1, 0, selectedObj)
+      objects.push(selectedObj)
       draw()
     }
     event.preventDefault()

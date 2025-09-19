@@ -42,6 +42,12 @@ export class Hazard extends BaseObject {
     ctx.beginPath()
     if (this.direction === 'up') {
       for (let i = 0.5; i < width; i += 4) {
+        // ctx.fillStyle = 'rgb(255, 0, 0)'
+        // ctx.fillRect(x + i, y, 2, 1)
+        // ctx.fillStyle = '#fff'
+        // ctx.fillRect(x + i, y + 1, 2, 4)
+        // ctx.fillStyle = 'rgba(187, 111, 36, 1)'
+        // ctx.fillRect(x + i, y + 5, 2, 2)
         ctx.moveTo(x + i + 0, y + height - _)
         ctx.lineTo(x + i + 0, y + height - a)
         ctx.lineTo(x + i + 1, y + height - a)

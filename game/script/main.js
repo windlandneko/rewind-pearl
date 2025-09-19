@@ -15,8 +15,8 @@ async function startNewGame() {
 }
 
 Loading.on('complete', () => {
-  startNewGame()
-  return
+  // startNewGame()
+  // return
   const loadSaveData = localStorage.getItem(
     'rewind-pearl-autosave-' + currentUser
   )

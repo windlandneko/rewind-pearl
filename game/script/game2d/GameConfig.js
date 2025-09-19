@@ -1,6 +1,6 @@
 // 逻辑帧更新间隔时间（毫秒）
-export const UPDATE_INTERVAL = 10
-const UPDATE_PER_SECOND = 1000 / UPDATE_INTERVAL
+const UPDATE_PER_SECOND = 120
+export const UPDATE_INTERVAL = 1000 / UPDATE_PER_SECOND
 
 // 最大时间回溯记录（秒）
 export const MAX_SNAPSHOTS_COUNT = UPDATE_PER_SECOND * 60

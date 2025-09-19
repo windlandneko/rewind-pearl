@@ -4,7 +4,6 @@ import Vec2 from '../Vector.js'
 export class MovingPlatform extends Platform {
   timer = 0
   target = 0
-  deltaPosition = null
   color = '#fafafa'
 
   /**
@@ -17,11 +16,10 @@ export class MovingPlatform extends Platform {
    * @param {string} moveType
    */
   constructor(from, to, width, height, interval = 5, moveType = 'still') {
-    super(from?.x, from?.y, width, height)
+    super(from?.x ?? 0, from?.y ?? 0, width, height)
     this.r = this.from = from ?? new Vec2()
     this.to = to ?? new Vec2()
     this.interval = interval
-    this.deltaPosition = new Vec2(0, 0)
     this.moveType = moveType
   }
 
@@ -61,7 +59,7 @@ export class MovingPlatform extends Platform {
     }
 
     // 计算平台的移动向量
-    this.deltaPosition = this.r.sub(oldPosition)
+    this.v = this.r.sub(oldPosition)
   }
 
   /**
@@ -73,8 +71,8 @@ export class MovingPlatform extends Platform {
     super.interactWithPlayer(player, game)
 
     // 如果玩家站在平台上，让玩家跟随平台移动
-    if (this.checkCollision(player.groundCheckBox) && this.deltaPosition) {
-      player.r.addTo(this.deltaPosition)
+    if (this.checkCollision(player.groundCheckBox)) {
+      player.r.addTo(this.v)
     }
   }
 
@@ -89,8 +87,6 @@ export class MovingPlatform extends Platform {
       moveType: this.moveType,
       timer: this.timer,
       target: this.target,
-      deltaPositionX: this.deltaPosition?.x || 0,
-      deltaPositionY: this.deltaPosition?.y || 0,
     }
   }
 
@@ -102,9 +98,5 @@ export class MovingPlatform extends Platform {
     this.moveType = state.moveType
     this.timer = state.timer
     this.target = state.target
-    this.deltaPosition = new Vec2(
-      state.deltaPositionX || 0,
-      state.deltaPositionY || 0
-    )
   }
 }

@@ -1,8 +1,8 @@
 import { BaseObject } from './BaseObject.js'
-import SoundManager from '../../SoundManager.js'
+import Vec2 from '../Vector.js'
 
 export class Trigger extends BaseObject {
-  lastPlayerIn = new WeakMap()
+  playerInteract = new WeakMap() // 这还是JS吗，给我干哪来了
 
   /**
    * 触发器对象
@@ -10,50 +10,50 @@ export class Trigger extends BaseObject {
    * @param {number} y
    * @param {number} width
    * @param {number} height
-   * @param {boolean} once
-   * @param {function} enterCallback
-   * @param {function} leaveCallback
+   * @param {boolean} triggerOnce
+   * @param {function} onEnter
+   * @param {function} onLeave
    */
-  constructor(x, y, width, height, once, enterCallback, leaveCallback) {
+  constructor(x, y, width, height, triggerOnce, onEnter, onLeave) {
     super(x, y, width, height)
-    this.once = once
-    this.enterCallback = enterCallback
-    this.leaveCallback = leaveCallback
+    this.triggerOnce = triggerOnce
+    this.enterCallback = onEnter
+    this.leaveCallback = onLeave
   }
 
-  interactWithPlayer(player, game) {
+  async interactWithPlayer(player, game) {
     if (player.removed) return
     if (player.checkCollision(this)) {
-      this.trigger('enter', player, game)
+      await this.trigger(1, player, game)
     } else {
-      this.trigger('leave', player, game)
+      await this.trigger(0, player, game)
     }
   }
 
-  trigger(type, player, game) {
-    if (type === 'enter') {
-      if (!this.lastPlayerIn.get(player)) {
+  async trigger(type, player, game) {
+    if (type === 1) {
+      if (!this.playerInteract.get(player)) {
         try {
-          this.enterCallback?.(game)
+          await this.enterCallback?.(game)
         } catch (e) {
           console.error(e)
-          this.once = true
+          this.triggerOnce = true
         }
-        this.lastPlayerIn.set(player, true)
+        this.playerInteract.set(player, true)
       }
-      if (this.once) this.enterCallback = null
+      if (this.triggerOnce) this.enterCallback = null
     }
-    if (type === 'leave') {
-      if (this.lastPlayerIn.get(player)) {
+    if (type === 0) {
+      if (this.playerInteract.get(player)) {
         try {
-          this.leaveCallback?.(game)
+          await this.leaveCallback?.(game)
         } catch (e) {
           console.error(e)
-          this.once = true
+          this.triggerOnce = true
         }
-        this.lastPlayerIn.set(player, false)
+        this.playerInteract.set(player, false)
       }
-      if (this.once) this.leaveCallback = null
+      if (this.triggerOnce) this.leaveCallback = null
     }
   }
 
@@ -70,7 +70,7 @@ export class Trigger extends BaseObject {
       ...super.state,
       enterCallback: this.enterCallback?.toString?.(),
       leaveCallback: this.leaveCallback?.toString?.(),
-      once: this.once,
+      triggerOnce: this.triggerOnce,
     }
   }
 
@@ -78,6 +78,6 @@ export class Trigger extends BaseObject {
     super.state = state
     this.enterCallback = eval(state.enterCallback)
     this.leaveCallback = eval(state.leaveCallback)
-    this.once = state.once
+    this.triggerOnce = state.triggerOnce
   }
 }
