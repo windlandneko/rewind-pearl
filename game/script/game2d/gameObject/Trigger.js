@@ -3,6 +3,7 @@ import Vec2 from '../Vector.js'
 
 export class Trigger extends BaseObject {
   interacting = false
+  lastInteracting = false
 
   /**
    * 触发器对象
@@ -21,11 +22,16 @@ export class Trigger extends BaseObject {
     this.leaveCallback = onLeave
   }
 
-  async interactWithPlayer(player, game) {
+  interactWithPlayer(player, game) {
+    if (player.removed) return
+
+    this.interacting |= this.checkCollision(player)
+  }
+
+  async trigger(game) {
     const $ = name => game.ref(name)
 
-    if (player.removed || player.type === 'GhostPlayer') return
-    if (player.checkCollision(this) && !this.interacting) {
+    if (!this.lastInteracting && this.interacting) {
       try {
         await this.enterCallback?.(game, $)
       } catch (e) {
@@ -33,9 +39,8 @@ export class Trigger extends BaseObject {
         this.triggerOnce = true
       }
       if (this.triggerOnce) this.enterCallback = null
-      this.interacting = true
     }
-    if (!player.checkCollision(this) && this.interacting) {
+    if (this.lastInteracting && !this.interacting) {
       try {
         await this.leaveCallback?.(game, $)
       } catch (e) {
@@ -43,8 +48,8 @@ export class Trigger extends BaseObject {
         this.triggerOnce = true
       }
       if (this.triggerOnce) this.leaveCallback = null
-      this.interacting = false
     }
+    this.lastInteracting = this.interacting
   }
 
   render(ctx, { scale }) {
@@ -62,6 +67,7 @@ export class Trigger extends BaseObject {
       leaveCallback: this.leaveCallback?.toString?.(),
       triggerOnce: this.triggerOnce,
       interacting: this.interacting,
+      lastInteracting: this.lastInteracting,
     }
   }
 
@@ -71,5 +77,6 @@ export class Trigger extends BaseObject {
     this.leaveCallback = eval(state.leaveCallback)
     this.triggerOnce = state.triggerOnce
     this.interacting = state.interacting
+    this.lastInteracting = state.lastInteracting
   }
 }

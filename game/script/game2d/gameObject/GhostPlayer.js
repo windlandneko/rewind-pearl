@@ -26,6 +26,13 @@ export class GhostPlayer extends Player {
   }
 
   update(dt, game) {
+    if (this.lifetimeBegin > game.tick || this.lifetimeEnd <= game.tick) {
+      this.removed = true
+      return
+    } else {
+      this.removed = false
+    }
+
     const record = this.stateHistory.get(game.tick)
 
     super.update(dt, game)

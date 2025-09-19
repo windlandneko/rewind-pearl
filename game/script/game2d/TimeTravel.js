@@ -1,4 +1,4 @@
-import { TIME_TRAVEL_DISTANCE, TIME_TRAVEL_CHARGE_TIME } from './GameConfig.js'
+import { TIME_TRAVEL_CHARGE_TIME } from './GameConfig.js'
 import { Player } from './gameObject/Player.js'
 import { GhostPlayer } from './gameObject/GhostPlayer.js'
 
@@ -9,7 +9,6 @@ class TimeTravelManager {
   state = null
   radius = 0
   radiusMax = 0
-  startTime = 0
 
   set game(game) {
     this.#game = game
@@ -18,7 +17,8 @@ class TimeTravelManager {
   startTimeTravelPreview() {
     if (this.state === 'success') return
     this.state = 'pending'
-    this.startTime = performance.now()
+    this.startTick = this.#game.tick
+    this.deltaTick = 0
 
     // 计算最大圆圈半径（对角线的一半）
     this.radiusMax =
@@ -32,24 +32,24 @@ class TimeTravelManager {
 
   get canTimeTravel() {
     return (
-      this.#game.tick >= TIME_TRAVEL_DISTANCE &&
       this.#game.globalState.timeTravelUsed <
-        this.#game.globalState.timeTravelMax
+      this.#game.globalState.timeTravelMax
     )
   }
 
   update(dt) {
     if (this.state === 'pending') {
-      const holdTime = performance.now() - this.startTime
-      if (holdTime >= TIME_TRAVEL_CHARGE_TIME) {
+      if (this.deltaTick >= TIME_TRAVEL_CHARGE_TIME) {
         if (this.canTimeTravel) {
           this.state = 'success'
-          this.#game.player.timeTravelUsed++
+          this.#game.globalState.timeTravelUsed++
         } else {
           this.state = null
         }
       } else {
-        this.radius = (12 + holdTime / 200) * 0.1 + this.radius * 0.9
+        this.radius =
+          (this.canTimeTravel * 40 + 6 + this.deltaTick / 20) * 0.1 +
+          this.radius * 0.9
       }
     } else if (this.state === 'success') {
       this.radius += dt * Math.min(800, this.radius ** 2 / 10)
@@ -85,7 +85,7 @@ class TimeTravelManager {
     this.#game.player.state = state
     this.#game.camera.target = this.#game.player
 
-    this.#game.tick = Math.max(1, this.#game.tick - 5 * 100)
+    this.#game.tick = Math.max(1, this.startTick - this.deltaTick * 5)
     this.#game.player.spawnX = this.#game.player.r.x
     this.#game.player.spawnY = this.#game.player.r.y
     this.#game.player.lifetimeBegin = this.#game.tick
@@ -103,7 +103,7 @@ class TimeTravelManager {
     const game = this.#game
     const ctx = game.ctx
     const tmpctx = game.tmpctx
-    const tick = Math.max(1, game.tick - 500)
+    const tick = Math.max(1, this.startTick - this.deltaTick * 5)
 
     if (this.radius === 0 || !game.history.has(tick)) return
     const targetState = game.history.get(tick)
@@ -122,6 +122,9 @@ class TimeTravelManager {
 
     // 按优先级渲染游戏对象
     game.renderGroups.interactables.forEach(obj => {
+      if (!obj.hidden) obj.render(tmpctx, game)
+    })
+    game.renderGroups.triggers.forEach(obj => {
       if (!obj.hidden) obj.render(tmpctx, game)
     })
     game.renderGroups.collectibles.forEach(obj => {
@@ -172,7 +175,7 @@ class TimeTravelManager {
     gradient.addColorStop(
       1,
       this.state === 'success'
-        ? 'rgba(255, 255, 255, 0.5)'
+        ? 'rgba(87, 87, 200, 0.5)'
         : this.canTimeTravel
         ? 'rgba(87, 87, 200, 0.5)'
         : 'rgba(255, 0, 0, 0.5)'
@@ -224,7 +227,7 @@ class TimeTravelManager {
       this.state === 'success'
         ? '#ffffff'
         : this.canTimeTravel
-        ? '#aaaaaa'
+        ? 'rgba(233, 233, 255, 0.9)'
         : '#ff0000'
     ctx.lineWidth = 5
     ctx.beginPath()

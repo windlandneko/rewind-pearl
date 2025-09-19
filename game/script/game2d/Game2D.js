@@ -35,6 +35,7 @@ export class Game {
     collectibles: [],
     enemies: [],
     interactables: [],
+    triggers: [],
   }
   #ref = new Map()
 
@@ -402,7 +403,12 @@ export class Game {
 
     TimeTravel.update(dt)
 
-    if (!this.isRunning || TimeTravel.state !== null) return
+    if (!this.isRunning) return
+
+    if (TimeTravel.state !== null) {
+      TimeTravel.deltaTick++
+      return
+    }
 
     this.tick++
     this.maxTick = Math.max(this.maxTick, this.tick)
@@ -471,6 +477,12 @@ export class Game {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this)
     })
+    this.renderGroups.triggers.forEach(obj => {
+      obj.interacting = false
+      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      obj.interactWithPlayer(this.player, this)
+      obj.trigger(this)
+    })
     this.renderGroups.platforms.forEach(obj => {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this)
@@ -507,6 +519,9 @@ export class Game {
 
     // 按优先级渲染游戏对象
     this.renderGroups.interactables.forEach(obj => {
+      if (!obj.hidden) obj.render(ctx, this)
+    })
+    this.renderGroups.triggers.forEach(obj => {
       if (!obj.hidden) obj.render(ctx, this)
     })
     this.renderGroups.collectibles.forEach(obj => {
@@ -549,11 +564,9 @@ export class Game {
       obj => obj.type === 'Enemy' || obj.type === 'Hazard'
     )
     this.renderGroups.interactables = objects.filter(
-      obj =>
-        obj.type === 'Interactable' ||
-        obj.type === 'LevelChanger' ||
-        obj.type === 'Trigger'
+      obj => obj.type === 'Interactable' || obj.type === 'LevelChanger'
     )
+    this.renderGroups.triggers = objects.filter(obj => obj.type === 'Trigger')
 
     this.#ref = new Map()
     objects.forEach(obj => {
@@ -662,7 +675,7 @@ export class Game {
     ctx.fillStyle = '#fff'
     ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
     ctx.fillText(`HP: ${this.player.health}`, 20, 10)
-    ctx.fillText(`Score: ${this.player.score}`, 20, 50)
+    ctx.fillText(`TimeTravelUsed: ${this.globalState?.timeTravelUsed}`, 20, 50)
     ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
     // 狼跳机制说明
     ctx.fillStyle = 'white'

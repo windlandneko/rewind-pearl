@@ -5,9 +5,7 @@ export const UPDATE_INTERVAL = 1000 / UPDATE_PER_SECOND
 // 最大时间回溯记录（秒）
 export const MAX_SNAPSHOTS_COUNT = UPDATE_PER_SECOND * 60
 // 时间回溯充能时间（毫秒）
-export const TIME_TRAVEL_CHARGE_TIME = 500
-// 时间回溯时长（秒）
-export const TIME_TRAVEL_DISTANCE = UPDATE_PER_SECOND * 5
+export const TIME_TRAVEL_CHARGE_TIME = 1 * UPDATE_PER_SECOND
 
 // 渲染配置
 export const GRID_SIZE = 8
