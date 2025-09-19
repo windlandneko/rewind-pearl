@@ -31,10 +31,12 @@ export class Trigger extends BaseObject {
   }
 
   async trigger(type, player, game) {
+    const $ = name => game.ref(name)
+
     if (type === 1) {
       if (!this.playerInteract.get(player)) {
         try {
-          await this.enterCallback?.(game)
+          await this.enterCallback?.(game, $)
         } catch (e) {
           console.error(e)
           this.triggerOnce = true
@@ -46,7 +48,7 @@ export class Trigger extends BaseObject {
     if (type === 0) {
       if (this.playerInteract.get(player)) {
         try {
-          await this.leaveCallback?.(game)
+          await this.leaveCallback?.(game, $)
         } catch (e) {
           console.error(e)
           this.triggerOnce = true

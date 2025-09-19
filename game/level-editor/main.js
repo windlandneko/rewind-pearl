@@ -1803,14 +1803,14 @@ export function ${levelSelect.value || 'UnknownLevelName'}(game) {
             obj.height
           }, ${obj.once}, ${
             obj.enterCallback
-              ? `game => {\n${obj.enterCallback
+              ? `(game, $) => {\n${obj.enterCallback
                   .split('\n')
                   .map(line => '      ' + line)
                   .join('\n')}\n    }`
               : 'null'
           }, ${
             obj.leaveCallback
-              ? `game => {\n${obj.leaveCallback
+              ? `(game, $) => {\n${obj.leaveCallback
                   .split('\n')
                   .map(line => '      ' + line)
                   .join('\n')}\n    }`
