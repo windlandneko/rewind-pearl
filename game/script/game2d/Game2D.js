@@ -89,8 +89,6 @@ export class Game {
 
       resizeCanvas(this.ctx, DPR)
       resizeCanvas(this.tmpctx, DPR)
-      resizeCanvas(this.tileCtx, DPR)
-      if (this.tileHelper) this.tileHelper.render(this.tileCtx)
     }
     const resizeCanvas = (ctx, DPR) => {
       ctx.scale(DPR, DPR)
@@ -219,7 +217,7 @@ export class Game {
     this.tileHelper.render(this.tileCtx)
 
     this.tileHelper.edges.forEach(edge => {
-      this.gameObjects.push(new GameObjects.Platform(...edge))
+      this.gameObjects.push(new GameObjects.Platform(...edge).hide())
     })
 
     if (this.levelData.background) {

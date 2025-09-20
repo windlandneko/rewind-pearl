@@ -19,12 +19,12 @@ export const InputEnum = {
 export class Player extends BaseObject {
   color = 'blue'
 
-  gravity = 600 // 重力加速度
-  moveSpeed = 72 // 移动速度 (像素/秒)
-  jumpSpeed = 130 // 跳跃速度 (像素/秒)
+  gravity = 500 // 重力加速度
+  moveSpeed = 64 // 移动速度 (像素/秒)
+  jumpSpeed = 110 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
-  maxJumpTime = 0.15 // 跳跃增益时间（秒）
+  maxJumpTime = 0.2 // 跳跃增益时间（秒）
 
   invincibleTime = 4 // 无敌时间 (秒)
 

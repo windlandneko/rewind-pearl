@@ -1,10 +1,8 @@
-import { UPDATE_INTERVAL } from '../GameConfig.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
   color = 'rgba(84, 89, 136, 1)'
   shadowColor = 'rgba(84, 89, 136, 0.5)'
-  hidden = true
 
   constructor(x, y, width, height, ladder = false) {
     super(x, y, width, height)

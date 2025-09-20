@@ -7,7 +7,6 @@ export { Stage4 } from './Stage4.js'
 export { Stage5 } from './Stage5.js'
 
 export { TileTest } from './TileTest.js'
+export { TileTest2 } from './TileTest2.js'
 export { HazardTest } from './HazardTest.js'
 export { MovingPlatformTest } from './MovingPlatformTest.js'
-export { DoublePlatformTest } from './DoublePlatformTest.js'
-export { SolidTileTest } from './SolidTileTest.js'
