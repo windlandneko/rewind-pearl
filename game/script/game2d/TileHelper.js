@@ -1,3 +1,5 @@
+import Asset from '../Asset.js'
+
 /**
  * 地图背景图块管理器
  *
@@ -7,6 +9,9 @@ export class TileHelper {
   #tiles
   #hitbox
   #walls
+  #tileset = new Map()
+  #padding = []
+  #center = []
 
   static palette = [
     null,
@@ -29,6 +34,8 @@ export class TileHelper {
   ]
 
   constructor(tileData) {
+    this.#loadTilesXML(Asset.get('tiles/index'))
+
     this.height = tileData.length
     this.width = tileData[0]?.length || 0
 
@@ -40,7 +47,120 @@ export class TileHelper {
 
     this.#hitbox = this.#tiles.map(row => row.map(tile => this.isValid(tile)))
 
+    this.#generatePaddingAndCenter()
     this.#generateEdges()
+  }
+
+  /**
+   * 加载 XML 格式的图块数据
+   * @param {Document} xml
+   */
+  #loadTilesXML(xml) {
+    this.#tileset.clear()
+    xml.querySelectorAll('Tileset').forEach(root => {
+      const id = root.getAttribute('id')
+      const path = root.getAttribute('path')
+      const sound = root.getAttribute('sound')
+
+      if (!Asset.has(path)) return
+
+      const image = Asset.get(path)
+
+      const ignores =
+        root
+          .getAttribute('ignores')
+          ?.split(',')
+          .map(s => s.trim())
+          .filter(Boolean) ?? []
+      const copy =
+        root
+          .getAttribute('copy')
+          ?.split(',')
+          .map(s => s.trim())
+          .filter(Boolean) ?? []
+
+      const sets = new Map()
+
+      copy.forEach(key => {
+        if (!this.#tileset.has(key)) return
+        this.#tileset.get(key).sets.forEach((value, key) => {
+          sets.set(key, value)
+        })
+      })
+
+      root.querySelectorAll('set').forEach(setNode => {
+        const key = setNode.getAttribute('mask')
+        const mask = key
+          .split('-')
+          .map(row =>
+            row.split('').map(c => (c === '1' ? 1 : c === '0' ? 0 : null))
+          )
+        const tiles = setNode
+          .getAttribute('tiles')
+          .split(';')
+          .map(pair => pair.trim())
+          .filter(Boolean)
+          .map(pair => pair.split(',').map(n => parseInt(n, 10)))
+        sets.set(key, { mask, tiles })
+      })
+
+      this.#tileset.set(id, {
+        path,
+        image,
+        sound,
+        ignores,
+        copy,
+        sets,
+      })
+    })
+    console.log(this.#tileset)
+  }
+
+  #generatePaddingAndCenter() {
+    this.#padding = this.#tiles.map(row => row.map(() => false))
+    this.#center = this.#tiles.map(row => row.map(() => false))
+
+    const visited = this.#tiles.map(row => row.map(() => false))
+    const queue = []
+    // 先将所有空气块入队
+    for (let i = 1; i <= this.height; i++) {
+      for (let j = 1; j <= this.width; j++) {
+        if (this.#tiles[i][j] === 0) {
+          queue.push([i, j, 0])
+          visited[i][j] = true
+        }
+      }
+    }
+    const dirs = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+      [1, 1],
+      [1, -1],
+      [-1, 1],
+      [-1, -1],
+    ]
+    while (queue.length) {
+      const [i, j, d] = queue.shift()
+      if (d === 2) this.#padding[i][j] = true
+      if (d > 2) this.#center[i][j] = true
+      for (const [di, dj] of dirs) {
+        const ni = i + di,
+          nj = j + dj
+        if (
+          ni >= 0 &&
+          ni < this.height &&
+          nj >= 0 &&
+          nj < this.width &&
+          !visited[ni][nj] &&
+          this.isValid(this.#tiles[ni][nj])
+        ) {
+          queue.push([ni, nj, d + 1])
+          visited[ni][nj] = true
+        }
+      }
+    }
   }
 
   #generateEdges() {
@@ -72,13 +192,41 @@ export class TileHelper {
           this.edges.push([x, y, (r - j) * 8, 8])
         } else {
           // try expand vertically
-          console.log('try expand vertically', i, j)
           this.#walls[i][j] = true
           let r = i
           while (r <= this.height && this.#walls[r][j])
-            (this.#walls[r++][j] = false), console.log(r, j)
+            this.#walls[r++][j] = false
           if (r > i) this.edges.push([x, y, 8, (r - i) * 8])
         }
+      }
+    }
+  }
+
+  #chooseTile(i, j, sets, ignores = []) {
+    if (this.#center[i][j] && sets.has('center')) {
+      const { tiles } = sets.get('center')
+      return tiles[Math.floor(Math.random() * tiles.length)]
+    } else if (this.#padding[i][j] && sets.has('padding')) {
+      const { tiles } = sets.get('padding')
+      return tiles[Math.floor(Math.random() * tiles.length)]
+    } else {
+      for (const { mask, tiles } of sets.values()) {
+        let match = true
+        mask.forEach((row, di) => {
+          row.forEach((val, dj) => {
+            if (
+              val === null ||
+              ignores.includes(this.#tiles[i + di - 1][j + dj - 1])
+            )
+              return
+            if (val === 1 && !this.#hitbox[i + di - 1][j + dj - 1])
+              match = false
+            if (val === 0 && this.#hitbox[i + di - 1][j + dj - 1]) match = false
+          })
+        })
+        if (!match) continue
+
+        return tiles[Math.floor(Math.random() * tiles.length)]
       }
     }
   }
@@ -87,7 +235,20 @@ export class TileHelper {
     return id === -1 || (1 <= id && id <= TileHelper.palette.length)
   }
 
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   */
   render(ctx) {
+    ctx.canvas.width = this.width * 8
+    ctx.canvas.height = this.height * 8
+
+    ctx.imageSmoothingEnabled = false
+    ctx.webkitImageSmoothingEnabled = false
+    ctx.mozImageSmoothingEnabled = false
+    ctx.msImageSmoothingEnabled = false
+    ctx.textBaseline = 'top'
+    ctx.textAlign = 'center'
+
     ctx.fillStyle = '#1B2C40'
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
@@ -95,35 +256,45 @@ export class TileHelper {
       for (let j = 1; j <= this.width; j++) {
         if (!this.#hitbox[i][j]) continue
 
-        const tile = this.#tiles[i][j]
+        const tile = String(this.#tiles[i][j])
         const x = (j - 1) * 8
         const y = (i - 1) * 8
 
-        ctx.fillStyle = this.getColor(tile)
-        ctx.fillRect(x, y, 8, 8)
+        if (!this.#tileset.has(tile)) {
+          ctx.fillStyle = this.getColor(tile)
+          ctx.fillRect(x, y, 8, 8)
 
-        ctx.fillStyle = this.getBorderColor(tile)
-        if (!this.#hitbox[i + 1][j]) ctx.fillRect(x, y + 7, 8, 1)
-        if (!this.#hitbox[i - 1][j]) ctx.fillRect(x, y, 8, 1)
-        if (!this.#hitbox[i][j + 1]) ctx.fillRect(x + 7, y, 1, 8)
-        if (!this.#hitbox[i][j - 1]) ctx.fillRect(x, y, 1, 8)
+          ctx.fillStyle = this.getBorderColor(tile)
+          if (!this.#hitbox[i + 1][j]) ctx.fillRect(x, y + 7, 8, 1)
+          if (!this.#hitbox[i - 1][j]) ctx.fillRect(x, y, 8, 1)
+          if (!this.#hitbox[i][j + 1]) ctx.fillRect(x + 7, y, 1, 8)
+          if (!this.#hitbox[i][j - 1]) ctx.fillRect(x, y, 1, 8)
 
-        if (!this.#hitbox[i + 1][j + 1]) ctx.fillRect(x + 7, y + 7, 1, 1)
-        if (!this.#hitbox[i + 1][j - 1]) ctx.fillRect(x, y + 7, 1, 1)
-        if (!this.#hitbox[i - 1][j + 1]) ctx.fillRect(x + 7, y, 1, 1)
-        if (!this.#hitbox[i - 1][j - 1]) ctx.fillRect(x, y, 1, 1)
+          if (!this.#hitbox[i + 1][j + 1]) ctx.fillRect(x + 7, y + 7, 1, 1)
+          if (!this.#hitbox[i + 1][j - 1]) ctx.fillRect(x, y + 7, 1, 1)
+          if (!this.#hitbox[i - 1][j + 1]) ctx.fillRect(x + 7, y, 1, 1)
+          if (!this.#hitbox[i - 1][j - 1]) ctx.fillRect(x, y, 1, 1)
 
-        // ctx.fillStyle = 'red'
-        // if (
-        //   this.#tiles[i + 1][j] != 0 &&
-        //   this.#tiles[i][j + 1] != 0 &&
-        //   this.#tiles[i - 1][j] != 0 &&
-        //   this.#tiles[i][j - 1] != 0
-        // ) {
-        // } else ctx.fillRect(x + 3, y + 3, 2, 2)
+          continue
+        }
+
+        const { image, sets, ignores } = this.#tileset.get(tile)
+
+        const [sx, sy] = this.#chooseTile(i, j, sets, ignores)
+        ctx.drawImage(image, sx * 8, sy * 8, 8, 8, x, y, 8, 8)
+
+        // // 绘制padding和center分布
+        // if (this.#padding[i][j]) {
+        //   ctx.fillStyle = 'yellow'
+        //   ctx.fillRect(x + 2, y + 2, 4, 4)
+        // } else if (this.#center[i][j]) {
+        //   ctx.fillStyle = 'lime'
+        //   ctx.fillRect(x + 2, y + 2, 4, 4)
+        // }
       }
     }
 
+    // 绘制切分后的碰撞体
     // ctx.strokeStyle = '#578DFF'
     // ctx.lineWidth = 1
     // this.edges.forEach(([x, y, width, height]) => {

@@ -118,6 +118,8 @@ class Asset {
       return 'json'
     } else if (textExtensions.includes(extension)) {
       return 'text'
+    } else if (extension === 'xml') {
+      return 'xml'
     }
     return 'binary'
   }
@@ -143,6 +145,8 @@ class Asset {
         return this.#loadJSON(url)
       case 'text':
         return this.#loadText(url)
+      case 'xml':
+        return this.#loadXML(url)
       default:
         return this.#loadBinary(url)
     }
@@ -222,6 +226,21 @@ class Asset {
       throw new Error(`Failed to load binary from ${url}: ${req.status}`)
     }
     return req.arrayBuffer()
+  }
+
+  /**
+   * 加载 XML 文件
+   * @param {string} url - 文件 URL
+   * @returns {Promise<Document>}
+   */
+  async #loadXML(url) {
+    const req = await fetch(url)
+    if (!req.ok) {
+      throw new Error(`Failed to load XML from ${url}: ${req.status}`)
+    }
+    const text = await req.text()
+    const parser = new DOMParser()
+    return parser.parseFromString(text, "application/xml")
   }
 }
 
