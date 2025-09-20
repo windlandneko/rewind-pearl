@@ -34,7 +34,7 @@ export class Hazard extends BaseObject {
     const width = Math.round(this.width * scale) / scale
     const height = Math.round(this.height * scale) / scale
 
-    const _ = 1
+    const _ = 0
     const a = _ + 3
     const b = a + 2
 

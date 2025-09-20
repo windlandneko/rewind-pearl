@@ -10,6 +10,7 @@ import TimeTravel from './TimeTravel.js'
 import Dialogue from '../Dialogue.js'
 import Asset from '../Asset.js'
 import { InputEnum } from './gameObject/Player.js'
+import { TileHelper } from './TileHelper.js'
 
 export class Game {
   listener = new EventListener()
@@ -66,49 +67,47 @@ export class Game {
     /** @type {HTMLCanvasElement} */
     this.canvas = document.getElementById('game-canvas')
     /** @type {HTMLCanvasElement} */
-    this.canvas2 = new OffscreenCanvas(width, height)
+    this.tmpCanvas = new OffscreenCanvas(width, height)
+    /** @type {HTMLCanvasElement} */
+    this.tileCanvas = new OffscreenCanvas(width, height)
 
     /** @type {CanvasRenderingContext2D} */
     this.ctx = this.canvas.getContext('2d')
     /** @type {CanvasRenderingContext2D} */
-    this.tmpctx = this.canvas2.getContext('2d')
+    this.tmpctx = this.tmpCanvas.getContext('2d')
+    /** @type {CanvasRenderingContext2D} */
+    this.tileCtx = this.tileCanvas.getContext('2d')
 
-    const resizeCanvas = () => {
+    const resize = () => {
       const { width, height } = main.getBoundingClientRect()
-
       const DPR = devicePixelRatio
-
-      // 应用DPR缩放
-      this.ctx.scale(DPR, DPR)
-      this.tmpctx.scale(DPR, DPR)
-
-      this.canvas.width = this.displayWidth = width * DPR
-      this.canvas.height = this.displayHeight = height * DPR
+      this.displayWidth = width * DPR
+      this.displayHeight = height * DPR
 
       if (this.isRunning)
         this.scale = this.displayHeight / this.camera.viewport.height
 
-      // 同步预览画布尺寸
-      this.canvas2.width = this.displayWidth
-      this.canvas2.height = this.displayHeight
+      resizeCanvas(this.ctx, DPR)
+      resizeCanvas(this.tmpctx, DPR)
+      resizeCanvas(this.tileCtx, DPR)
+      if (this.tileHelper) this.tileHelper.render(this.tileCtx)
+    }
+    const resizeCanvas = (ctx, DPR) => {
+      ctx.scale(DPR, DPR)
 
-      this.ctx.imageSmoothingEnabled = false
-      this.ctx.webkitImageSmoothingEnabled = false
-      this.ctx.mozImageSmoothingEnabled = false
-      this.ctx.msImageSmoothingEnabled = false
-      this.ctx.textBaseline = 'top'
-      this.ctx.textAlign = 'left'
+      ctx.canvas.width = this.displayWidth
+      ctx.canvas.height = this.displayHeight
 
-      this.tmpctx.imageSmoothingEnabled = false
-      this.tmpctx.webkitImageSmoothingEnabled = false
-      this.tmpctx.mozImageSmoothingEnabled = false
-      this.tmpctx.msImageSmoothingEnabled = false
-      this.tmpctx.textBaseline = 'top'
-      this.tmpctx.textAlign = 'left'
+      ctx.imageSmoothingEnabled = false
+      ctx.webkitImageSmoothingEnabled = false
+      ctx.mozImageSmoothingEnabled = false
+      ctx.msImageSmoothingEnabled = false
+      ctx.textBaseline = 'top'
+      ctx.textAlign = 'center'
     }
 
-    resizeCanvas()
-    addEventListener('resize', resizeCanvas, 16)
+    resize()
+    addEventListener('resize', resize)
 
     this.canvas.classList.add('hidden')
 
@@ -215,6 +214,13 @@ export class Game {
       this.levelData.spawnpoint.y
     )
     this.#setupCamera(this.levelData)
+
+    this.tileHelper = new TileHelper(this.tileData)
+    this.tileHelper.render(this.tileCtx)
+
+    this.tileHelper.edges.forEach(edge => {
+      this.gameObjects.push(new GameObjects.Platform(...edge))
+    })
 
     if (this.levelData.background) {
       this.$backgroundImage.src = Asset.get(
@@ -526,6 +532,8 @@ export class Game {
 
     // 绘制背景网格
     if (this.debug) this.#renderBackgroundGrid(ctx)
+
+    ctx.drawImage(this.tileCanvas, 0, 0)
 
     // 按优先级渲染游戏对象
     this.renderGroups.interactables.forEach(obj => {

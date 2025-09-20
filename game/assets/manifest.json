@@ -4,7 +4,8 @@
     "menu": "audio/To Far Shores.mp3",
     "chat": "audio/甲論乙駁 _ あきやまうに.mp3",
     "Gate of steiner": "audio/阿保剛 - Gate of steiner.mp3",
-    "Memories of Memories": "audio/Memories of Memories.mp3"
+    "Memories of Memories": "audio/Memories of Memories.mp3",
+    "Home": "audio/Toby Fox - Home.mp3"
   },
 
   "character": {
@@ -83,7 +84,8 @@
     "litang": "background/litang.png",
     "magic": "background/magic.jpg",
     "test": "background/01.data.png",
-    "underground": "background/underground.png"
+    "underground": "background/underground.png",
+    "home": "background/home.png"
   },
 
   "sprite": {

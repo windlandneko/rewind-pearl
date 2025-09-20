@@ -222,7 +222,7 @@ export class Camera {
     this.#updateShake(dt)
 
     // 更新微震动效果
-    this.#updateMicroShake(dt)
+    // this.#updateMicroShake(dt)
 
     if (!this.#target) return
 

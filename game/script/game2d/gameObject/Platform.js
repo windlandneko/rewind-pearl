@@ -2,8 +2,9 @@ import { UPDATE_INTERVAL } from '../GameConfig.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Platform extends BaseObject {
-  color = '#666'
-  shadowColor = '#6666'
+  color = 'rgba(84, 89, 136, 1)'
+  shadowColor = 'rgba(84, 89, 136, 0.5)'
+  hidden = true
 
   constructor(x, y, width, height, ladder = false) {
     super(x, y, width, height)
@@ -60,7 +61,7 @@ export class Platform extends BaseObject {
     } else if (minOverlap === overlapBottom) {
       // 从下方碰撞（撞头）
       player.r.y = this.r.y + this.height
-      player.v.y = -player.v.y * 0.2
+      player.v.y = -player.v.y * 0.1
     } else if (minOverlap === overlapLeft) {
       // 从左侧碰撞
       player.r.x = this.r.x - player.width

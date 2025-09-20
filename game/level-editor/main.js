@@ -32,6 +32,17 @@ const TOOL_COLOR = {
   spawnpoint: 'rgba(0, 57, 164, 0.25)',
 }
 
+// 背景块颜色编号
+const TILE_COLOR = [
+  '#100F1C', // null
+  '#525989', // 1
+  '#865642', // 2
+  '#578DFF', // 3
+  '#2B4755', // 4
+  '#192C41', // 5
+  '#100F1C', // 6
+]
+
 const DIRECTION = {
   NORTH: 0b0001,
   EAST: 0b0010,
@@ -75,6 +86,8 @@ let successMessageTimeout = null
 
 // 播放模式相关变量
 let isPlayMode = false
+let isDrawBgMode = false // 是否为绘制背景模式
+let currentTileType = 1 // 当前绘制的背景块编号
 let animationId = null
 let platformOriginalPositions = new Map() // 存储移动平台的原始位置
 
@@ -84,13 +97,17 @@ let levelData = {
   introDialogue: null,
   background: 'test',
   bgm: 'test',
-  height: 192,
+  height: 180,
   width: 320,
   worldBorder: false,
-  cameraHeight: 192,
+  cameraHeight: 180,
   cameraWidth: 320,
-  cameraBound: { x: 0, y: 0, width: 320, height: 192 },
+  cameraBound: { x: 0, y: 0, width: 320, height: 180 },
 }
+
+let tileData = Array(Math.ceil(levelData.height / 8))
+  .fill()
+  .map(() => Array(Math.ceil(levelData.width / 8)).fill(0))
 
 // 玩家出生点
 let spawnpoint = {
@@ -207,7 +224,8 @@ function showProperties(obj) {
           type: 'number',
           onChange: value => {
             obj.cameraHeight = parseFloat(value)
-            obj.cameraWidth = Math.round(obj.cameraHeight * (5 / 3) * 100) / 100
+            obj.cameraWidth =
+              Math.round(obj.cameraHeight * (16 / 9) * 100) / 100
             document.querySelector(
               `input[type="number"][data-ref="cameraWidth"]`
             ).value = obj.cameraWidth
@@ -545,6 +563,20 @@ document.getElementById('exportBtn').addEventListener('click', exportCode)
 // 播放控制按钮
 document.getElementById('playBtn').addEventListener('click', togglePlayMode)
 
+// 绘制背景按钮
+document.getElementById('drawBgBtn').addEventListener('click', () => {
+  isDrawBgMode = !isDrawBgMode
+  document.getElementById('drawBgBtn').classList.toggle('active', isDrawBgMode)
+  draw()
+})
+
+// 数字键切换当前背景块编号
+window.addEventListener('keydown', e => {
+  if (isDrawBgMode && /^[1-9]$/.test(e.key)) {
+    currentTileType = parseInt(e.key)
+  }
+})
+
 // 设置工具
 function setTool(tool) {
   // 在播放模式下禁用工具切换
@@ -596,25 +628,40 @@ function draw() {
   // 绘制网格
   drawGrid()
 
+  // 绘制背景块
+  for (let i = 0; i < tileData.length; i++) {
+    for (let j = 0; j < tileData[i].length; j++) {
+      const t = tileData[i][j]
+      if (t > 0 && TILE_COLOR[t]) {
+        ctx.fillStyle = TILE_COLOR[t]
+        ctx.fillRect(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+      }
+    }
+  }
+
   // 绘制关卡边界
   drawLevelBounds()
 
-  // 绘制对象
-  objects.forEach(obj => drawObject(obj))
-
-  // 绘制临时对象
-  if (tempObject) {
-    drawObject(tempObject)
-  }
-
-  // 绘制框选区域
-  if (isBoxSelecting) {
-    drawBoxSelect()
-  }
-
-  // 绘制选择框
-  if (selectedObjects.length > 0) {
-    selectedObjects.forEach(obj => drawSelectionBox(obj))
+  if (!isDrawBgMode) {
+    // 绘制对象
+    objects.forEach(obj => drawObject(obj))
+    // 绘制临时对象
+    if (tempObject) drawObject(tempObject)
+    // 绘制框选区域
+    if (isBoxSelecting) drawBoxSelect()
+    // 绘制选择框
+    if (selectedObjects.length > 0)
+      selectedObjects.forEach(obj => drawSelectionBox(obj))
+  } else {
+    // 绘制当前背景块预览
+    if (lastMousePos) {
+      const gridX = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
+      const gridY = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
+      ctx.strokeStyle = TILE_COLOR[currentTileType]
+      ctx.lineWidth = 2 / zoom
+      ctx.setLineDash([4 / zoom, 4 / zoom])
+      ctx.strokeRect(gridX, gridY, GRID_SIZE, GRID_SIZE)
+    }
   }
 
   ctx.restore()
@@ -679,7 +726,7 @@ function drawObject(obj) {
     drawMovingPlatformAnchor(obj)
   }
 
-  ctx.fillStyle = TOOL_COLOR[obj.type] + (obj.hidden ? '4' : 'f')
+  ctx.fillStyle = TOOL_COLOR[obj.type] ?? '#666' + (obj.hidden ? '4' : 'f')
   ctx.save()
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
@@ -1061,6 +1108,24 @@ canvas.addEventListener('mousedown', event => {
 
   const mousePos = getMousePos(event)
 
+  if (event.button === 1) {
+    isPanning = true
+    panStart = {
+      x: event.clientX - panOffset.x,
+      y: event.clientY - panOffset.y,
+    }
+    updateCursor(mousePos)
+    return
+  }
+
+  if (isDrawBgMode) {
+    isBgDrawing = true
+    bgDrawType = event.button === 2 ? 0 : currentTileType
+    drawBgTile(mousePos, bgDrawType)
+    draw()
+    return
+  }
+
   const obj = getObjectAt(mousePos, true)
 
   // 检查是否按下了Ctrl键进行框选
@@ -1207,7 +1272,6 @@ canvas.addEventListener('mousedown', event => {
       }
       showProperties(levelData)
     }
-    updateCursor(mousePos)
   } else {
     // 开始创建新对象
     isCreating = true
@@ -1223,6 +1287,7 @@ canvas.addEventListener('mousedown', event => {
     }
     showProperties(null)
   }
+
   updateCursor(mousePos)
   draw()
 })
@@ -1234,6 +1299,12 @@ document.addEventListener('mousemove', e => {
 
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
+
+  draw()
+  if (isBgDrawing) {
+    drawBgTile(mousePos, bgDrawType)
+    return
+  }
 
   if (isBoxSelecting) {
     boxSelectEnd = mousePos
@@ -1350,9 +1421,34 @@ document.addEventListener('mousemove', e => {
   }
 })
 
+// 屏蔽右键菜单，防止干扰
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault()
+  return false
+})
+
+// 新增：绘制/删除背景块的辅助函数
+let isBgDrawing = false
+let bgDrawType = 1
+function drawBgTile(mousePos, type) {
+  const i = Math.floor(mousePos.y / GRID_SIZE)
+  const j = Math.floor(mousePos.x / GRID_SIZE)
+  if (i >= 0 && i < tileData.length && j >= 0 && j < tileData[i].length) {
+    if (tileData[i][j] !== type) {
+      tileData[i][j] = type
+    }
+  }
+}
+
 function onMouseup() {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
+
+  // 新增：绘制背景拖动结束逻辑
+  if (isBgDrawing) {
+    isBgDrawing = false
+    return
+  }
 
   if (isBoxSelecting) {
     // 完成框选
@@ -1771,9 +1867,14 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     },
   }
 
+  game.tileData = [\n    [${tileData
+    .map(row => row.join(','))
+    .join('],\n    [')}],\n  ]
+
   SoundManager.playBGM('${levelData.bgm}')
 
   game.gameObjects.push(
+
 `
   objects
     .sort((a, b) => {
@@ -1864,6 +1965,8 @@ function getCursorStyle(mousePos) {
 
   const objectAtZeroPadding = getObjectAt(mousePos, false, 0)
 
+  if (isBgDrawing) return 'crosshair'
+  if (isDrawBgMode) return 'cell'
   if (isDraggingAnchor) return 'crosshair'
   if (isPanning) return 'grabbing'
   if (isResizing) return null // 保持当前样式
@@ -2204,12 +2307,12 @@ levelSelect.addEventListener('change', () => {
       introDialogue: null,
       background: 'test',
       bgm: 'test',
-      height: 192,
+      height: 180,
       width: 320,
       worldBorder: false,
-      cameraHeight: 192,
+      cameraHeight: 180,
       cameraWidth: 320,
-      cameraBound: { x: 0, y: 0, width: 320, height: 192 },
+      cameraBound: { x: 0, y: 0, width: 320, height: 180 },
     }
     objects = []
     spawnpoint = {
@@ -2249,6 +2352,7 @@ levelSelect.addEventListener('change', () => {
 function saveCurrentLevel(name) {
   levels[name] = {
     levelData: JSON.parse(JSON.stringify(levelData)),
+    tileData: JSON.parse(JSON.stringify(tileData)),
     objects: JSON.parse(JSON.stringify(objects)),
     spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
     panOffset: { ...panOffset },
@@ -2268,6 +2372,14 @@ function loadLevelByName(name) {
       width: levelData.width,
       height: levelData.height,
     }
+  // 加载tileData
+  if (level.tileData) {
+    tileData = level.tileData
+  } else {
+    tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
+      .fill()
+      .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
+  }
   objects = level.objects
   spawnpoint = level.spawnpoint
   panOffset = level.panOffset ?? { x: 0, y: 0 }
@@ -2353,12 +2465,12 @@ if (!loaded) {
       introDialogue: null,
       background: 'test',
       bgm: 'test',
-      height: 192,
+      height: 180,
       width: 320,
       worldBorder: false,
-      cameraHeight: 192,
+      cameraHeight: 180,
       cameraWidth: 320,
-      cameraBound: { x: 0, y: 0, width: 320, height: 192 },
+      cameraBound: { x: 0, y: 0, width: 320, height: 180 },
     }
     objects = []
     spawnpoint = {
