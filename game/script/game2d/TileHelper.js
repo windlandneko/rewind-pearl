@@ -8,12 +8,13 @@ import Asset from '../Asset.js'
 export class TileHelper {
   #tiles
   #hitbox
-  #walls
   #tileset = new Map()
-  #padding = []
-  #center = []
+  #paletteMap = new Map()
+  #walls // dis = 1
+  #padding // dis = 2
+  #center // dis > 2
 
-  static palette = [
+  static color = [
     null,
     '#525989', // 1
     '#865642', // 2
@@ -23,7 +24,7 @@ export class TileHelper {
     '#100F1C', // 6
   ]
 
-  static borderPalette = [
+  static borderColor = [
     null,
     '#A2B0BE', // 1
     '#D1A570', // 2
@@ -33,19 +34,25 @@ export class TileHelper {
     '#100F1C', // 6
   ]
 
-  constructor(tileData) {
-    this.#loadTilesXML(Asset.get('tiles/index'))
+  constructor(tileData, tilePalette = Array(10).fill('default')) {
+    this.#tileset = this.#loadTileSetFromXML(Asset.get('tiles/index'))
 
     this.height = tileData.length
     this.width = tileData[0]?.length || 0
 
+    this.#paletteMap = tilePalette.map(name => Asset.get('tiles/' + name))
+
     this.#tiles = [
       new Array(this.width + 2).fill(-1),
-      ...tileData.map(row => [-1, ...row, -1]),
+      ...tileData.map(row => [
+        -1,
+        ...row.split('').map(c => parseInt(c, 10)),
+        -1,
+      ]),
       new Array(this.width + 2).fill(-1),
     ]
 
-    this.#hitbox = this.#tiles.map(row => row.map(tile => this.isValid(tile)))
+    this.#hitbox = this.#tiles.map(row => row.map(tile => tile > 0))
 
     this.#generatePaddingAndCenter()
     this.#generateEdges()
@@ -55,65 +62,54 @@ export class TileHelper {
    * 加载 XML 格式的图块数据
    * @param {Document} xml
    */
-  #loadTilesXML(xml) {
-    this.#tileset.clear()
-    xml.querySelectorAll('Tileset').forEach(root => {
-      const id = root.getAttribute('id')
-      const path = root.getAttribute('path')
-      const sound = root.getAttribute('sound')
+  #loadTileSetFromXML(xml) {
+    const root = xml.querySelector('Tileset')
+    const sound = root.getAttribute('sound')
 
-      if (!Asset.has(path)) return
+    const ignores =
+      root
+        .getAttribute('ignores')
+        ?.split(',')
+        .map(s => s.trim())
+        .filter(Boolean) ?? []
+    const copy =
+      root
+        .getAttribute('copy')
+        ?.split(',')
+        .map(s => s.trim())
+        .filter(Boolean) ?? []
 
-      const image = Asset.get(path)
+    const sets = new Map()
 
-      const ignores =
-        root
-          .getAttribute('ignores')
-          ?.split(',')
-          .map(s => s.trim())
-          .filter(Boolean) ?? []
-      const copy =
-        root
-          .getAttribute('copy')
-          ?.split(',')
-          .map(s => s.trim())
-          .filter(Boolean) ?? []
-
-      const sets = new Map()
-
-      copy.forEach(key => {
-        if (!this.#tileset.has(key)) return
-        this.#tileset.get(key).sets.forEach((value, key) => {
-          sets.set(key, value)
-        })
-      })
-
-      root.querySelectorAll('set').forEach(setNode => {
-        const key = setNode.getAttribute('mask')
-        const mask = key
-          .split('-')
-          .map(row =>
-            row.split('').map(c => (c === '1' ? 1 : c === '0' ? 0 : null))
-          )
-        const tiles = setNode
-          .getAttribute('tiles')
-          .split(';')
-          .map(pair => pair.trim())
-          .filter(Boolean)
-          .map(pair => pair.split(',').map(n => parseInt(n, 10)))
-        sets.set(key, { mask, tiles })
-      })
-
-      this.#tileset.set(id, {
-        path,
-        image,
-        sound,
-        ignores,
-        copy,
-        sets,
+    copy.forEach(key => {
+      if (!this.#tileset.has(key)) return
+      this.#tileset.get(key).sets.forEach((value, key) => {
+        sets.set(key, value)
       })
     })
-    console.log(this.#tileset)
+
+    root.querySelectorAll('set').forEach(setNode => {
+      const key = setNode.getAttribute('mask')
+      const mask = key
+        .split('-')
+        .map(row =>
+          row.split('').map(c => (c === '1' ? 1 : c === '0' ? 0 : null))
+        )
+      const tiles = setNode
+        .getAttribute('tiles')
+        .split(';')
+        .map(pair => pair.trim())
+        .filter(Boolean)
+        .map(pair => pair.split(',').map(n => parseInt(n, 10)))
+      sets.set(key, { mask, tiles })
+    })
+
+    return {
+      sound,
+      ignores,
+      copy,
+      sets,
+    }
   }
 
   #generatePaddingAndCenter() {
@@ -154,7 +150,7 @@ export class TileHelper {
           nj >= 0 &&
           nj < this.width &&
           !visited[ni][nj] &&
-          this.isValid(this.#tiles[ni][nj])
+          this.#tiles[ni][nj] > 0
         ) {
           queue.push([ni, nj, d + 1])
           visited[ni][nj] = true
@@ -202,7 +198,9 @@ export class TileHelper {
     }
   }
 
-  #chooseTile(i, j, sets, ignores = []) {
+  #chooseTile(i, j) {
+    const { sets, ignores } = this.#tileset
+
     if (this.#center[i][j] && sets.has('center')) {
       const { tiles } = sets.get('center')
       return tiles[Math.floor(Math.random() * tiles.length)]
@@ -231,10 +229,6 @@ export class TileHelper {
     }
   }
 
-  isValid(id) {
-    return id === -1 || (1 <= id && id <= TileHelper.palette.length)
-  }
-
   /**
    * @param {CanvasRenderingContext2D} ctx
    */
@@ -256,34 +250,16 @@ export class TileHelper {
       for (let j = 1; j <= this.width; j++) {
         if (!this.#hitbox[i][j]) continue
 
-        const tile = String(this.#tiles[i][j])
+        const tile = this.#tiles[i][j]
+
+        const [sx, sy] = this.#chooseTile(i, j)
+        const image = this.#paletteMap[tile] ?? Asset.get('tiles/default')
+
         const x = (j - 1) * 8
         const y = (i - 1) * 8
-
-        if (!this.#tileset.has(tile)) {
-          ctx.fillStyle = this.getColor(tile)
-          ctx.fillRect(x, y, 8, 8)
-
-          ctx.fillStyle = this.getBorderColor(tile)
-          if (!this.#hitbox[i + 1][j]) ctx.fillRect(x, y + 7, 8, 1)
-          if (!this.#hitbox[i - 1][j]) ctx.fillRect(x, y, 8, 1)
-          if (!this.#hitbox[i][j + 1]) ctx.fillRect(x + 7, y, 1, 8)
-          if (!this.#hitbox[i][j - 1]) ctx.fillRect(x, y, 1, 8)
-
-          if (!this.#hitbox[i + 1][j + 1]) ctx.fillRect(x + 7, y + 7, 1, 1)
-          if (!this.#hitbox[i + 1][j - 1]) ctx.fillRect(x, y + 7, 1, 1)
-          if (!this.#hitbox[i - 1][j + 1]) ctx.fillRect(x + 7, y, 1, 1)
-          if (!this.#hitbox[i - 1][j - 1]) ctx.fillRect(x, y, 1, 1)
-
-          continue
-        }
-
-        const { image, sets, ignores } = this.#tileset.get(tile)
-
-        const [sx, sy] = this.#chooseTile(i, j, sets, ignores)
         ctx.drawImage(image, sx * 8, sy * 8, 8, 8, x, y, 8, 8)
 
-        // // 绘制padding和center分布
+        // 绘制padding和center分布
         // if (this.#padding[i][j]) {
         //   ctx.fillStyle = 'yellow'
         //   ctx.fillRect(x + 2, y + 2, 4, 4)
@@ -303,10 +279,10 @@ export class TileHelper {
   }
 
   getColor(index) {
-    return TileHelper.palette[index] ?? '#000000'
+    return TileHelper.color[index] ?? '#000000'
   }
 
   getBorderColor(index) {
-    return TileHelper.borderPalette[index] ?? '#FFFFFF'
+    return TileHelper.borderColor[index] ?? '#FFFFFF'
   }
 }

@@ -147,11 +147,6 @@ export class Game {
       }),
 
       Keyboard.onKeydown(['Q', 'E'], () => {
-        console.log(
-          Keyboard.allActive('Q', 'E'),
-          Keyboard.isActive('Q'),
-          Keyboard.isActive('E')
-        )
         if (Keyboard.allActive('Q', 'E') && this.player.onGround)
           TimeTravel.startTimeTravelPreview(this)
       }),
@@ -213,7 +208,7 @@ export class Game {
     )
     this.#setupCamera(this.levelData)
 
-    this.tileHelper = new TileHelper(this.tileData)
+    this.tileHelper = new TileHelper(this.tileData, this.tilePalette)
     this.tileHelper.render(this.tileCtx)
 
     this.tileHelper.edges.forEach(edge => {

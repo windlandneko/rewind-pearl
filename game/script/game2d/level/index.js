@@ -8,5 +8,6 @@ export { Stage5 } from './Stage5.js'
 
 export { TileTest } from './TileTest.js'
 export { TileTest2 } from './TileTest2.js'
+export { TileTest3 } from './TileTest3.js'
 export { HazardTest } from './HazardTest.js'
 export { MovingPlatformTest } from './MovingPlatformTest.js'

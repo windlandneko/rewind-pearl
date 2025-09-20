@@ -3,6 +3,95 @@ const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 const toolbar = document.getElementById('toolbar')
 
+// 网格大小
+const GRID_SIZE = 8
+
+const PALETTE = [
+  'Air',
+  'alternateTemplate',
+  'AutumnGrass',
+  'AutumnGrassDead',
+  'BalatroSilver',
+  'Basalt',
+  'BasaltGrass',
+  'BasaltGrassAutumn',
+  'BasaltGrassAutumnDead',
+  'BasaltGrassDead',
+  'BasaltMagma',
+  'BasaltSnow',
+  'BetterCement',
+  'BetterCementGrass',
+  'BetterCementGrassAutumn',
+  'BetterCementGrassAutumnDead',
+  'BetterCementGrassDead',
+  'BetterCementSnow',
+  'BetterSummit',
+  'BetterSummitGrass',
+  'BetterSummitGrassAutumn',
+  'BetterSummitGrassAutumnDead',
+  'BetterSummitGrassDead',
+  'BetterSummitNoSnow',
+  'bgButternutBrick',
+  'bgButternutLeaves',
+  'bgFadedBrickBlue',
+  'bgFadedBrickWhite',
+  'ButternutBrick',
+  'ButternutGrass',
+  'ButternutLeaves',
+  'ButternutWood',
+  'ClearIce',
+  'CreepyRock',
+  'DarkRock',
+  'DarkRockMagma',
+  'DarkRockSnow',
+  'DarkRockVines',
+  'DeadGrass',
+  'EcoFuture',
+  'EcoFutureDark',
+  'FadedBrickBlue',
+  'FadedBrickBlueVines',
+  'FadedBrickGrey',
+  'FadedBrickRed',
+  'FadedBrickRedAlt',
+  'FadedBrickWhite',
+  'FadedBrickYellow',
+  'GlacialIce',
+  'GlacialIceSnow',
+  'LumpyCement',
+  'LumpyCementAutumnGrass',
+  'LumpyCementGrass',
+  'LumpyCementSnow',
+  'MoltenRock',
+  'MossGreen',
+  'MossTeal',
+  'PaleLimestone',
+  'Rock',
+  'RockMagma',
+  'RockVines',
+  'RockyCoral',
+  'RockyMud',
+  'RockyMudGrass',
+  'RockyMudGrassAutumn',
+  'RockyMudGrassAutumnDead',
+  'RockyMudGrassDead',
+  'RockyMudSnow',
+  'Snow',
+  'Straw',
+]
+
+const DEFAULT_PALETTE = [
+  'Air',
+  'GlacialIce',
+  'BetterCementSnow',
+  'PaleLimestone',
+  'FadedBrickGrey',
+  'Rock',
+  'DarkRock',
+  'BetterSummitNoSnow',
+  'DarkRockMagma',
+  'ButternutBrick',
+]
+
 // 工具
 const TOOL = {
   pointer: 'pointer',
@@ -33,15 +122,15 @@ const TOOL_COLOR = {
 }
 
 // 背景块颜色编号
-const TILE_COLOR = [
-  '#100F1C', // null
-  '#525989', // 1
-  '#865642', // 2
-  '#578DFF', // 3
-  '#2B4755', // 4
-  '#192C41', // 5
-  '#100F1C', // 6
-]
+const TILE_COLOR = Array(10)
+  .fill()
+  .map(
+    () =>
+      '#' +
+      Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0')
+  )
 
 const DIRECTION = {
   NORTH: 0b0001,
@@ -105,9 +194,10 @@ let levelData = {
   cameraBound: { x: 0, y: 0, width: 320, height: 180 },
 }
 
-let tileData = Array(Math.ceil(levelData.height / 8))
+let tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
   .fill()
-  .map(() => Array(Math.ceil(levelData.width / 8)).fill(0))
+  .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
+let tilePalette = [...DEFAULT_PALETTE]
 
 // 玩家出生点
 let spawnpoint = {
@@ -118,9 +208,6 @@ let spawnpoint = {
   height: 16,
 }
 objects.push(spawnpoint)
-
-// 网格大小
-const GRID_SIZE = 8
 
 // 属性面板
 const propertiesPanel = document.getElementById('propertiesPanel')
@@ -154,6 +241,24 @@ propertiesPanel.style.display = 'none'
 // 显示属性面板
 function showProperties(obj) {
   if (!obj) return
+
+  if (obj === 'tilePalette') {
+    propertiesTitle.textContent = '调色板'
+    propertiesContent.innerHTML = ''
+    propertiesPanel.style.display = 'block'
+
+    for (let i = 0; i < 10; i++) {
+      addProperty({
+        label: `#${i + 1}`,
+        value: tilePalette[i] ?? 'up',
+        type: 'select',
+        onChange: value => (tilePalette[i] = value),
+        options: PALETTE,
+      })
+    }
+
+    return
+  }
 
   propertiesTitle.textContent = obj.type
   propertiesContent.innerHTML = ''
@@ -566,6 +671,7 @@ document.getElementById('playBtn').addEventListener('click', togglePlayMode)
 // 绘制背景按钮
 document.getElementById('drawBgBtn').addEventListener('click', () => {
   isDrawBgMode = !isDrawBgMode
+  if (isDrawBgMode) showProperties('tilePalette')
   document.getElementById('drawBgBtn').classList.toggle('active', isDrawBgMode)
   draw()
 })
@@ -1856,9 +1962,11 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     },
   }
 
-  game.tileData = [\n    [${tileData
-    .map(row => row.join(','))
-    .join('],\n    [')}],\n  ]
+  game.tilePalette = ${JSON.stringify(tilePalette)}
+
+  game.tileData = [\n    "${tileData
+    .map(row => row.join(''))
+    .join('",\n    "')}",\n  ]
 
   game.sound.playBGM('${levelData.bgm}')
 
@@ -2312,6 +2420,10 @@ levelSelect.addEventListener('change', () => {
       width: 10,
       height: 16,
     }
+    tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
+      .fill()
+      .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
+    tilePalette = [...DEFAULT_PALETTE]
     objects.push(spawnpoint)
     panOffset = { x: 0, y: 0 }
     zoom = 3
@@ -2343,6 +2455,7 @@ function saveCurrentLevel(name) {
   levels[name] = {
     levelData: JSON.parse(JSON.stringify(levelData)),
     tileData: JSON.parse(JSON.stringify(tileData)),
+    tilePalette: JSON.parse(JSON.stringify(tilePalette)),
     objects: JSON.parse(JSON.stringify(objects)),
     spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
     panOffset: { ...panOffset },
@@ -2370,6 +2483,8 @@ function loadLevelByName(name) {
       .fill()
       .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
   }
+  // tilePalette = level.tilePalette || [...DEFAULT_PALETTE]
+  tilePalette = [...DEFAULT_PALETTE]
   objects = level.objects
   spawnpoint = level.spawnpoint
   panOffset = level.panOffset ?? { x: 0, y: 0 }
