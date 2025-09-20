@@ -1,7 +1,7 @@
 import Asset from '../Asset.js'
 
 /**
- * 地图背景图块管理器
+ * 2D地图图块辅助类
  *
  * @author windlandneko
  */
@@ -10,29 +10,9 @@ export class TileHelper {
   #hitbox
   #tileset = new Map()
   #paletteMap = new Map()
-  #walls // dis = 1
-  #padding // dis = 2
-  #center // dis > 2
-
-  static color = [
-    null,
-    '#525989', // 1
-    '#865642', // 2
-    '#578DFF', // 3
-    '#2B4755', // 4
-    '#192C41', // 5
-    '#100F1C', // 6
-  ]
-
-  static borderColor = [
-    null,
-    '#A2B0BE', // 1
-    '#D1A570', // 2
-    '#FFFFFF', // 3
-    '#A1B6B2', // 4
-    '#32465c', // 5
-    '#100F1C', // 6
-  ]
+  #walls // dis = 1 (边缘)
+  #padding // dis = 2 (过渡区域)
+  #center // dis > 2 (中心区域)
 
   constructor(tileData, tilePalette = Array(10).fill('default')) {
     this.#tileset = this.#loadTileSetFromXML(Asset.get('tiles/index'))
@@ -235,15 +215,6 @@ export class TileHelper {
   render(ctx) {
     ctx.canvas.width = this.width * 8
     ctx.canvas.height = this.height * 8
-
-    ctx.imageSmoothingEnabled = false
-    ctx.webkitImageSmoothingEnabled = false
-    ctx.mozImageSmoothingEnabled = false
-    ctx.msImageSmoothingEnabled = false
-    ctx.textBaseline = 'top'
-    ctx.textAlign = 'center'
-
-    ctx.fillStyle = '#1B2C40'
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
     for (let i = 1; i <= this.height; i++) {
@@ -255,34 +226,10 @@ export class TileHelper {
         const [sx, sy] = this.#chooseTile(i, j)
         const image = this.#paletteMap[tile] ?? Asset.get('tiles/default')
 
-        const x = (j - 1) * 8
-        const y = (i - 1) * 8
-        ctx.drawImage(image, sx * 8, sy * 8, 8, 8, x, y, 8, 8)
-
-        // 绘制padding和center分布
-        // if (this.#padding[i][j]) {
-        //   ctx.fillStyle = 'yellow'
-        //   ctx.fillRect(x + 2, y + 2, 4, 4)
-        // } else if (this.#center[i][j]) {
-        //   ctx.fillStyle = 'lime'
-        //   ctx.fillRect(x + 2, y + 2, 4, 4)
-        // }
+        const tx = (j - 1) * 8
+        const ty = (i - 1) * 8
+        ctx.drawImage(image, sx * 8, sy * 8, 8, 8, tx, ty, 8, 8)
       }
     }
-
-    // 绘制切分后的碰撞体
-    // ctx.strokeStyle = '#578DFF'
-    // ctx.lineWidth = 1
-    // this.edges.forEach(([x, y, width, height]) => {
-    //   ctx.strokeRect(x + 2, y + 2, width - 4, height - 4)
-    // })
-  }
-
-  getColor(index) {
-    return TileHelper.color[index] ?? '#000000'
-  }
-
-  getBorderColor(index) {
-    return TileHelper.borderColor[index] ?? '#FFFFFF'
   }
 }
