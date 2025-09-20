@@ -8,6 +8,11 @@
     "Home": "audio/Toby Fox - Home.mp3"
   },
 
+  "tiles": {
+    "index": "tiles/index.xml",
+    "BetterCementSnow": "tiles/BetterCementSnow.png"
+  },
+
   "character": {
     "gunmu": "character/gunmu/normal.png",
     "dingzhen": {
