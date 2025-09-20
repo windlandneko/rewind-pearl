@@ -1833,19 +1833,8 @@ function exportCode() {
   // 查找 objects 中的 spawnpoint
   const spawnObj = objects.find(obj => obj.type === 'spawnpoint') ?? spawnpoint
   let code = `\
-import {
-  BaseObject,
-  Collectible,
-  Enemy,
-  Hazard,
-  Interactable,
-  LevelChanger,
-  MovingPlatform,
-  Platform,
-  Trigger,
-} from '../gameObject/index.js'
+import * as $ from '../gameObject/index.js'
 import Vec2 from '../Vector.js'
-import SoundManager from '../../SoundManager.js'
 
 export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
   const height = ${levelData.height}
@@ -1871,7 +1860,7 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     .map(row => row.join(','))
     .join('],\n    [')}],\n  ]
 
-  SoundManager.playBGM('${levelData.bgm}')
+  game.sound.playBGM('${levelData.bgm}')
 
   game.gameObjects.push(
 
@@ -1884,40 +1873,41 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     })
     .forEach(obj => {
       if (obj.type === 'spawnpoint') return // 跳过玩家出生点
+      let str = '    new $.'
       switch (obj.type) {
         case TOOL.platform:
-          code += `    new Platform(${obj.x}, ${obj.y}, ${obj.width}, ${
-            obj.height
-          }, ${obj.ladder ?? false})`
+          str += `Platform(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${
+            obj.ladder ?? false
+          })`
           break
         case TOOL.interactable:
-          code += `    new Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
+          str += `Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
           break
         case TOOL.movingPlatform:
-          code += `    new MovingPlatform(new Vec2(${obj.fromX}, ${
+          str += `MovingPlatform(new Vec2(${obj.fromX}, ${
             obj.fromY
           }), new Vec2(${obj.toX}, ${obj.toY}), ${obj.width}, ${obj.height}, ${
             obj.ladder ?? false
           }, ${obj.interval ?? 5}, '${obj.moveType ?? 'linear'}')`
           break
         case TOOL.levelChanger:
-          code += `    new LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
+          str += `LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
           break
         case TOOL.enemy:
-          code += `    new Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+          str += `Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
           break
         case TOOL.collectible:
-          code += `    new Collectible(${obj.x - 6}, ${obj.y - 6}, '${
-            obj.spriteId
-          }', ${obj.onlyGhostCanCollect})`
+          str += `Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}', ${
+            obj.onlyGhostCanCollect
+          })`
           break
         case TOOL.hazard:
-          code += `    new Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
+          str += `Hazard(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.direction}')`
           break
         case TOOL.trigger:
-          code += `    new Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${
-            obj.height
-          }, ${obj.once}, ${
+          str += `Trigger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${
+            obj.once
+          }, ${
             obj.enterCallback
               ? `(game, $) => {\n${obj.enterCallback
                   .split('\n')
@@ -1936,9 +1926,9 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
         default:
           console.warn('未知对象类型，无法导出代码:', obj)
       }
-      if (obj.ref) code += `.ref('${obj.ref}')`
-      if (obj.hidden) code += `.hide()`
-      code += ',\n'
+      if (obj.ref) str += `.ref('${obj.ref}')`
+      if (obj.hidden) str += `.hide()`
+      code += str + ',\n'
     })
   code = code.slice(0, -2) + '\n  )\n}\n'
   navigator.clipboard.writeText(code).then(() => {
