@@ -10,7 +10,6 @@ export function Stage1(game) {
     background: 'test',
     height,
     width,
-    worldBorder: false,
     spawnpoint: new Vec2(24, 8),
     cameraHeight: 180,
     cameraBound: {

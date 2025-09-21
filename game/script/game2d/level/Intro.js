@@ -21,7 +21,6 @@ export function Intro(game) {
     background: 'test',
     height,
     width,
-    worldBorder: false,
     spawnpoint: new Vec2(88, 136),
     cameraHeight: 180,
     cameraBound: {

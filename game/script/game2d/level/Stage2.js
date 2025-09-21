@@ -21,7 +21,6 @@ export function Stage2(game) {
     background: 'magic',
     height,
     width,
-    worldBorder: true,
     spawnpoint: new Vec2(32, 250),
     camera: {
       height: SCREEN_HEIGHT,

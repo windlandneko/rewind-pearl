@@ -20,7 +20,6 @@ export function Stage3(game) {
   game.levelData = {
     height,
     width,
-    worldBorder: false,
     spawnpoint: new Vec2(32, 150),
     background: 'litang',
   }

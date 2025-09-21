@@ -21,7 +21,6 @@ export function MovingPlatformTest(game) {
     background: 'test',
     height,
     width,
-    worldBorder: true,
     spawnpoint: new Vec2(56, 0),
     cameraHeight: 192,
   }

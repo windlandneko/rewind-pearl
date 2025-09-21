@@ -191,7 +191,6 @@ let levelData = {
   bgm: 'test',
   height: 180,
   width: 320,
-  worldBorder: false,
   cameraHeight: 180,
   cameraWidth: 320,
   cameraBound: { x: 0, y: 0, width: 320, height: 180 },
@@ -379,12 +378,6 @@ function showProperties(obj) {
         value: obj.bgm ?? '',
         type: 'text',
         onChange: value => (obj.bgm = value),
-      })
-      addProperty({
-        label: '启用世界边界',
-        value: obj.worldBorder ?? false,
-        type: 'checkbox',
-        onChange: value => (obj.worldBorder = value),
       })
       break
     case TOOL.interactable:
@@ -1982,9 +1975,6 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
   game.levelData = {
     introDialogue: '${levelData.introDialogue ?? 'null'}',
     background: '${levelData.background}',
-    height,
-    width,
-    worldBorder: ${levelData.worldBorder},
     spawnpoint: new Vec2(${spawnObj.x}, ${spawnObj.y}),
     cameraHeight: ${levelData.cameraHeight},
     cameraBound: {
@@ -2440,7 +2430,6 @@ levelSelect.addEventListener('change', () => {
       bgm: 'test',
       height: 180,
       width: 320,
-      worldBorder: false,
       cameraHeight: 180,
       cameraWidth: 320,
       cameraBound: { x: 0, y: 0, width: 320, height: 180 },
@@ -2605,7 +2594,6 @@ if (!loaded) {
       bgm: 'test',
       height: 180,
       width: 320,
-      worldBorder: false,
       cameraHeight: 180,
       cameraWidth: 320,
       cameraBound: { x: 0, y: 0, width: 320, height: 180 },

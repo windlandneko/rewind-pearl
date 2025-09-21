@@ -10,7 +10,6 @@ export function HazardTest(game) {
     background: 'test',
     height,
     width,
-    worldBorder: false,
     spawnpoint: new Vec2(344, 320),
     cameraHeight: 396,
     cameraBound: {

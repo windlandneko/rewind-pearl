@@ -10,7 +10,6 @@ export function TileTest2(game) {
     background: '',
     height,
     width,
-    worldBorder: false,
     spawnpoint: new Vec2(155, 64),
     cameraHeight: 180,
     cameraBound: {

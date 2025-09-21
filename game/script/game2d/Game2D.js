@@ -435,29 +435,6 @@ export class Game {
     this.ghostPlayers.forEach(ghost => ghost.update(dt, this))
     this.player.update(dt, this)
 
-    // 世界边界
-    if (this.levelData.worldBorder) {
-      // 左
-      if (this.player.r.x < 0) {
-        this.player.r.x = 0
-        this.player.v.x = 0
-      }
-      // 右
-      if (this.player.r.x + this.player.width > this.levelData.width) {
-        this.player.r.x = this.levelData.width - this.player.width
-        this.player.v.x = 0
-      }
-      // 上
-      if (this.player.r.y < 0) {
-        this.player.r.y = 0
-        this.player.v.y = 0
-      }
-      // 下
-      if (this.player.r.y > this.levelData.height) {
-        this.player.onDamage()
-      }
-    }
-
     // 更新游戏对象本身
     this.gameObjects.forEach(obj => obj.update(dt))
 
