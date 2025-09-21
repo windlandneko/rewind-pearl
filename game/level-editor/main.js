@@ -819,12 +819,20 @@ function switchBgDrawMode() {
 }
 
 // 数字键切换当前背景块编号
+let spaceKeyDown = false
 addEventListener('keydown', e => {
   if (isDrawBgMode && /^[1-9]$/.test(e.key)) {
     currentTileType = parseInt(e.key)
     draw()
   }
-  if (e.code === 'Space') switchBgDrawMode()
+  if (e.code === 'Space' && !spaceKeyDown) {
+    switchBgDrawMode()
+    spaceKeyDown = true
+    e.preventDefault()
+  }
+})
+addEventListener('keyup', e => {
+  if (e.code === 'Space') spaceKeyDown = false
 })
 
 // 设置工具
