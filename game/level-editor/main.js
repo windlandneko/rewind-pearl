@@ -14,6 +14,9 @@ const tileCanvas = new OffscreenCanvas(1, 1)
 /** @type {CanvasRenderingContext2D} */
 const tileCtx = tileCanvas.getContext('2d')
 
+/** @type {TileHelper} */
+let tileHelper
+
 {
   const $info = document.getElementById('information')
   const queue = []
@@ -24,18 +27,17 @@ const tileCtx = tileCanvas.getContext('2d')
   }
   const handle = requestAnimationFrame(anim)
 
-  const refreshCanvas = debounce(() => {
-    new TileHelper(tileData, tilePalette).render(tileCtx)
-    draw()
-  }, 1000)
+  const refreshCanvas = debounce(() => draw(), 250)
 
   Asset.loadFromManifest('./', status => {
     queue.push(`(${status.count}/${status.total}) 加载 ${status.current}`)
+    tileHelper.render(tileCtx)
     refreshCanvas()
   }).then(() => {
     queue.push(`瓦片加载完成！`)
     cancelAnimationFrame(handle)
     $info.animate({ opacity: 0 }, { duration: 2500, fill: 'forwards' })
+    tileHelper.render(tileCtx)
     refreshCanvas()
   })
 }
@@ -43,77 +45,77 @@ const tileCtx = tileCanvas.getContext('2d')
 // 网格大小
 const GRID_SIZE = 8
 
+// 瓦片调色板（带中文提示）
 const PALETTE = [
-  'Air',
-  'alternateTemplate',
-  'AutumnGrass',
-  'AutumnGrassDead',
-  'BalatroSilver',
-  'Basalt',
-  'BasaltGrass',
-  'BasaltGrassAutumn',
-  'BasaltGrassAutumnDead',
-  'BasaltGrassDead',
-  'BasaltMagma',
-  'BasaltSnow',
-  'BetterCement',
-  'BetterCementGrass',
-  'BetterCementGrassAutumn',
-  'BetterCementGrassAutumnDead',
-  'BetterCementGrassDead',
-  'BetterCementSnow',
-  'BetterSummit',
-  'BetterSummitGrass',
-  'BetterSummitGrassAutumn',
-  'BetterSummitGrassAutumnDead',
-  'BetterSummitGrassDead',
-  'BetterSummitNoSnow',
-  'bgButternutBrick',
-  'bgButternutLeaves',
-  'bgFadedBrickBlue',
-  'bgFadedBrickWhite',
-  'ButternutBrick',
-  'ButternutGrass',
-  'ButternutLeaves',
-  'ButternutWood',
-  'ClearIce',
-  'CreepyRock',
-  'DarkRock',
-  'DarkRockMagma',
-  'DarkRockSnow',
-  'DarkRockVines',
-  'DeadGrass',
-  'EcoFuture',
-  'EcoFutureDark',
-  'FadedBrickBlue',
-  'FadedBrickBlueVines',
-  'FadedBrickGrey',
-  'FadedBrickRed',
-  'FadedBrickRedAlt',
-  'FadedBrickWhite',
-  'FadedBrickYellow',
-  'GlacialIce',
-  'GlacialIceSnow',
-  'LumpyCement',
-  'LumpyCementAutumnGrass',
-  'LumpyCementGrass',
-  'LumpyCementSnow',
-  'MoltenRock',
-  'MossGreen',
-  'MossTeal',
-  'PaleLimestone',
-  'Rock',
-  'RockMagma',
-  'RockVines',
-  'RockyCoral',
-  'RockyMud',
-  'RockyMudGrass',
-  'RockyMudGrassAutumn',
-  'RockyMudGrassAutumnDead',
-  'RockyMudGrassDead',
-  'RockyMudSnow',
-  'Snow',
-  'Straw',
+  ['虚空', 'Air'],
+  ['秋草', 'AutumnGrass'],
+  ['枯秋草', 'AutumnGrassDead'],
+  ['银色砖', 'BalatroSilver'],
+  ['玄武岩', 'Basalt'],
+  ['玄武岩草', 'BasaltGrass'],
+  ['秋玄武岩草', 'BasaltGrassAutumn'],
+  ['枯秋玄武岩草', 'BasaltGrassAutumnDead'],
+  ['枯玄武岩草', 'BasaltGrassDead'],
+  ['玄武岩岩浆', 'BasaltMagma'],
+  ['玄武岩雪', 'BasaltSnow'],
+  ['水泥砖', 'BetterCement'],
+  ['水泥砖草', 'BetterCementGrass'],
+  ['秋水泥砖草', 'BetterCementGrassAutumn'],
+  ['枯秋水泥砖草', 'BetterCementGrassAutumnDead'],
+  ['枯水泥砖草', 'BetterCementGrassDead'],
+  ['雪水泥砖', 'BetterCementSnow'],
+  ['雪山', 'BetterSummit'],
+  ['雪山草', 'BetterSummitGrass'],
+  ['秋雪山草', 'BetterSummitGrassAutumn'],
+  ['枯秋雪山草', 'BetterSummitGrassAutumnDead'],
+  ['枯雪山草', 'BetterSummitGrassDead'],
+  ['无雪雪山', 'BetterSummitNoSnow'],
+  ['黄油砖背景', 'bgButternutBrick'],
+  ['黄油叶背景', 'bgButternutLeaves'],
+  ['蓝砖背景', 'bgFadedBrickBlue'],
+  ['白砖背景', 'bgFadedBrickWhite'],
+  ['黄油砖', 'ButternutBrick'],
+  ['黄油草', 'ButternutGrass'],
+  ['黄油叶', 'ButternutLeaves'],
+  ['黄油木', 'ButternutWood'],
+  ['透明冰', 'ClearIce'],
+  ['诡异岩石', 'CreepyRock'],
+  ['暗岩石', 'DarkRock'],
+  ['暗岩浆', 'DarkRockMagma'],
+  ['暗岩雪', 'DarkRockSnow'],
+  ['暗岩藤蔓', 'DarkRockVines'],
+  ['枯草', 'DeadGrass'],
+  ['生态未来', 'EcoFuture'],
+  ['生态未来暗', 'EcoFutureDark'],
+  ['蓝砖', 'FadedBrickBlue'],
+  ['蓝砖藤蔓', 'FadedBrickBlueVines'],
+  ['灰砖', 'FadedBrickGrey'],
+  ['红砖', 'FadedBrickRed'],
+  ['红砖变体', 'FadedBrickRedAlt'],
+  ['白砖', 'FadedBrickWhite'],
+  ['黄砖', 'FadedBrickYellow'],
+  ['冰川冰', 'GlacialIce'],
+  ['冰川雪', 'GlacialIceSnow'],
+  ['疙瘩水泥', 'LumpyCement'],
+  ['秋疙瘩水泥草', 'LumpyCementAutumnGrass'],
+  ['疙瘩水泥草', 'LumpyCementGrass'],
+  ['疙瘩水泥雪', 'LumpyCementSnow'],
+  ['熔岩岩石', 'MoltenRock'],
+  ['苔藓绿', 'MossGreen'],
+  ['苔藓蓝绿', 'MossTeal'],
+  ['浅石灰岩', 'PaleLimestone'],
+  ['岩石', 'Rock'],
+  ['岩石岩浆', 'RockMagma'],
+  ['岩石藤蔓', 'RockVines'],
+  ['珊瑚岩', 'RockyCoral'],
+  ['泥岩', 'RockyMud'],
+  ['泥岩草', 'RockyMudGrass'],
+  ['秋泥岩草', 'RockyMudGrassAutumn'],
+  ['枯秋泥岩草', 'RockyMudGrassAutumnDead'],
+  ['枯泥岩草', 'RockyMudGrassDead'],
+  ['泥岩雪', 'RockyMudSnow'],
+  ['雪', 'Snow'],
+  ['稻草', 'Straw'],
 ]
 
 const DEFAULT_PALETTE = [
@@ -317,7 +319,8 @@ function initializeLevel() {
     .fill()
     .map(() => Array(w).fill(0))
   tilePalette = [...DEFAULT_PALETTE]
-  new TileHelper(tileData, tilePalette).render(tileCtx)
+  tileHelper = new TileHelper(tileData, tilePalette)
+  tileHelper.render(tileCtx)
   undoStack = []
   redoStack = []
 }
@@ -332,12 +335,17 @@ function showProperties(obj) {
     propertiesContent.innerHTML = ''
     propertiesPanel.classList.remove('hide')
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 1; i < 10; i++) {
       addProperty({
         label: `瓦片 #${i}`,
         value: tilePalette[i] ?? 'up',
         type: 'select',
-        onChange: value => (tilePalette[i] = value),
+        onChange: value => {
+          tilePalette[i] = value
+
+          tileHelper = new TileHelper(tileData, tilePalette)
+          tileHelper.render(tileCtx)
+        },
         options: PALETTE,
       })
     }
@@ -364,6 +372,22 @@ function showProperties(obj) {
       editable: obj.type !== 'spawnpoint',
       onChange: value => (obj.ref = value),
     })
+    addPropertyPair(
+      {
+        label: '↔ 宽度',
+        value: obj.width,
+        type: 'number',
+        editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
+        onChange: value => (obj.width = parseFloat(value)),
+      },
+      {
+        label: '↕ 高度',
+        value: obj.height,
+        type: 'number',
+        editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
+        onChange: value => (obj.height = parseFloat(value)),
+      }
+    )
     if (obj.type !== 'movingPlatform')
       addPropertyPair(
         {
@@ -380,26 +404,24 @@ function showProperties(obj) {
         }
       )
   }
-  addPropertyPair(
-    {
-      label: '↔ 宽度',
-      value: obj.width,
-      type: 'number',
-      editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
-      onChange: value => (obj.width = parseFloat(value)),
-    },
-    {
-      label: '↕ 高度',
-      value: obj.height,
-      type: 'number',
-      editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
-      onChange: value => (obj.height = parseFloat(value)),
-    }
-  )
 
   // 特定属性
   switch (obj.type) {
     case 'levelData':
+      addPropertyPair(
+        {
+          label: '↔ 瓦片宽度',
+          value: obj.tileWidth,
+          type: 'number',
+          onChange: value => (obj.tileWidth = parseInt(value)),
+        },
+        {
+          label: '↕ 瓦片高度',
+          value: obj.tileHeight,
+          type: 'number',
+          onChange: value => (obj.tileHeight = parseInt(value)),
+        }
+      )
       addPropertyPair(
         {
           label: '↔ 摄像机宽度',
@@ -621,9 +643,14 @@ function addProperty({
     input = document.createElement('select')
     options.forEach(opt => {
       const option = document.createElement('option')
-      option.value = opt
-      option.textContent = opt
-      if (opt === value) option.selected = true
+      if (typeof opt === 'string') {
+        option.value = option.textContent = opt
+      } else {
+        option.textContent = opt[0] + ' - ' + opt[1]
+        option.value = opt[1]
+      }
+      if (typeof opt === 'string' ? opt === value : opt[1] === value)
+        option.selected = true
       input.appendChild(option)
     })
   } else if (type === 'checkbox') {
@@ -758,7 +785,6 @@ function switchBgDrawMode() {
   else showProperties(levelData)
   document.getElementById('drawBgBtn').classList.toggle('active', isDrawBgMode)
   document.getElementById('toolbar').classList.toggle('hide', isDrawBgMode)
-  propertiesPanel.classList.toggle('hide', isDrawBgMode)
 
   tileCursor.x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
   tileCursor.y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
@@ -818,7 +844,7 @@ resize()
 
 let tileCursor = { x: 0, y: 0 }
 let tileCursorTarget = { x: 0, y: 0 }
-let k = 0.15
+let k = 0.2
 
 const updateTileCursor = () => {
   drawTileCursor()
@@ -882,7 +908,7 @@ function drawTileCursor() {
   ctx.lineWidth = 0.75
   ctx.setLineDash([])
 
-  ctx.globalCompositeOperation = 'difference'
+  ctx.globalCompositeOperation = 'screen'
 
   // 四角的框
   const d = 3 + (painterSize * GRID_SIZE) / 2
@@ -907,9 +933,15 @@ function drawTileCursor() {
   ctx.fillStyle = '#ffffff'
   ctx.font = `${17 / zoom}px FiraCode, HarmonyOS Sans SC, monospace`
   ctx.fillText(
-    type ? `#${type} ${tilePalette[type]}` : '#0 [Erase Mode]',
+    `#${type} ${PALETTE.find(item => item[1] === tilePalette[type])[0]}`,
     x1,
     y2 + 5 / zoom
+  )
+  ctx.font = `${12 / zoom}px FiraCode, HarmonyOS Sans SC, monospace`
+  ctx.fillText(
+    type ? tilePalette[type] : 'Eraser',
+    x1,
+    y2 + 25 / zoom
   )
 
   ctx.restore()
@@ -1383,6 +1415,7 @@ canvas.addEventListener('mousedown', event => {
   if (isDrawBgMode) {
     isBgDrawing = true
     bgDrawType = event.button === 2 ? 0 : currentTileType
+    lastPainted = [-1, -1, -1, -1]
     drawBgTile(mousePos, bgDrawType)
     draw()
     return
@@ -1683,11 +1716,22 @@ canvas.addEventListener('contextmenu', e => {
 })
 
 // 新增：绘制/删除背景块的辅助函数
+let lastPainted = [-1, -1, -1, -1]
 function drawBgTile(mousePos, type) {
   const x1 = Math.floor(mousePos.y / GRID_SIZE) - painterSize
   const y1 = Math.floor(mousePos.x / GRID_SIZE) - painterSize
   const x2 = x1 + painterSize * 2
   const y2 = y1 + painterSize * 2
+
+  if (
+    lastPainted[0] === x1 &&
+    lastPainted[1] === y1 &&
+    lastPainted[2] === x2 &&
+    lastPainted[3] === y2
+  )
+    return
+  lastPainted = [x1, y1, x2, y2]
+
   for (let i = x1; i <= x2; i++) {
     for (let j = y1; j <= y2; j++) {
       if (
@@ -1700,7 +1744,8 @@ function drawBgTile(mousePos, type) {
       }
     }
   }
-  new TileHelper(tileData, tilePalette).render(tileCtx)
+  tileHelper.tiles = tileData
+  tileHelper.render(tileCtx)
 }
 
 function onMouseup() {
@@ -2572,9 +2617,21 @@ levelSelect.addEventListener('change', () => {
 })
 
 function saveCurrentLevel(name) {
+  function resize2DArray(arr, rows, cols, value = 0) {
+    return Array.from({ length: rows }, (_, i) =>
+      Array.from({ length: cols }, (_, j) =>
+        arr[i] && arr[i][j] !== undefined ? arr[i][j] : value
+      )
+    )
+  }
+
   levels[name] = structuredClone({
     levelData,
-    tileData,
+    tileData: resize2DArray(
+      tileData,
+      levelData.tileHeight,
+      levelData.tileWidth
+    ),
     tilePalette,
     objects,
     spawnpoint,
@@ -2587,12 +2644,38 @@ function saveCurrentLevel(name) {
 function loadLevelByName(name) {
   const level = levels[name]
   if (!level) return
+
   levelData = level.levelData
   tileData = level.tileData
-  new TileHelper(tileData, tilePalette).render(tileCtx)
-  // todo
-  // tilePalette = level.tilePalette || [...DEFAULT_PALETTE]
-  tilePalette = [...DEFAULT_PALETTE]
+  tilePalette = level.tilePalette || [...DEFAULT_PALETTE]
+
+  // Capability
+  {
+    if (!levelData.tileWidth)
+      levelData.tileWidth = Math.ceil(levelData.width / GRID_SIZE)
+    if (!levelData.tileHeight)
+      levelData.tileHeight = Math.ceil(levelData.height / GRID_SIZE)
+    if (!levelData.cameraBound)
+      levelData.cameraBound = {
+        x: 0,
+        y: 0,
+        width: levelData.width,
+        height: levelData.height,
+      }
+
+    if (
+      !tileData ||
+      tileData.length !== levelData.tileHeight ||
+      tileData[0].length !== levelData.tileWidth
+    ) {
+      tileData = Array.from({ length: levelData.tileHeight }, () =>
+        Array.from({ length: levelData.tileWidth }, () => 0)
+      )
+    }
+  }
+
+  tileHelper = new TileHelper(tileData, tilePalette)
+  tileHelper.render(tileCtx)
   objects = level.objects
   spawnpoint = level.spawnpoint
   panOffset = level.panOffset ?? { x: 0, y: 0 }
