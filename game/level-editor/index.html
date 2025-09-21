@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>关卡编辑器</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="fontawesome.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="main.js" type="module" defer></script>
 </head>
 
 <body>
@@ -14,13 +15,17 @@
         <h1>关卡编辑器</h1>
         <div class="hint">
             <p>提示：关卡数据会自动保存。</p>
-            <p><kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 切换图层，<kbd>delete</kbd>
+            <p><kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 置底/置顶，<kbd>delete</kbd>
                 删除选中元素，<kbd>Alt</kbd> 取消吸附网格，<kbd>Shift</kbd> 多选</p>
             <p><kbd>Ctrl+A</kbd> 全选，<kbd>Ctrl+C</kbd> 复制，<kbd>Ctrl+V</kbd> 粘贴，<kbd>Ctrl+Z</kbd>
-                撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Ctrl+鼠标</kbd> 框选</p>
+                撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Shift+拖动</kbd> 框选</p>
+            <p>背景绘制模式：<kbd>1</kbd> ~ <kbd>9</kbd> 切换瓦片类型，<kbd>鼠标左键</kbd> 绘制，
+                <kbd>鼠标中键</kbd> 移动，<kbd>鼠标右键</kbd> 擦除，<kbd>Q</kbd> / <kbd>E</kbd> 调整画笔大小
+            </p>
         </div>
     </div>
     <canvas id="canvas"></canvas>
+    <canvas id="canvas-tile-cursor"></canvas>
     <div id="vignette"></div>
     <div id="toolbar">
         <button id="pointerTool" class="tool active">
@@ -79,7 +84,12 @@
         </h3>
         <div id="propertiesContent"></div>
     </div>
-    <div class="actions">
+    <div class="actions right top">
+        <button id="exportBtn"><i class="fas fa-share-square"></i> <span>导出</span></button>
+        <button id="playBtn"><i class="fas fa-play icon"></i> <span>播放</span></button>
+        <button id="drawBgBtn"><i class="fas fa-paint-brush icon"></i> <span>绘制背景（E）</span></button>
+    </div>
+    <div class="actions right bottom">
         <select id="levelSelect">
             <option value="">新建关卡...</option>
         </select>
@@ -89,11 +99,10 @@
         <button id="deleteLevelBtn" class="level-action-btn delete-btn" title="删除关卡">
             <i class="fas fa-trash"></i>
         </button>
-        <button id="exportBtn"><i class="fas fa-share-square"></i> <span>导出</span></button>
-        <button id="playBtn"><i class="fas fa-play icon"></i> <span>播放</span></button>
-        <button id="drawBgBtn"><i class="fas fa-paint-brush icon"></i> <span>绘制背景</span></button>
     </div>
-    <script src="main.js" defer></script>
+    <div class="left bottom" id="information">
+        准备加载瓦片...
+    </div>
 </body>
 
 </html>

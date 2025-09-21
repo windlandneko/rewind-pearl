@@ -5,7 +5,6 @@ import SpriteAnimation from '../Sprite.js'
 import Asset from '../../Asset.js'
 import Keyboard from '../../Keyboard.js'
 import { MAX_SNAPSHOTS_COUNT } from '../GameConfig.js'
-import * as Levels from '../level/index.js'
 
 export const InputEnum = {
   INTERACT: 1 << 0,

@@ -1,4 +1,3 @@
-import TimeTravel from '../TimeTravel.js'
 import { Player, InputEnum } from './Player.js'
 
 /**

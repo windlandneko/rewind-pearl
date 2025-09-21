@@ -1,7 +1,44 @@
+import Asset from '../script/Asset.js'
+import { TileHelper } from '../script/game2d/TileHelper.js'
+import { debounce } from '../script/utils.js'
+
 const canvas = document.getElementById('canvas')
 /** @type {CanvasRenderingContext2D} */
 const ctx = canvas.getContext('2d')
-const toolbar = document.getElementById('toolbar')
+
+const tileCursorCanvas = document.getElementById('canvas-tile-cursor')
+/** @type {CanvasRenderingContext2D} */
+const tileCursorCtx = tileCursorCanvas.getContext('2d')
+
+const tileCanvas = new OffscreenCanvas(1, 1)
+/** @type {CanvasRenderingContext2D} */
+const tileCtx = tileCanvas.getContext('2d')
+
+{
+  const $info = document.getElementById('information')
+  const queue = []
+  const anim = () => {
+    requestAnimationFrame(anim)
+    if (!queue.length) return
+    $info.textContent = queue.shift()
+  }
+  const handle = requestAnimationFrame(anim)
+
+  const refreshCanvas = debounce(() => {
+    new TileHelper(tileData, tilePalette).render(tileCtx)
+    draw()
+  }, 1000)
+
+  Asset.loadFromManifest('./', status => {
+    queue.push(`(${status.count}/${status.total}) 加载 ${status.current}`)
+    refreshCanvas()
+  }).then(() => {
+    queue.push(`瓦片加载完成！`)
+    cancelAnimationFrame(handle)
+    $info.animate({ opacity: 0 }, { duration: 2500, fill: 'forwards' })
+    refreshCanvas()
+  })
+}
 
 // 网格大小
 const GRID_SIZE = 8
@@ -115,10 +152,10 @@ const TOOL_COLOR = {
   levelChanger: '#be6',
   enemy: '#800',
   collectible: '#0ff',
-  hazard: '#f80',
+  hazard: '#eee',
   trigger: '#ccc',
   eraser: '#d22',
-  spawnpoint: 'rgba(0, 57, 164, 0.25)',
+  spawnpoint: '#03a',
 }
 
 // 背景块颜色编号
@@ -142,16 +179,16 @@ const DIRECTION = {
   SOUTH: 0b1000,
 }
 
-let currentTool = TOOL.pointer
-let objects = []
-let selectedObjects = [] // 选择的对象数组（单选时长度为1，多选时长度>1）
+let currentTool
+let objects
+let selectedObjects // 选择的对象数组（单选时长度为1，多选时长度>1）
 let isDragging = false
 let dragStart = { x: 0, y: 0 }
 let isResizing = false
 let resizeHandle = 0b0000
-let panOffset = { x: 0, y: 0 }
-let zoom = 3
-let targetZoom = 3
+let panOffset
+let zoom
+let targetZoom
 let isPanning = false
 let panStart = { x: 0, y: 0 }
 
@@ -184,32 +221,19 @@ let animationId = null
 let platformOriginalPositions = new Map() // 存储移动平台的原始位置
 
 // 关卡元数据
-let levelData = {
-  type: 'levelData',
-  introDialogue: null,
-  background: 'test',
-  bgm: 'test',
-  height: 180,
-  width: 320,
-  cameraHeight: 180,
-  cameraWidth: 320,
-  cameraBound: { x: 0, y: 0, width: 320, height: 180 },
-}
+let levelData
 
-let tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
-  .fill()
-  .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
-let tilePalette = [...DEFAULT_PALETTE]
+let tileData
+let tilePalette
 
 // 玩家出生点
-let spawnpoint = {
-  type: 'spawnpoint',
-  x: levelData.width / 2 - 5,
-  y: levelData.height / 2 - 8,
-  width: 10,
-  height: 16,
-}
-objects.push(spawnpoint)
+let spawnpoint
+
+let isBgDrawing = false
+let bgDrawType = 1
+let painterSize = 1 // 画笔大小
+
+let lastMousePos = { x: 0, y: 0 }
 
 // 属性面板
 const propertiesPanel = document.getElementById('propertiesPanel')
@@ -225,7 +249,7 @@ if (toggleBtn && arrow) {
       propertiesPanel.style.maxHeight = '44px'
       arrow.style.transform = 'rotate(-90deg)'
     } else {
-      propertiesPanel.style.maxHeight = '600px'
+      propertiesPanel.style.maxHeight = 'calc(100vh - 20px)'
       arrow.style.transform = 'rotate(0deg)'
     }
   })
@@ -237,8 +261,67 @@ const levelSelect = document.getElementById('levelSelect')
 const renameLevelBtn = document.getElementById('renameLevelBtn')
 const deleteLevelBtn = document.getElementById('deleteLevelBtn')
 
+let isFreeMove = false
+
+// 复制粘贴功能
+let copiedObject = null
+let copiedObjects = [] // 多选复制对象数组
+
+// 撤回重做相关
+let undoStack = [] // 撤回栈
+let redoStack = [] // 重做栈
+const MAX_HISTORY = 50 // 最大历史记录数
+
 // 初始化
-propertiesPanel.style.display = 'none'
+propertiesPanel.classList.add('hide')
+
+function initializeLevel() {
+  const h = 90
+  const w = 160
+
+  levelData = {
+    type: 'levelData',
+    introDialogue: null,
+    background: 'test',
+    bgm: 'test',
+    tileHeight: h,
+    tileWidth: w,
+    cameraHeight: 180,
+    cameraWidth: 320,
+    cameraBound: {
+      x: (w * GRID_SIZE - 320) / 2,
+      y: (h * GRID_SIZE - 180) / 2,
+      width: 320,
+      height: 180,
+    },
+  }
+  spawnpoint = {
+    type: 'spawnpoint',
+    x: (levelData.tileWidth * GRID_SIZE) / 2 - 5,
+    y: (levelData.tileHeight * GRID_SIZE) / 2 - 8,
+    width: 10,
+    height: 16,
+  }
+
+  currentTool = TOOL.pointer
+  objects = [spawnpoint]
+  selectedObjects = []
+
+  panOffset = {
+    x: -(w * GRID_SIZE * zoom + 320) / 2,
+    y: -(h * GRID_SIZE * zoom + 180) / 2,
+  }
+  zoom = 3
+  targetZoom = 3
+  tileData = Array(h)
+    .fill()
+    .map(() => Array(w).fill(0))
+  tilePalette = [...DEFAULT_PALETTE]
+  new TileHelper(tileData, tilePalette).render(tileCtx)
+  undoStack = []
+  redoStack = []
+}
+initializeLevel()
 
 // 显示属性面板
 function showProperties(obj) {
@@ -247,7 +330,7 @@ function showProperties(obj) {
   if (obj === 'tilePalette') {
     propertiesTitle.textContent = '调色板'
     propertiesContent.innerHTML = ''
-    propertiesPanel.style.display = 'block'
+    propertiesPanel.classList.remove('hide')
 
     for (let i = 0; i < 10; i++) {
       addProperty({
@@ -264,7 +347,7 @@ function showProperties(obj) {
 
   propertiesTitle.textContent = obj.type
   propertiesContent.innerHTML = ''
-  propertiesPanel.style.display = 'block'
+  propertiesPanel.classList.remove('hide')
 
   // 通用属性
   if (obj.type !== 'levelData') {
@@ -665,18 +748,30 @@ document.getElementById('exportBtn').addEventListener('click', exportCode)
 document.getElementById('playBtn').addEventListener('click', togglePlayMode)
 
 // 绘制背景按钮
-document.getElementById('drawBgBtn').addEventListener('click', () => {
+document
+  .getElementById('drawBgBtn')
+  .addEventListener('click', () => switchBgDrawMode())
+
+function switchBgDrawMode() {
   isDrawBgMode = !isDrawBgMode
   if (isDrawBgMode) showProperties('tilePalette')
+  else showProperties(levelData)
   document.getElementById('drawBgBtn').classList.toggle('active', isDrawBgMode)
+  document.getElementById('toolbar').classList.toggle('hide', isDrawBgMode)
+  propertiesPanel.classList.toggle('hide', isDrawBgMode)
+
+  tileCursor.x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
+  tileCursor.y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
   draw()
-})
+}
 
 // 数字键切换当前背景块编号
 window.addEventListener('keydown', e => {
   if (isDrawBgMode && /^[1-9]$/.test(e.key)) {
     currentTileType = parseInt(e.key)
+    draw()
   }
+  if (e.key === 'e') switchBgDrawMode()
 })
 
 // 设置工具
@@ -700,29 +795,42 @@ function setTool(tool) {
 }
 
 // 调整画布大小
-function resizeCanvas() {
+function resize() {
+  resizeCanvas(ctx)
+  resizeCanvas(tileCursorCtx)
+  draw()
+}
+function resizeCanvas(ctx) {
   const DPR = devicePixelRatio
-  canvas.width = window.innerWidth * DPR
-  canvas.height = window.innerHeight * DPR
-  canvas.style.width = window.innerWidth + 'px'
-  canvas.style.height = window.innerHeight + 'px'
+  ctx.canvas.width = innerWidth * DPR
+  ctx.canvas.height = innerHeight * DPR
+  ctx.canvas.style.width = innerWidth + 'px'
+  ctx.canvas.style.height = innerHeight + 'px'
   ctx.scale(DPR, DPR)
   ctx.imageSmoothingEnabled = false
   ctx.webkitImageSmoothingEnabled = false
   ctx.mozImageSmoothingEnabled = false
   ctx.msImageSmoothingEnabled = false
-  // 居中显示关卡
-  panOffset.x = (window.innerWidth - levelData.width * zoom) / 2
-  panOffset.y = (window.innerHeight - levelData.height * zoom) / 2
-  draw()
 }
 
-window.addEventListener('resize', resizeCanvas)
-resizeCanvas()
+addEventListener('resize', resize)
+resize()
+
+let tileCursor = { x: 0, y: 0 }
+let tileCursorTarget = { x: 0, y: 0 }
+let k = 0.15
+
+const updateTileCursor = () => {
+  drawTileCursor()
+  tileCursor.x = k * tileCursorTarget.x + (1 - k) * tileCursor.x
+  tileCursor.y = k * tileCursorTarget.y + (1 - k) * tileCursor.y
+  requestAnimationFrame(updateTileCursor)
+}
+updateTileCursor()
 
 // 绘制
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   ctx.save()
   ctx.translate(panOffset.x, panOffset.y)
   ctx.scale(zoom, zoom)
@@ -730,77 +838,87 @@ function draw() {
   // 绘制网格
   drawGrid()
 
-  // 绘制背景块
-  for (let i = 0; i < tileData.length; i++) {
-    for (let j = 0; j < tileData[i].length; j++) {
-      const t = tileData[i][j]
-      if (t > 0 && TILE_COLOR[t]) {
-        ctx.fillStyle = TILE_COLOR[t]
-        ctx.fillRect(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE)
-
-        if (isDrawBgMode) {
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          ctx.fillStyle = t < 6 ? '#0006' : '#fff6'
-          ctx.font = `6px monospace`
-          ctx.fillText(
-            t,
-            j * GRID_SIZE + GRID_SIZE / 2,
-            i * GRID_SIZE + GRID_SIZE / 2 + 0.7
-          )
-        }
-      }
-    }
-  }
-
   // 绘制关卡边界
   drawLevelBounds()
 
-  if (!isDrawBgMode) {
-    // 绘制对象
-    objects.forEach(obj => drawObject(obj))
-    // 绘制临时对象
-    if (tempObject) drawObject(tempObject)
-    // 绘制框选区域
-    if (isBoxSelecting) drawBoxSelect()
-    // 绘制选择框
-    if (selectedObjects.length > 0)
-      selectedObjects.forEach(obj => drawSelectionBox(obj))
-  } else {
-    // 绘制当前背景块预览
-    if (lastMousePos) {
-      const x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
-      const y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
-      ctx.strokeStyle = TILE_COLOR[currentTileType]
-      ctx.lineWidth = 0.8
-      ctx.setLineDash([])
+  if (!isDrawBgMode) ctx.drawImage(tileCanvas, 0, 0)
 
-      // 四角的框
-      const d = 2
-      ctx.beginPath()
-      ctx.moveTo(x, y + d)
-      ctx.lineTo(x, y)
-      ctx.lineTo(x + d, y)
-      ctx.moveTo(x + GRID_SIZE - d, y)
-      ctx.lineTo(x + GRID_SIZE, y)
-      ctx.lineTo(x + GRID_SIZE, y + d)
-      ctx.moveTo(x + GRID_SIZE, y + GRID_SIZE - d)
-      ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
-      ctx.lineTo(x + GRID_SIZE - d, y + GRID_SIZE)
-      ctx.moveTo(x + d, y + GRID_SIZE)
-      ctx.lineTo(x, y + GRID_SIZE)
-      ctx.lineTo(x, y + GRID_SIZE - d)
-      ctx.stroke()
-    }
+  // 绘制对象
+  objects.forEach(obj => drawObject(obj))
+  // 绘制临时对象
+  if (tempObject) drawObject(tempObject)
+  // 绘制框选区域
+  if (isBoxSelecting) drawBoxSelect()
+
+  if (isDrawBgMode) {
+    ctx.drawImage(tileCanvas, 0, 0)
   }
+
+  ctx.restore()
+}
+
+function drawTileCursor() {
+  if (!lastMousePos) return
+
+  const ctx = tileCursorCtx
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+
+  if (!isDrawBgMode) return
+
+  ctx.save()
+  ctx.translate(panOffset.x, panOffset.y)
+  ctx.scale(zoom, zoom)
+
+  const type = bgDrawType === 0 ? 0 : currentTileType
+
+  tileCursorTarget.x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
+  tileCursorTarget.y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
+  const x1 = tileCursor.x - painterSize * GRID_SIZE
+  const y1 = tileCursor.y - painterSize * GRID_SIZE
+  const x2 = x1 + (painterSize * 2 + 1) * GRID_SIZE
+  const y2 = y1 + (painterSize * 2 + 1) * GRID_SIZE
+
+  ctx.strokeStyle = TILE_COLOR[type]
+  ctx.lineWidth = 0.75
+  ctx.setLineDash([])
+
+  ctx.globalCompositeOperation = 'difference'
+
+  // 四角的框
+  const d = 3 + (painterSize * GRID_SIZE) / 2
+  ctx.beginPath()
+  ctx.moveTo(x1, y1 + d)
+  ctx.lineTo(x1, y1)
+  ctx.lineTo(x1 + d, y1)
+  ctx.moveTo(x2 - d, y1)
+  ctx.lineTo(x2, y1)
+  ctx.lineTo(x2, y1 + d)
+  ctx.moveTo(x2, y2 - d)
+  ctx.lineTo(x2, y2)
+  ctx.lineTo(x2 - d, y2)
+  ctx.moveTo(x1 + d, y2)
+  ctx.lineTo(x1, y2)
+  ctx.lineTo(x1, y2 - d)
+  ctx.stroke()
+
+  // 左上角显示编号和当前调色板名称
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'top'
+  ctx.fillStyle = '#ffffff'
+  ctx.font = `${17 / zoom}px FiraCode, HarmonyOS Sans SC, monospace`
+  ctx.fillText(
+    type ? `#${type} ${tilePalette[type]}` : '#0 [Erase Mode]',
+    x1,
+    y2 + 5 / zoom
+  )
 
   ctx.restore()
 }
 
 // 绘制网格
 function drawGrid() {
-  ctx.strokeStyle = '#eee'
-  ctx.lineWidth = 0.75 / zoom
+  ctx.strokeStyle = '#39485A'
+  ctx.lineWidth = 0.4
 
   // 计算可见区域
   const left = -panOffset.x / zoom
@@ -809,11 +927,12 @@ function drawGrid() {
   const bottom = (-panOffset.y + canvas.height) / zoom
 
   // 找到网格起始点
-  const startX = Math.floor(left / GRID_SIZE) * GRID_SIZE
-  const startY = Math.floor(top / GRID_SIZE) * GRID_SIZE
-  const endX = Math.ceil(right / GRID_SIZE) * GRID_SIZE
-  const endY = Math.ceil(bottom / GRID_SIZE) * GRID_SIZE
-
+  const startX = Math.max(0, Math.floor(left / GRID_SIZE)) * GRID_SIZE
+  const startY = Math.max(0, Math.floor(top / GRID_SIZE)) * GRID_SIZE
+  const endX =
+    Math.min(levelData.tileWidth, Math.ceil(right / GRID_SIZE)) * GRID_SIZE
+  const endY =
+    Math.min(levelData.tileHeight, Math.ceil(bottom / GRID_SIZE)) * GRID_SIZE
   for (let x = startX; x <= endX; x += GRID_SIZE) {
     ctx.beginPath()
     ctx.moveTo(x, startY)
@@ -830,11 +949,21 @@ function drawGrid() {
 
 // 绘制关卡边界
 function drawLevelBounds() {
-  ctx.fillStyle = 'rgba(0, 170, 255, 0.05)'
+  ctx.fillStyle = '#192c41ea'
   ctx.strokeStyle = 'rgba(0, 170, 255, 0.2)'
   ctx.lineWidth = 1
-  ctx.fillRect(0, 0, levelData.width, levelData.height)
-  ctx.strokeRect(0, 0, levelData.width, levelData.height)
+  ctx.fillRect(
+    0,
+    0,
+    levelData.tileWidth * GRID_SIZE,
+    levelData.tileHeight * GRID_SIZE
+  )
+  ctx.strokeRect(
+    0,
+    0,
+    levelData.tileWidth * GRID_SIZE,
+    levelData.tileHeight * GRID_SIZE
+  )
 
   ctx.strokeStyle = 'rgba(0, 137, 78, 1)'
   ctx.setLineDash([5, 4])
@@ -858,7 +987,8 @@ function drawObject(obj) {
     drawMovingPlatformAnchor(obj)
   }
 
-  ctx.fillStyle = TOOL_COLOR[obj.type] ?? '#666' + (obj.hidden ? '4' : 'f')
+  ctx.fillStyle =
+    (TOOL_COLOR[obj.type] ?? '#666') + (obj.hidden || isDrawBgMode ? '4' : 'f')
   ctx.save()
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
@@ -938,8 +1068,8 @@ function drawObject(obj) {
 
   // 绘制选中状态（单选或多选）
   if (selectedObjects.includes(obj)) {
-    // 绘制调整大小手柄
     drawResizeHandles(obj)
+    drawSelectionBox(obj)
   }
 }
 
@@ -1258,10 +1388,10 @@ canvas.addEventListener('mousedown', event => {
     return
   }
 
-  const obj = getObjectAt(mousePos, true)
+  const obj = getObjectAt(mousePos, false)
 
-  // 检查是否按下了Ctrl键进行框选
-  if (event.ctrlKey && currentTool === TOOL.pointer) {
+  // 检查是否按下了Shift键进行框选
+  if (event.shiftKey) {
     isBoxSelecting = true
     boxSelectStart = mousePos
     boxSelectEnd = mousePos
@@ -1273,7 +1403,7 @@ canvas.addEventListener('mousedown', event => {
   }
 
   if (currentTool === TOOL.eraser) {
-    const obj = getObjectAt(mousePos, true, 0)
+    const obj = getObjectAt(mousePos, false, 0)
     if (obj && obj.type !== 'spawnpoint') {
       objects = objects.filter(o => o !== obj)
       removeFromSelection(obj)
@@ -1432,15 +1562,14 @@ document.addEventListener('mousemove', e => {
   // 在播放模式下禁用编辑功能
   if (isPlayMode) return
 
-  draw()
   if (isBgDrawing) {
     drawBgTile(mousePos, bgDrawType)
+    draw()
     return
   }
 
   if (isBoxSelecting) {
     boxSelectEnd = mousePos
-    draw()
   } else if (isDraggingAnchor === 'from') {
     draggingAnchor.fromX = getSnappedValue(mousePos.x)
     draggingAnchor.fromY = getSnappedValue(mousePos.y)
@@ -1450,7 +1579,6 @@ document.addEventListener('mousemove', e => {
     draggingAnchor.y = draggingAnchor.fromY
 
     showProperties(draggingAnchor)
-    draw()
   } else if (isDraggingAnchor === 'to') {
     draggingAnchor.toX = getSnappedValue(mousePos.x)
     draggingAnchor.toY = getSnappedValue(mousePos.y)
@@ -1459,20 +1587,19 @@ document.addEventListener('mousemove', e => {
     // draggingAnchor.x 和 draggingAnchor.y 保持不变
 
     showProperties(draggingAnchor)
-    draw()
   } else if (isDragging) {
     const selectedObj = getSelectedObject()
     if (selectedObj) {
-      const newX = getSnappedValue(mousePos.x - dragStart.x)
-      const newY = getSnappedValue(mousePos.y - dragStart.y)
+      const newX = mousePos.x - dragStart.x
+      const newY = mousePos.y - dragStart.y
 
       // 计算偏移量
-      const deltaX = newX - selectedObj.x
-      const deltaY = newY - selectedObj.y
+      const deltaX = getSnappedValue(newX - selectedObj.x)
+      const deltaY = getSnappedValue(newY - selectedObj.y)
 
       // 更新平台位置
-      selectedObj.x = newX
-      selectedObj.y = newY
+      selectedObj.x = selectedObj.x + deltaX
+      selectedObj.y = selectedObj.y + deltaY
 
       // 对于移动平台，轨迹起点跟随平台中心
       if (selectedObj.type === TOOL.movingPlatform) {
@@ -1485,28 +1612,27 @@ document.addEventListener('mousemove', e => {
         selectedObj.fromY = newY
 
         // 更新轨迹终点保持相对位置
-        selectedObj.toX = getSnappedValue(newX + relativeToX)
-        selectedObj.toY = getSnappedValue(newY + relativeToY)
+        selectedObj.toX = newX + relativeToX
+        selectedObj.toY = newY + relativeToY
       }
 
       showProperties(selectedObj)
-      draw()
     }
   } else if (isMultiDragging && selectedObjects.length > 0) {
     // 多选移动
     selectedObjects.forEach((obj, index) => {
       const offset = multiDragOffsets[index]
       if (offset) {
-        const newX = getSnappedValue(mousePos.x - offset.offsetX)
-        const newY = getSnappedValue(mousePos.y - offset.offsetY)
+        const newX = mousePos.x - offset.offsetX
+        const newY = mousePos.y - offset.offsetY
 
         // 计算偏移量
-        const deltaX = newX - obj.x
-        const deltaY = newY - obj.y
+        const deltaX = getSnappedValue(newX - obj.x)
+        const deltaY = getSnappedValue(newY - obj.y)
 
         // 更新对象位置
-        obj.x = newX
-        obj.y = newY
+        obj.x = obj.x + deltaX
+        obj.y = obj.y + deltaY
 
         // 对于移动平台，轨迹起点跟随平台中心
         if (obj.type === TOOL.movingPlatform) {
@@ -1519,23 +1645,20 @@ document.addEventListener('mousemove', e => {
           obj.fromY = newY
 
           // 更新轨迹终点保持相对位置
-          obj.toX = getSnappedValue(newX + relativeToX)
-          obj.toY = getSnappedValue(newY + relativeToY)
+          obj.toX = newX + relativeToX
+          obj.toY = newY + relativeToY
         }
       }
     })
-    draw()
   } else if (isResizing) {
     const selectedObj = getSelectedObject()
     if (selectedObj) {
       resizeObject(selectedObj, resizeHandle, mousePos)
       showProperties(selectedObj)
-      draw()
     }
   } else if (isPanning) {
     panOffset.x = e.clientX - panStart.x
     panOffset.y = e.clientY - panStart.y
-    draw()
   } else if (isCreating && tempObject) {
     // 收集品不需要拖拽设置大小，直接使用点击位置
     if (tempObject.type === TOOL.collectible) {
@@ -1549,8 +1672,8 @@ document.addEventListener('mousemove', e => {
       tempObject.height = Math.abs(endY - createStart.y)
       tempObject.width = Math.abs(endX - createStart.x)
     }
-    draw()
   }
+  draw()
 })
 
 // 屏蔽右键菜单，防止干扰
@@ -1560,16 +1683,24 @@ canvas.addEventListener('contextmenu', e => {
 })
 
 // 新增：绘制/删除背景块的辅助函数
-let isBgDrawing = false
-let bgDrawType = 1
 function drawBgTile(mousePos, type) {
-  const i = Math.floor(mousePos.y / GRID_SIZE)
-  const j = Math.floor(mousePos.x / GRID_SIZE)
-  if (i >= 0 && i < tileData.length && j >= 0 && j < tileData[i].length) {
-    if (tileData[i][j] !== type) {
-      tileData[i][j] = type
+  const x1 = Math.floor(mousePos.y / GRID_SIZE) - painterSize
+  const y1 = Math.floor(mousePos.x / GRID_SIZE) - painterSize
+  const x2 = x1 + painterSize * 2
+  const y2 = y1 + painterSize * 2
+  for (let i = x1; i <= x2; i++) {
+    for (let j = y1; j <= y2; j++) {
+      if (
+        i >= 0 &&
+        i < levelData.tileHeight &&
+        j >= 0 &&
+        j < levelData.tileWidth
+      ) {
+        if (tileData[i][j] !== type) tileData[i][j] = type
+      }
     }
   }
+  new TileHelper(tileData, tilePalette).render(tileCtx)
 }
 
 function onMouseup() {
@@ -1579,6 +1710,8 @@ function onMouseup() {
   // 新增：绘制背景拖动结束逻辑
   if (isBgDrawing) {
     isBgDrawing = false
+    bgDrawType = currentTileType
+    draw()
     return
   }
 
@@ -1632,6 +1765,15 @@ addEventListener('blur', () => {
 // 滚轮缩放
 canvas.addEventListener('wheel', e => {
   e.preventDefault()
+
+  if (e.altKey) {
+    // 调整画笔大小
+    if (e.deltaY < 0) painterSize++
+    else painterSize--
+    painterSize = Math.max(0, Math.min(10, painterSize))
+    return
+  }
+
   const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
   const oldZoom = zoom
   targetZoom *= zoomFactor
@@ -1969,9 +2111,6 @@ import * as $ from '../gameObject/index.js'
 import Vec2 from '../Vector.js'
 
 export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
-  const height = ${levelData.height}
-  const width = ${levelData.width}
-
   game.levelData = {
     introDialogue: '${levelData.introDialogue ?? 'null'}',
     background: '${levelData.background}',
@@ -1983,6 +2122,8 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
       width: ${levelData.cameraBound.width},
       height: ${levelData.cameraBound.height},
     },
+    tileWidth: ${levelData.tileWidth},
+    tileHeight: ${levelData.tileHeight},
   }
 
   game.tilePalette = ${JSON.stringify(tilePalette)}
@@ -2072,8 +2213,6 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     }, 800)
   })
 }
-
-let lastMousePos = { x: 0, y: 0 }
 
 // 更新鼠标指针
 function updateCursor(mousePos = null) {
@@ -2173,7 +2312,7 @@ document.addEventListener('keydown', event => {
     }
   }
   // 添加键盘切换工具
-  if (event.key >= '0' && event.key <= '9') {
+  if (event.key >= '0' && event.key <= '9' && !isDrawBgMode) {
     const toolIndex = parseInt(event.key)
     const toolNames = [
       TOOL.eraser,
@@ -2215,23 +2354,12 @@ document.addEventListener('keydown', event => {
   }
 })
 
-let isFreeMove = false
-
-// 复制粘贴功能
-let copiedObject = null
-let copiedObjects = [] // 多选复制对象数组
-
-// 撤回重做相关
-let undoStack = [] // 撤回栈
-let redoStack = [] // 重做栈
-const MAX_HISTORY = 50 // 最大历史记录数
-
 // 保存当前状态到历史栈
 function saveState() {
-  const state = {
-    objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
-  }
+  const state = structuredClone({
+    objects,
+    selectedObjects,
+  })
 
   // 添加到撤回栈
   undoStack.push(state)
@@ -2250,16 +2378,17 @@ function undo() {
   if (undoStack.length === 0) return
 
   // 保存当前状态到重做栈
-  const currentState = {
-    objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
-  }
+  const currentState = structuredClone({
+    objects,
+    selectedObjects,
+  })
   redoStack.push(currentState)
 
   // 从撤回栈恢复状态
   const previousState = undoStack.pop()
-  objects = previousState.objects
-  selectedObjects = previousState.selectedObjects
+  if (previousState.objects) objects = previousState.objects
+  if (previousState.selectedObjects)
+    selectedObjects = previousState.selectedObjects
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
@@ -2279,16 +2408,16 @@ function redo() {
   if (redoStack.length === 0) return
 
   // 保存当前状态到撤回栈
-  const currentState = {
-    objects: JSON.parse(JSON.stringify(objects)),
-    selectedObjects: JSON.parse(JSON.stringify(selectedObjects)),
-  }
+  const currentState = structuredClone({
+    objects,
+    selectedObjects,
+  })
   undoStack.push(currentState)
 
   // 从重做栈恢复状态
   const nextState = redoStack.pop()
-  objects = nextState.objects
-  selectedObjects = nextState.selectedObjects
+  if (nextState.objects) objects = nextState.objects
+  if (nextState.selectedObjects) selectedObjects = nextState.selectedObjects
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
@@ -2303,6 +2432,7 @@ function redo() {
   draw()
 }
 
+let pastedOffset = 0
 // 复制对象（支持多选）
 function copyObjects() {
   const objectsToCopy = selectedObjects
@@ -2315,7 +2445,9 @@ function copyObjects() {
   if (validObjects.length === 0) return
 
   // 深拷贝对象数组
-  copiedObjects = validObjects.map(obj => JSON.parse(JSON.stringify(obj)))
+  copiedObjects = structuredClone(validObjects)
+
+  pastedOffset = 0 // 重置粘贴偏移
 
   console.log(`已复制 ${copiedObjects.length} 个对象`)
 }
@@ -2326,10 +2458,12 @@ function pasteObjects() {
 
   saveState() // 保存状态到历史栈
 
+  pastedOffset += 1
+
   // 深拷贝并偏移位置
   const newObjects = copiedObjects.map(obj => {
-    const newObj = JSON.parse(JSON.stringify(obj))
-    const offset = GRID_SIZE
+    const newObj = structuredClone(obj)
+    const offset = GRID_SIZE * pastedOffset
     const newX = getSnappedValue(obj.x + offset)
     const newY = getSnappedValue(obj.y + offset)
 
@@ -2423,45 +2557,9 @@ levelSelect.addEventListener('change', () => {
     // 自动保存当前关卡
     if (currentLevelName) saveCurrentLevel(currentLevelName)
     // 新建关卡数据
-    levelData = {
-      type: 'levelData',
-      introDialogue: null,
-      background: 'test',
-      bgm: 'test',
-      height: 180,
-      width: 320,
-      cameraHeight: 180,
-      cameraWidth: 320,
-      cameraBound: { x: 0, y: 0, width: 320, height: 180 },
-    }
-    objects = []
-    spawnpoint = {
-      type: 'spawnpoint',
-      x: levelData.width / 2 - 5,
-      y: levelData.height / 2 - 8,
-      width: 10,
-      height: 16,
-    }
-    tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
-      .fill()
-      .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
-    tilePalette = [...DEFAULT_PALETTE]
-    objects.push(spawnpoint)
-    panOffset = { x: 0, y: 0 }
-    zoom = 3
-    targetZoom = 3
-    selectedObjects = []
-    undoStack = []
-    redoStack = []
-    levels[name] = {
-      levelData: JSON.parse(JSON.stringify(levelData)),
-      objects: JSON.parse(JSON.stringify(objects)),
-      spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
-      panOffset: { ...panOffset },
-      zoom,
-    }
+    initializeLevel()
+    saveCurrentLevel(name)
     currentLevelName = name
-    localStorage.setItem('level-editor-levels', JSON.stringify(levels))
     updateLevelSelect()
     levelSelect.value = name
     showProperties(levelData)
@@ -2474,15 +2572,15 @@ levelSelect.addEventListener('change', () => {
 })
 
 function saveCurrentLevel(name) {
-  levels[name] = {
-    levelData: JSON.parse(JSON.stringify(levelData)),
-    tileData: JSON.parse(JSON.stringify(tileData)),
-    tilePalette: JSON.parse(JSON.stringify(tilePalette)),
-    objects: JSON.parse(JSON.stringify(objects)),
-    spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
-    panOffset: { ...panOffset },
+  levels[name] = structuredClone({
+    levelData,
+    tileData,
+    tilePalette,
+    objects,
+    spawnpoint,
+    panOffset,
     zoom,
-  }
+  })
   localStorage.setItem('level-editor-levels', JSON.stringify(levels))
 }
 
@@ -2490,21 +2588,9 @@ function loadLevelByName(name) {
   const level = levels[name]
   if (!level) return
   levelData = level.levelData
-  if (!levelData.cameraBound)
-    levelData.cameraBound = {
-      x: 0,
-      y: 0,
-      width: levelData.width,
-      height: levelData.height,
-    }
-  // 加载tileData
-  if (level.tileData) {
-    tileData = level.tileData
-  } else {
-    tileData = Array(Math.ceil(levelData.height / GRID_SIZE))
-      .fill()
-      .map(() => Array(Math.ceil(levelData.width / GRID_SIZE)).fill(0))
-  }
+  tileData = level.tileData
+  new TileHelper(tileData, tilePalette).render(tileCtx)
+  // todo
   // tilePalette = level.tilePalette || [...DEFAULT_PALETTE]
   tilePalette = [...DEFAULT_PALETTE]
   objects = level.objects
@@ -2549,11 +2635,11 @@ deleteLevelBtn.addEventListener('click', () => {
   delete levels[currentLevelName]
   localStorage.setItem('level-editor-levels', JSON.stringify(levels))
   // 切换到第一个关卡
-  const first = Object.keys(levels)[0]
-  loadLevelByName(first)
+  const last = Object.keys(levels).at(-1)
+  loadLevelByName(last)
   updateLevelSelect()
-  levelSelect.value = first
-  currentLevelName = first
+  levelSelect.value = last
+  currentLevelName = last
 })
 
 // 只保留一次自动保存绑定，且用最新逻辑
@@ -2587,39 +2673,7 @@ if (!loaded) {
   // 没有任何关卡则新建一个默认关卡
   if (Object.keys(levels).length === 0) {
     const name = '默认关卡'
-    levelData = {
-      type: 'levelData',
-      introDialogue: null,
-      background: 'test',
-      bgm: 'test',
-      height: 180,
-      width: 320,
-      cameraHeight: 180,
-      cameraWidth: 320,
-      cameraBound: { x: 0, y: 0, width: 320, height: 180 },
-    }
-    objects = []
-    spawnpoint = {
-      type: 'spawnpoint',
-      x: levelData.width / 2 - 5,
-      y: levelData.height / 2 - 8,
-      width: 10,
-      height: 16,
-    }
-    objects.push(spawnpoint)
-    panOffset = { x: 0, y: 0 }
-    zoom = 3
-    targetZoom = 3
-    selectedObjects = []
-    undoStack = []
-    redoStack = []
-    levels[name] = {
-      levelData: JSON.parse(JSON.stringify(levelData)),
-      objects: JSON.parse(JSON.stringify(objects)),
-      spawnpoint: JSON.parse(JSON.stringify(spawnpoint)),
-      panOffset: { ...panOffset },
-      zoom,
-    }
+    initializeLevel()
     currentLevelName = name
     localStorage.setItem('level-editor-levels', JSON.stringify(levels))
     updateLevelSelect()

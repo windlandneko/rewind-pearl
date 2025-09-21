@@ -28,18 +28,24 @@ export class TileHelper {
    * @param {string[]} tilePalette
    */
   constructor(tileData, tilePalette = Array(10).fill('default')) {
-    this.#tileset = this.#loadTileSetFromXML(Asset.get('tiles/index'))
-
     this.height = tileData.length
     this.width = tileData[0]?.length || 0
 
-    this.#paletteMap = tilePalette.map(name => Asset.get('tiles/' + name))
+    if (Asset.has('tiles/index'))
+      this.#tileset = this.#loadTileSetFromXML(Asset.get('tiles/index'))
+
+    this.#paletteMap = tilePalette.map(name => {
+      if (!Asset.has('tiles/' + name)) return
+      return Asset.get('tiles/' + name)
+    })
 
     this.#tiles = [
       new Array(this.width + 2).fill(-1),
       ...tileData.map(row => [
         -1,
-        ...row.split('').map(c => (c === ' ' ? 0 : parseInt(c, 10))),
+        ...(typeof row === 'string'
+          ? row.split('').map(c => (c === ' ' ? 0 : parseInt(c, 10)))
+          : row),
         -1,
       ]),
       new Array(this.width + 2).fill(-1),
@@ -60,7 +66,6 @@ export class TileHelper {
    */
   #loadTileSetFromXML(xml) {
     const root = xml.querySelector('Tileset')
-    const sound = root.getAttribute('sound')
 
     const ignores =
       root
@@ -68,21 +73,8 @@ export class TileHelper {
         ?.split(',')
         .map(s => s.trim())
         .filter(Boolean) ?? []
-    const copy =
-      root
-        .getAttribute('copy')
-        ?.split(',')
-        .map(s => s.trim())
-        .filter(Boolean) ?? []
 
     const sets = new Map()
-
-    copy.forEach(key => {
-      if (!this.#tileset.has(key)) return
-      this.#tileset.get(key).sets.forEach((value, key) => {
-        sets.set(key, value)
-      })
-    })
 
     root.querySelectorAll('set').forEach(setNode => {
       const key = setNode.getAttribute('mask')
@@ -101,9 +93,7 @@ export class TileHelper {
     })
 
     return {
-      sound,
       ignores,
-      copy,
       sets,
     }
   }
@@ -172,6 +162,8 @@ export class TileHelper {
   #chooseTile(i, j) {
     const { sets, ignores } = this.#tileset
 
+    this.#rand.seed = i * 31 + j * 17
+
     if (this.#distance[i][j] > 2 && sets.has('center')) {
       const { tiles } = sets.get('center')
       return tiles[this.#rand.nextInt(tiles.length)]
@@ -207,7 +199,7 @@ export class TileHelper {
     ctx.canvas.height = this.height * 8
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-    this.#rand.seed = 114514
+    if (!this.#tileset) return
 
     for (let i = 1; i <= this.height; i++) {
       for (let j = 1; j <= this.width; j++) {
@@ -216,6 +208,7 @@ export class TileHelper {
         const tile = this.#tiles[i][j]
 
         const image = this.#paletteMap[tile] ?? Asset.get('tiles/default')
+        if (!image) continue
 
         const [sx, sy] = this.#chooseTile(i, j)
         const [tx, ty] = [(j - 1) * 8, (i - 1) * 8]

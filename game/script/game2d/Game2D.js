@@ -1,26 +1,26 @@
 import { EventListener } from '../utils.js'
 import { Camera } from './Camera.js'
-import Keyboard from '../Keyboard.js'
-import SoundManager from '../SoundManager.js'
-import PauseManager from '../PauseManager.js'
-import * as GameObjects from './gameObject/index.js'
-import * as GameConfig from './GameConfig.js'
-import * as Levels from './level/index.js'
-import TimeTravel from './TimeTravel.js'
-import Dialogue from '../Dialogue.js'
-import Asset from '../Asset.js'
 import { InputEnum } from './gameObject/Player.js'
 import { TileHelper } from './TileHelper.js'
+import Asset from '../Asset.js'
+import Dialogue from '../Dialogue.js'
+import Keyboard from '../Keyboard.js'
+import TimeTravel from './TimeTravel.js'
+import SoundManager from '../SoundManager.js'
+import PauseManager from '../PauseManager.js'
+import * as Levels from './level/index.js'
+import * as GameConfig from './GameConfig.js'
+import * as GameObject from './gameObject/index.js'
 
 export class Game {
   listener = new EventListener()
 
   // 游戏对象
-  /** @type {GameObjects.Player} */
+  /** @type {GameObject.Player} */
   player = null
-  /** @type {GameObjects.GhostPlayer[]} */
+  /** @type {GameObject.GhostPlayer[]} */
   ghostPlayers = []
-  /** @type {GameObjects.BaseObject[]} */
+  /** @type {GameObject.BaseObject[]} */
   gameObjects = []
 
   // 全局数据
@@ -172,7 +172,7 @@ export class Game {
 
   importGameObjects(state) {
     this.gameObjects = state.map(state => {
-      const obj = new GameObjects[state.type]()
+      const obj = new GameObject[state.type]()
       obj.state = state
       return obj
     })
@@ -202,7 +202,7 @@ export class Game {
     this.levelData = {}
     setupFunction?.(this)
     this.levelData.name = setupFunction?.name
-    this.player = new GameObjects.Player(
+    this.player = new GameObject.Player(
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
@@ -212,7 +212,7 @@ export class Game {
     this.tileHelper.render(this.tileCtx)
 
     this.tileHelper.edges.forEach(edge => {
-      this.gameObjects.push(new GameObjects.Platform(...edge).hide())
+      this.gameObjects.push(new GameObject.Platform(...edge).hide())
     })
 
     if (this.levelData.background) {
@@ -610,17 +610,18 @@ export class Game {
     const offsetY = -renderPos.y * parallaxFactor
 
     // 限制位移范围，防止边缘露出
-    const maxOffsetX = this.levelData.width * 5 // 最大偏移为关卡宽度的5%
-    const maxOffsetY = this.levelData.height * 5 // 最大偏移为关卡高度的5%
+    const maxOffsetX = this.levelData.tileWidth * GameConfig.GRID_SIZE * 5 // 最大偏移为关卡宽度的5%
+    const maxOffsetY = this.levelData.tileHeight * GameConfig.GRID_SIZE * 5 // 最大偏移为关卡高度的5%
 
     const clampedOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX))
     const clampedOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
 
     // 应用变换（基础偏移-10% + 视差偏移）
-    const totalOffsetX = (clampedOffsetX / this.levelData.width) * 5 // 转换为百分比
-    const totalOffsetY = (clampedOffsetY / this.levelData.height) * 5 // 转换为百分比
-
-    this.$backgroundImage.style.transform = `translate(${totalOffsetX}%, ${totalOffsetY}%)`
+    this.$backgroundImage.style.transform = `translate(${
+      (clampedOffsetX / this.levelData.tileWidth / GameConfig.GRID_SIZE) * 5
+    }%, ${
+      (clampedOffsetY / this.levelData.tileHeight / GameConfig.GRID_SIZE) * 5
+    }%)`
   }
 
   /**

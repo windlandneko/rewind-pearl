@@ -6,17 +6,34 @@ export const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
 /**
  * Throttle a function to limit its execution rate
  * @param {Function} func
- * @param {number} delay
+ * @param {number} interval
  * @returns {Function}
  */
-export const throttle = (func, delay) => {
+export const throttle = (func, interval) => {
   let lastTime = 0
   return (...args) => {
     const now = performance.now()
-    if (now - lastTime >= delay) {
+    if (now - lastTime >= interval) {
       lastTime = now
       func(...args)
     }
+  }
+}
+
+/**
+ * Debounce a function to delay its execution until after a specified delay
+ * @param {Function} func
+ * @param {number} delay
+ * @returns {Function}
+ */
+export const debounce = (func, delay) => {
+  let handle = null
+  return (...args) => {
+    clearTimeout(handle)
+    handle = setTimeout(() => {
+      handle = null
+      func(...args)
+    }, delay)
   }
 }
 
