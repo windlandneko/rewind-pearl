@@ -378,13 +378,13 @@ function showProperties(obj) {
             label: '↔ 宽度',
             value: obj.width,
             type: 'number',
-            onChange: value => (obj.width = parseFloat(value)),
+            onChange: value => (obj.width = Math.max(0, parseFloat(value))),
           },
           {
             label: '↕ 高度',
             value: obj.height,
             type: 'number',
-            onChange: value => (obj.height = parseFloat(value)),
+            onChange: value => (obj.height = Math.max(0, parseFloat(value))),
           }
         )
       }
@@ -701,6 +701,7 @@ function addProperty({
       } else {
         onChange(input.value)
       }
+      saveState()
       draw()
     })
   }
@@ -735,6 +736,7 @@ function addPropertyPair(left, right) {
   else if (left.onChange)
     input1.addEventListener('input', () => {
       left.onChange(input1.value)
+      saveState()
       draw()
     })
   div1.appendChild(input1)
@@ -753,6 +755,7 @@ function addPropertyPair(left, right) {
   else if (right.onChange)
     input2.addEventListener('input', () => {
       right.onChange(input2.value)
+      saveState()
       draw()
     })
   div2.appendChild(input2)
@@ -2466,6 +2469,7 @@ function saveState() {
   const state = structuredClone({
     objects,
     selectedObjects,
+    levelData,
   })
 
   // 添加到撤回栈
@@ -2488,22 +2492,21 @@ function undo() {
   const currentState = structuredClone({
     objects,
     selectedObjects,
+    levelData,
   })
   redoStack.push(currentState)
 
   // 从撤回栈恢复状态
-  const previousState = undoStack.pop()
-  if (previousState.objects) objects = previousState.objects
-  if (previousState.selectedObjects)
-    selectedObjects = previousState.selectedObjects
+  const prevState = undoStack.pop()
+  if (prevState.objects) objects = prevState.objects
+  if (prevState.selectedObjects) selectedObjects = prevState.selectedObjects
+  if (prevState.levelData) levelData = prevState.levelData
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
     showProperties(selectedObjects[0])
-  } else if (selectedObjects.length > 1) {
-    showProperties(levelData)
   } else {
-    hideProperties()
+    showProperties(levelData)
   }
 
   console.log('已撤回操作')
@@ -2518,6 +2521,7 @@ function redo() {
   const currentState = structuredClone({
     objects,
     selectedObjects,
+    levelData,
   })
   undoStack.push(currentState)
 
@@ -2525,6 +2529,7 @@ function redo() {
   const nextState = redoStack.pop()
   if (nextState.objects) objects = nextState.objects
   if (nextState.selectedObjects) selectedObjects = nextState.selectedObjects
+  if (nextState.levelData) levelData = nextState.levelData
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
