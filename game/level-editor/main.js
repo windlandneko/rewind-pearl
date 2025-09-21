@@ -133,31 +133,31 @@ const DEFAULT_PALETTE = [
 
 // 工具
 const TOOL = {
+  eraser: 'eraser',
   pointer: 'pointer',
   platform: 'platform',
   interactable: 'interactable',
   movingPlatform: 'movingPlatform',
   levelChanger: 'levelChanger',
-  enemy: 'enemy',
+  cameraController: 'cameraController',
   collectible: 'collectible',
   hazard: 'hazard',
   trigger: 'trigger',
-  eraser: 'eraser',
 }
 
 // 工具颜色
 const TOOL_COLOR = {
-  pointer: '#07c',
-  platform: '#888',
-  interactable: '#0f0',
-  movingPlatform: '#520',
-  levelChanger: '#be6',
-  enemy: '#800',
-  collectible: '#0ff',
-  hazard: '#eee',
-  trigger: '#ccc',
-  eraser: '#d22',
-  spawnpoint: '#03a',
+  pointer: '#0074D9',
+  platform: '#dcac64',
+  interactable: '#2ECC40',
+  movingPlatform: '#FF851B',
+  levelChanger: '#FFDC00',
+  cameraController: '#ffb7b3',
+  collectible: '#39CCCC',
+  hazard: '#B10DC9',
+  trigger: '#cdcdcd',
+  eraser: '#85144b',
+  spawnpoint: '#0078f0',
 }
 
 // 背景块颜色编号
@@ -248,7 +248,7 @@ if (toggleBtn && arrow) {
   toggleBtn.addEventListener('click', () => {
     collapsed = !collapsed
     if (collapsed) {
-      propertiesPanel.style.maxHeight = '44px'
+      propertiesPanel.style.maxHeight = '38px'
       arrow.style.transform = 'rotate(-90deg)'
     } else {
       propertiesPanel.style.maxHeight = 'calc(100vh - 20px)'
@@ -359,35 +359,36 @@ function showProperties(obj) {
 
   // 通用属性
   if (obj.type !== 'levelData') {
-    addProperty({
-      label: '隐藏对象',
-      value: obj.hidden ?? false,
-      type: 'checkbox',
-      onChange: value => (obj.hidden = value),
-    })
-    addProperty({
-      label: '# ref',
-      value: obj.ref ?? '',
-      type: 'text',
-      editable: obj.type !== 'spawnpoint',
-      onChange: value => (obj.ref = value),
-    })
-    addPropertyPair(
-      {
-        label: '↔ 宽度',
-        value: obj.width,
-        type: 'number',
-        editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
-        onChange: value => (obj.width = parseFloat(value)),
-      },
-      {
-        label: '↕ 高度',
-        value: obj.height,
-        type: 'number',
-        editable: obj.type !== 'spawnpoint' && obj.type !== TOOL.collectible,
-        onChange: value => (obj.height = parseFloat(value)),
+    if (obj.type !== 'spawnpoint') {
+      addProperty({
+        label: '隐藏对象',
+        value: obj.hidden ?? false,
+        type: 'checkbox',
+        onChange: value => (obj.hidden = value),
+      })
+      addProperty({
+        label: '# ref',
+        value: obj.ref ?? '',
+        type: 'text',
+        onChange: value => (obj.ref = value),
+      })
+      if (obj.type !== 'collectible') {
+        addPropertyPair(
+          {
+            label: '↔ 宽度',
+            value: obj.width,
+            type: 'number',
+            onChange: value => (obj.width = parseFloat(value)),
+          },
+          {
+            label: '↕ 高度',
+            value: obj.height,
+            type: 'number',
+            onChange: value => (obj.height = parseFloat(value)),
+          }
+        )
       }
-    )
+    }
     if (obj.type !== 'movingPlatform')
       addPropertyPair(
         {
@@ -514,7 +515,7 @@ function showProperties(obj) {
     case TOOL.platform:
     case TOOL.movingPlatform:
       addProperty({
-        label: '脚手架（下方可穿过）',
+        label: '脚手架（下蹲穿过）',
         value: obj.ladder ?? false,
         type: 'checkbox',
         onChange: value => (obj.ladder = value),
@@ -575,6 +576,28 @@ function showProperties(obj) {
         value: obj.force ?? true,
         type: 'checkbox',
         onChange: value => (obj.force = value),
+      })
+      break
+    case TOOL.cameraController:
+      addPropertyPair(
+        {
+          label: '↔  横向偏移（像素）',
+          value: obj.paddingX ?? 0,
+          type: 'number',
+          onChange: value => (obj.paddingX = value),
+        },
+        {
+          label: '↕ 纵向偏移（像素）',
+          value: obj.paddingY ?? 0,
+          type: 'number',
+          onChange: value => (obj.paddingY = value),
+        }
+      )
+      addProperty({
+        label: '硬直时间（秒）',
+        value: obj.pauseSecond ?? 1,
+        type: 'number',
+        onChange: value => (obj.pauseSecond = value),
       })
       break
     case TOOL.collectible:
@@ -755,8 +778,8 @@ document
   .getElementById('levelChangerTool')
   .addEventListener('click', () => setTool(TOOL.levelChanger))
 document
-  .getElementById('enemyTool')
-  ?.addEventListener('click', () => setTool(TOOL.enemy))
+  .getElementById('cameraTool')
+  ?.addEventListener('click', () => setTool(TOOL.cameraController))
 document
   .getElementById('collectibleTool')
   ?.addEventListener('click', () => setTool(TOOL.collectible))
@@ -785,6 +808,7 @@ function switchBgDrawMode() {
   else showProperties(levelData)
   document.getElementById('drawBgBtn').classList.toggle('active', isDrawBgMode)
   document.getElementById('toolbar').classList.toggle('hide', isDrawBgMode)
+  tileCursorCanvas.classList.toggle('hide', !isDrawBgMode)
 
   tileCursor.x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
   tileCursor.y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
@@ -792,12 +816,12 @@ function switchBgDrawMode() {
 }
 
 // 数字键切换当前背景块编号
-window.addEventListener('keydown', e => {
+addEventListener('keydown', e => {
   if (isDrawBgMode && /^[1-9]$/.test(e.key)) {
     currentTileType = parseInt(e.key)
     draw()
   }
-  if (e.key === 'e') switchBgDrawMode()
+  if (e.code === 'Space') switchBgDrawMode()
 })
 
 // 设置工具
@@ -815,7 +839,7 @@ function setTool(tool) {
   activeBtn.classList.add('active')
   if (TOOL_COLOR[tool]) {
     activeBtn.style.borderColor = TOOL_COLOR[tool]
-    activeBtn.style.backgroundColor = TOOL_COLOR[tool] + '4'
+    activeBtn.style.backgroundColor = TOOL_COLOR[tool] + '44'
   }
   updateCursor(lastMousePos)
 }
@@ -844,10 +868,10 @@ resize()
 
 let tileCursor = { x: 0, y: 0 }
 let tileCursorTarget = { x: 0, y: 0 }
-let k = 0.2
 
 const updateTileCursor = () => {
   drawTileCursor()
+  let k = isBgDrawing ? 1 : 0.4
   tileCursor.x = k * tileCursorTarget.x + (1 - k) * tileCursor.x
   tileCursor.y = k * tileCursorTarget.y + (1 - k) * tileCursor.y
   requestAnimationFrame(updateTileCursor)
@@ -888,8 +912,6 @@ function drawTileCursor() {
 
   const ctx = tileCursorCtx
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-
-  if (!isDrawBgMode) return
 
   ctx.save()
   ctx.translate(panOffset.x, panOffset.y)
@@ -938,19 +960,15 @@ function drawTileCursor() {
     y2 + 5 / zoom
   )
   ctx.font = `${12 / zoom}px FiraCode, HarmonyOS Sans SC, monospace`
-  ctx.fillText(
-    type ? tilePalette[type] : 'Eraser',
-    x1,
-    y2 + 25 / zoom
-  )
+  ctx.fillText(type ? tilePalette[type] : 'Eraser', x1, y2 + 25 / zoom)
 
   ctx.restore()
 }
 
 // 绘制网格
 function drawGrid() {
-  ctx.strokeStyle = '#39485A'
-  ctx.lineWidth = 0.4
+  ctx.strokeStyle = '#fffb'
+  ctx.lineWidth = 0.5
 
   // 计算可见区域
   const left = -panOffset.x / zoom
@@ -1019,9 +1037,10 @@ function drawObject(obj) {
     drawMovingPlatformAnchor(obj)
   }
 
-  ctx.fillStyle =
-    (TOOL_COLOR[obj.type] ?? '#666') + (obj.hidden || isDrawBgMode ? '4' : 'f')
   ctx.save()
+  ctx.fillStyle =
+    (TOOL_COLOR[obj.type] ?? '#666666') +
+    (obj.hidden || isDrawBgMode ? '44' : 'ff')
   ctx.shadowColor = 'rgba(0, 0, 0, 0.2)'
   ctx.shadowBlur = 16
 
@@ -1031,8 +1050,41 @@ function drawObject(obj) {
     ctx.beginPath()
     ctx.arc(obj.x, obj.y, radius, 0, Math.PI * 2)
     ctx.fill()
+  } else if (obj.type === TOOL.cameraController) {
+    // 摄像机控制器绘制为外侧框线
+    ctx.restore()
+
+    ctx.strokeStyle = '#2ccc007b'
+    ctx.setLineDash([])
+    ctx.lineWidth = 0.75
+    ctx.strokeRect(obj.x, obj.y, obj.width, obj.height)
+
+    // 若选中则绘制内侧框线
+    if (selectedObjects.includes(obj)) {
+      ctx.fillStyle = '#2ccc003b'
+      ctx.setLineDash([])
+      ctx.lineWidth = 0.5
+      console.log(obj)
+      ctx.fillRect(
+        obj.x - obj.paddingX,
+        obj.y - obj.paddingY,
+        obj.width + obj.paddingX * 2,
+        obj.height + obj.paddingY * 2
+      )
+    }
+
+    ctx.fillStyle = '#2ccc00'
+    ctx.fillRect(obj.x + obj.width / 2 - 10, obj.y - 6, 20, 6)
+    ctx.font = `5px FiraCode, monospace`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'bottom'
+    ctx.fillStyle = '#000000ff'
+    ctx.fillText('Camera', obj.x + obj.width / 2, obj.y)
+    ctx.save()
   } else if (obj.type === TOOL.hazard) {
     ctx.restore()
+    ctx.fillStyle = '#ececec' + (obj.hidden || isDrawBgMode ? '44' : 'ff')
+
     const direction = obj.direction ?? 'up'
 
     const { x, y, width: w, height: h } = obj
@@ -1228,7 +1280,7 @@ function drawElementIcon(obj) {
 
   // 根据元素类型设置图标颜色
   // 深色背景的元素使用白色图标，浅色背景的使用深色图标
-  const darkBackgroundTypes = [TOOL.movingPlatform, TOOL.enemy, TOOL.hazard]
+  const darkBackgroundTypes = [TOOL.movingPlatform, TOOL.hazard]
   if (darkBackgroundTypes.includes(obj.type)) {
     ctx.fillStyle = '#ffffff' // 白色图标
   } else {
@@ -1266,9 +1318,7 @@ function drawElementIcon(obj) {
       ctx.fillText('🚪', centerX, centerY)
       break
 
-    case TOOL.enemy:
-      // 敌人图标 - 使用骷髅字符
-      ctx.fillText('💀', centerX, centerY)
+    case TOOL.cameraController:
       break
 
     case TOOL.interactable:
@@ -1424,7 +1474,7 @@ canvas.addEventListener('mousedown', event => {
   const obj = getObjectAt(mousePos, false)
 
   // 检查是否按下了Shift键进行框选
-  if (event.shiftKey) {
+  if (!obj && event.shiftKey) {
     isBoxSelecting = true
     boxSelectStart = mousePos
     boxSelectEnd = mousePos
@@ -1447,61 +1497,62 @@ canvas.addEventListener('mousedown', event => {
     if (obj) {
       // 先检查是否在已选中的对象上点击
       if (isSelected(obj)) {
-        // 在已选中的对象上点击，直接开始拖拽
-        if (selectedObjects.length === 1) {
-          // 单选拖拽：检查移动平台锚点或调整手柄
-          const selectedObj = getSelectedObject()
-          if (selectedObj) {
-            if (selectedObj.type === TOOL.movingPlatform) {
-              const anchor = getMovingPlatformAnchor(selectedObj, mousePos)
-              if (anchor) {
-                saveState() // 保存状态到历史栈
-                isDraggingAnchor = anchor
-                draggingAnchor = selectedObj
-                showProperties(selectedObj)
-                updateCursor(mousePos)
-                draw()
-                return
+        if (event.shiftKey) {
+          // 在已选中的对象上按住Shift点击，取消选择该对象
+          removeFromSelection(obj)
+        } else {
+          // 在已选中的对象上点击，直接开始拖拽
+          if (selectedObjects.length === 1) {
+            // 单选拖拽：检查移动平台锚点或调整手柄
+            const selectedObj = getSelectedObject()
+            if (selectedObj) {
+              if (selectedObj.type === TOOL.movingPlatform) {
+                const anchor = getMovingPlatformAnchor(selectedObj, mousePos)
+                if (anchor) {
+                  saveState() // 保存状态到历史栈
+                  isDraggingAnchor = anchor
+                  draggingAnchor = selectedObj
+                  showProperties(selectedObj)
+                  updateCursor(mousePos)
+                  draw()
+                  return
+                }
               }
-            }
 
-            // 检查是否点击了调整手柄
-            resizeHandle = getResizeHandle(selectedObj, mousePos)
-            if (resizeHandle) {
-              saveState() // 保存状态到历史栈
-              isResizing = true
-            } else {
-              saveState() // 保存状态到历史栈
-              isDragging = true
+              // 检查是否点击了调整手柄
+              resizeHandle = getResizeHandle(selectedObj, mousePos)
+              if (resizeHandle) {
+                saveState() // 保存状态到历史栈
+                isResizing = true
+              } else {
+                saveState() // 保存状态到历史栈
+                isDragging = true
+              }
+              dragStart = {
+                x: mousePos.x - selectedObj.x,
+                y: mousePos.y - selectedObj.y,
+              }
+              showProperties(selectedObj)
             }
-            dragStart = {
-              x: mousePos.x - selectedObj.x,
-              y: mousePos.y - selectedObj.y,
+          } else if (selectedObjects.length > 1) {
+            // 多选拖拽
+            saveState() // 保存状态到历史栈
+            isMultiDragging = true
+            multiDragStart = {
+              x: mousePos.x,
+              y: mousePos.y,
             }
-            showProperties(selectedObj)
+            // 记录每个对象的初始位置
+            multiDragOffsets = selectedObjects.map(obj => ({
+              offsetX: mousePos.x - obj.x,
+              offsetY: mousePos.y - obj.y,
+            }))
+            showProperties(levelData)
           }
-        } else if (selectedObjects.length > 1) {
-          // 多选拖拽
-          saveState() // 保存状态到历史栈
-          isMultiDragging = true
-          multiDragStart = {
-            x: mousePos.x,
-            y: mousePos.y,
-          }
-          // 记录每个对象的初始位置
-          multiDragOffsets = selectedObjects.map(obj => ({
-            offsetX: mousePos.x - obj.x,
-            offsetY: mousePos.y - obj.y,
-          }))
-          showProperties(levelData)
         }
       } else {
         // 在未选中的对象上点击，处理选择逻辑
-        if (event.ctrlKey) {
-          // Ctrl+点击：保留已选择的物体，添加新选择
-          addToSelection(obj)
-        } else if (event.shiftKey) {
-          // Shift+点击：切换选择状态
+        if (event.shiftKey) {
           addToSelection(obj)
         } else {
           // 普通点击：单选
@@ -1641,12 +1692,12 @@ document.addEventListener('mousemove', e => {
         const relativeToY = selectedObj.toY - selectedObj.fromY
 
         // 更新轨迹起点为新的平台中心
-        selectedObj.fromX = newX
-        selectedObj.fromY = newY
+        selectedObj.fromX = selectedObj.fromX + deltaX
+        selectedObj.fromY = selectedObj.fromY + deltaY
 
         // 更新轨迹终点保持相对位置
-        selectedObj.toX = newX + relativeToX
-        selectedObj.toY = newY + relativeToY
+        selectedObj.toX = selectedObj.fromX + relativeToX
+        selectedObj.toY = selectedObj.fromY + relativeToY
       }
 
       showProperties(selectedObj)
@@ -1674,12 +1725,12 @@ document.addEventListener('mousemove', e => {
           const relativeToY = obj.toY - obj.fromY
 
           // 更新轨迹起点为新的平台中心
-          obj.fromX = newX
-          obj.fromY = newY
+          obj.fromX = obj.fromX + deltaX
+          obj.fromY = obj.fromY + deltaY
 
           // 更新轨迹终点保持相对位置
-          obj.toX = newX + relativeToX
-          obj.toY = newY + relativeToY
+          obj.toX = obj.fromX + relativeToX
+          obj.toY = obj.fromY + relativeToY
         }
       }
     })
@@ -1718,8 +1769,10 @@ canvas.addEventListener('contextmenu', e => {
 // 新增：绘制/删除背景块的辅助函数
 let lastPainted = [-1, -1, -1, -1]
 function drawBgTile(mousePos, type) {
-  const x1 = Math.floor(mousePos.y / GRID_SIZE) - painterSize
-  const y1 = Math.floor(mousePos.x / GRID_SIZE) - painterSize
+  const x = Math.floor(mousePos.y / GRID_SIZE)
+  const y = Math.floor(mousePos.x / GRID_SIZE)
+  const x1 = x - painterSize
+  const y1 = y - painterSize
   const x2 = x1 + painterSize * 2
   const y2 = y1 + painterSize * 2
 
@@ -1738,7 +1791,8 @@ function drawBgTile(mousePos, type) {
         i >= 0 &&
         i < levelData.tileHeight &&
         j >= 0 &&
-        j < levelData.tileWidth
+        j < levelData.tileWidth &&
+        (i - x) ** 2 + (j - y) ** 2 <= painterSize ** 2 + 1
       ) {
         if (tileData[i][j] !== type) tileData[i][j] = type
       }
@@ -1811,7 +1865,7 @@ addEventListener('blur', () => {
 canvas.addEventListener('wheel', e => {
   e.preventDefault()
 
-  if (e.altKey) {
+  if (!e.altKey && isDrawBgMode) {
     // 调整画笔大小
     if (e.deltaY < 0) painterSize++
     else painterSize--
@@ -1856,6 +1910,20 @@ function getObjectAt(pos, moveTop, padding = 6 / zoom) {
       const radius = 6 // 收集品的半径
       const distance = Math.sqrt((pos.x - obj.x) ** 2 + (pos.y - obj.y) ** 2)
       if (distance <= radius + padding) {
+        if (moveTop) {
+          objects.splice(i, 1)
+          objects.push(obj)
+        }
+        return obj
+      }
+    } else if (obj.type === TOOL.cameraController) {
+      // 相机控制器使用顶部标签区域进行点击检测，位置在 [x + width / 2 - 10, y - 6] 宽度20，高度6
+      if (
+        pos.x >= obj.x + obj.width / 2 - 10 - padding &&
+        pos.x <= obj.x + obj.width / 2 + 10 + padding &&
+        pos.y >= obj.y - 6 - padding &&
+        pos.y <= obj.y - padding
+      ) {
         if (moveTop) {
           objects.splice(i, 1)
           objects.push(obj)
@@ -2004,6 +2072,9 @@ function createObject(type, pos) {
     case TOOL.levelChanger:
       obj = { ...obj, nextStage: 'nextStage', force: true, hidden: true }
       break
+    case TOOL.cameraController:
+      obj = { ...obj, paddingX: -16, paddingY: 0, pauseSecond: 1, hidden: true }
+      break
     case TOOL.trigger:
       obj = {
         ...obj,
@@ -2086,7 +2157,7 @@ function updatePlayButton() {
   } else {
     playBtn.classList.remove('active')
     playIcon.className = 'fas fa-play icon'
-    playText.textContent = '播放'
+    playText.textContent = '预览'
   }
 }
 
@@ -2210,8 +2281,8 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
         case TOOL.levelChanger:
           str += `LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
           break
-        case TOOL.enemy:
-          str += `Enemy(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height})`
+        case TOOL.cameraController:
+          str += `CameraController(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${obj.paddingX}, ${obj.paddingY}, ${obj.pauseSecond})`
           break
         case TOOL.collectible:
           str += `Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}', ${
@@ -2251,8 +2322,10 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
   navigator.clipboard.writeText(code).then(() => {
     document.getElementById('exportBtn').innerHTML =
       '<i class="fas fa-check"></i> 已复制到剪贴板'
+    document.getElementById('exportBtn').classList.add('active')
     clearTimeout(successMessageTimeout)
     successMessageTimeout = setTimeout(() => {
+      document.getElementById('exportBtn').classList.remove('active')
       document.getElementById('exportBtn').innerHTML =
         '<i class="fas fa-share-square"></i> 导出'
     }, 800)
@@ -2359,18 +2432,7 @@ document.addEventListener('keydown', event => {
   // 添加键盘切换工具
   if (event.key >= '0' && event.key <= '9' && !isDrawBgMode) {
     const toolIndex = parseInt(event.key)
-    const toolNames = [
-      TOOL.eraser,
-      TOOL.pointer,
-      TOOL.platform,
-      TOOL.interactable,
-      TOOL.movingPlatform,
-      TOOL.levelChanger,
-      TOOL.enemy,
-      TOOL.collectible,
-      TOOL.hazard,
-      TOOL.trigger,
-    ]
+    const toolNames = Object.values(TOOL)
     setTool(toolNames[toolIndex])
     event.preventDefault()
   }
@@ -2726,7 +2788,7 @@ deleteLevelBtn.addEventListener('click', () => {
 })
 
 // 只保留一次自动保存绑定，且用最新逻辑
-window.addEventListener('beforeunload', () => {
+addEventListener('beforeunload', () => {
   if (currentLevelName) saveCurrentLevel(currentLevelName)
   // 记录当前关卡名到全局状态
   localStorage.setItem('level-editor-state', currentLevelName)

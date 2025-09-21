@@ -42,6 +42,7 @@ export class Game {
 
   // 游戏状态
   isRunning = false
+  preventUpdateUntilTick = 0
   camera = new Camera()
   scale = 1
 
@@ -137,9 +138,6 @@ export class Game {
       }),
       Keyboard.onKeydown('Space', () => {
         this.player.inputState |= InputEnum.JUMP_DOWN
-      }),
-      Keyboard.onKeyup('Space', () => {
-        this.player.inputState |= InputEnum.JUMP_UP
       }),
 
       Keyboard.onKeydown(['R'], () => {
@@ -410,6 +408,20 @@ export class Game {
   async update(dt) {
     if (PauseManager.isPaused) return
 
+    // 更新摄像机
+    this.camera.setWorldBounds(
+      this.levelData.cameraBound?.x,
+      this.levelData.cameraBound?.y,
+      this.levelData.cameraBound?.width,
+      this.levelData.cameraBound?.height
+    )
+    this.camera.update(dt)
+
+    if (this.preventUpdateUntilTick > 0) {
+      this.preventUpdateUntilTick--
+      return
+    }
+
     TimeTravel.update(dt)
 
     if (!this.isRunning) return
@@ -471,15 +483,6 @@ export class Game {
       this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
       obj.interactWithPlayer(this.player, this, dt)
     })
-
-    // 更新摄像机
-    this.camera.setWorldBounds(
-      this.levelData.cameraBound?.x,
-      this.levelData.cameraBound?.y,
-      this.levelData.cameraBound?.width,
-      this.levelData.cameraBound?.height
-    )
-    this.camera.update(dt)
 
     if (this.tick % 6000 === 5000) this.saveGame('自动保存', true)
   }
@@ -555,7 +558,9 @@ export class Game {
     this.renderGroups.interactables = objects.filter(
       obj => obj.type === 'Interactable' || obj.type === 'LevelChanger'
     )
-    this.renderGroups.triggers = objects.filter(obj => obj.type === 'Trigger')
+    this.renderGroups.triggers = objects.filter(
+      obj => obj.type === 'Trigger' || obj.type === 'CameraController'
+    )
 
     this.#ref = new Map()
     objects.forEach(obj => {
@@ -725,6 +730,36 @@ export class Game {
       0,
       this.displayHeight - 80
     )
+
+    // 渲染玩家y速度折线图
+    const graphWidth = 2400
+    const graphHeight = 80
+    const graphX = 20
+    const graphY = 580
+    ctx.save()
+    ctx.strokeStyle = '#00bfff'
+    ctx.lineWidth = 6
+    ctx.beginPath()
+    const history = this.player.stateHistory
+    for (let i = Math.max(1, this.tick - 500); i <= this.tick; i++) {
+      const x = graphX + ((i / 500) % 1) * graphWidth
+      const y = graphY + graphHeight / 2 - history.get(i).vy * 1
+      if (i % 500 === 0) ctx.moveTo(x, y)
+      else ctx.lineTo(x, y)
+    }
+    ctx.stroke()
+    // 坐标轴
+    ctx.strokeStyle = '#888'
+    ctx.lineWidth = 1
+    ctx.beginPath()
+    ctx.moveTo(graphX, graphY + graphHeight / 2)
+    ctx.lineTo(graphX + graphWidth, graphY + graphHeight / 2)
+    ctx.stroke()
+    // 标签
+    ctx.fillStyle = '#fff'
+    ctx.font = '16px FiraCode, monospace'
+    ctx.fillText('玩家Y速度', graphX, graphY - 8)
+    ctx.restore()
 
     // 摄像机跟随边距
     ctx.save()
@@ -904,6 +939,10 @@ export class Game {
     ctx.fillText(`${this.tick}/${this.maxTick}`, timelineX + 4, timelineY + 1)
 
     ctx.restore()
+  }
+
+  pauseUpdateUntilTick(tick) {
+    this.preventUpdateUntilTick = tick
   }
 }
 

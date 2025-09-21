@@ -13,19 +13,9 @@
 <body>
     <div id="header">
         <h1>关卡编辑器</h1>
-        <div class="hint">
-            <p>提示：关卡数据会自动保存。</p>
-            <p><kbd>0</kbd> ~ <kbd>9</kbd> 切换工具栏，<kbd>[</kbd> 和 <kbd>]</kbd> 置底/置顶，<kbd>delete</kbd>
-                删除选中元素，<kbd>Alt</kbd> 取消吸附网格，<kbd>Shift</kbd> 多选</p>
-            <p><kbd>Ctrl+A</kbd> 全选，<kbd>Ctrl+C</kbd> 复制，<kbd>Ctrl+V</kbd> 粘贴，<kbd>Ctrl+Z</kbd>
-                撤回，<kbd>Ctrl+Y</kbd> 重做，<kbd>Shift+拖动</kbd> 多选</p>
-            <p><strong>背景绘制</strong>：<kbd>1</kbd> ~ <kbd>9</kbd> 切换瓦片类型，<kbd>左键</kbd> 绘制，
-                按住 <kbd>滚轮</kbd> 移动，<kbd>右键</kbd> 擦除，<kbd>Alt+滚轮</kbd> 调整画笔大小
-            </p>
-        </div>
     </div>
     <canvas id="canvas"></canvas>
-    <canvas id="canvas-tile-cursor"></canvas>
+    <canvas id="canvas-tile-cursor" class="hide"></canvas>
     <div id="vignette"></div>
     <div id="toolbar">
         <button id="pointerTool" class="tool active">
@@ -49,9 +39,9 @@
             <i class="fas fa-door-open icon"></i>
             <span>关卡切换</span>
         </button>
-        <button id="enemyTool" class="tool">
-            <i class="fas fa-skull icon"></i>
-            <span>敌人</span>
+        <button id="cameraTool" class="tool">
+            <i class="fas fa-camera icon"></i>
+            <span style="white-space: nowrap;">摄像机控制</span>
         </button>
         <button id="collectibleTool" class="tool">
             <i class="fas fa-gem icon"></i>
@@ -85,24 +75,472 @@
         <div id="propertiesContent"></div>
     </div>
     <div class="actions right top">
-        <button id="exportBtn"><i class="fas fa-share-square"></i> <span>导出</span></button>
-        <button id="playBtn"><i class="fas fa-play icon"></i> <span>播放</span></button>
-        <button id="drawBgBtn"><i class="fas fa-paint-brush icon"></i> <span>绘制背景（E）</span></button>
     </div>
     <div class="actions right bottom">
-        <select id="levelSelect">
-            <option value="">新建关卡...</option>
-        </select>
-        <button id="renameLevelBtn" class="level-action-btn rename-btn" title="重命名关卡">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button id="deleteLevelBtn" class="level-action-btn delete-btn" title="删除关卡">
-            <i class="fas fa-trash"></i>
-        </button>
+        <button id="drawBgBtn"><i class="fas fa-paint-brush icon"></i> <span>背景模式</span></button>
+        <div class="actions" style="position: relative; flex-direction: row;">
+            <select id="levelSelect">
+                <option value="">新建关卡...</option>
+            </select>
+            <button id="renameLevelBtn" class="level-action-btn rename-btn" title="重命名关卡">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button id="deleteLevelBtn" class="level-action-btn delete-btn" title="删除关卡">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
     </div>
-    <div class="left bottom" id="information">
+    <div class="right top" id="information">
         准备加载瓦片...
     </div>
+    <div class="actions left bottom">
+        <button id="exportBtn"><i class="fas fa-share-square"></i> <span>导出</span></button>
+        <button id="playBtn"><i class="fas fa-play icon"></i> <span>预览</span></button>
+        <button id="helpBtn"><i class="fas fa-question-circle"></i> <span>使用帮助</span></button>
+    </div>
+
+
+    <!-- 使用帮助模态框 -->
+    <div id="helpModal" class="help-modal">
+        <div class="help-modal-content">
+            <span class="help-modal-close" id="helpModalClose">&times;</span>
+            <h2>关卡编辑器使用说明</h2>
+            <p>
+                本编辑器支持多关卡管理、对象拖拽与批量编辑、属性自定义、背景绘制、导出与预览等功能。所有操作均自动保存，无需担心丢失。<br>
+                推荐流程：
+                <b>① 选择工具</b>（下方工具栏或数字键）→ <b>② 在画布上点击/拖动</b>添加或编辑对象 → <b>③ 左下角导出/预览</b>保存或测试关卡。
+            </p>
+            <h3>工具栏说明</h3>
+            <style>
+                .object-card-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                    margin: 24px 0 0 0;
+                    padding: 0;
+                }
+
+                .object-card {
+                    background: #f5f6fa;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+                    padding: 16px 20px 12px 20px;
+                    min-width: 240px;
+                    max-width: 320px;
+                    flex: 1 1 240px;
+                    position: relative;
+                    border: 1px solid #e3e4e8;
+                    transition: box-shadow 0.2s, border-color 0.2s;
+                }
+
+                .object-card:hover {
+                    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+                    border-color: #bfc2d1;
+                }
+
+                .object-card-title {
+                    display: flex;
+                    align-items: center;
+                    font-size: 17px;
+                    font-weight: 600;
+                    margin-bottom: 10px;
+                    gap: 8px;
+                    color: #222;
+                }
+
+                .object-card-title i {
+                    font-size: 18px;
+                    color: #2276c2;
+                }
+
+                .object-card-key {
+                    position: absolute;
+                    top: 10px;
+                    right: 16px;
+                    font-size: 28px;
+                    color: #bfc2d1;
+                    font-weight: 600;
+                    opacity: 0.7;
+                    pointer-events: none;
+                }
+
+                .object-card-params {
+                    color: #444;
+                    font-size: 15px;
+                    margin-bottom: 4px;
+                    font-weight: 500;
+                }
+
+                .object-card-params code {
+                    background: #eef1f7;
+                    border: none;
+                    padding: 2px 5px;
+                    font-size: 14px;
+                    font-family: 'FiraCode', 'HarmonyOS Sans SC', monospace;
+                    color: #2276c2;
+                }
+
+                .object-card ul {
+                    margin: 0 0 8px 0;
+                    padding-left: 18px;
+                    list-style: disc;
+                }
+
+                .object-card ul li {
+                    margin-bottom: 2px;
+                    font-size: 14px;
+                    color: #333;
+                    line-height: 1.7;
+                }
+
+                .object-card-section {
+                    margin-bottom: 6px;
+                    font-size: 15px;
+                    color: #222;
+                }
+
+                .object-card-section strong {
+                    color: #2276c2;
+                    font-weight: 600;
+                }
+
+                .object-card-notice {
+                    color: #b85c00;
+                    font-size: 13px;
+                    margin-top: 4px;
+                    font-weight: 500;
+                }
+
+                .object-card-list {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 20px;
+                    margin: 24px 0 0 0;
+                    padding: 0;
+                    justify-content: flex-start;
+                }
+
+                .object-card {
+                    background: #f5f6fa;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+                    padding: 16px 20px 12px 20px;
+                    min-width: 260px;
+                    max-width: 340px;
+                    flex: 1 1 320px;
+                    position: relative;
+                    border: 1px solid #e3e4e8;
+                    transition: box-shadow 0.2s, border-color 0.2s;
+                }
+
+                .help-modal-content {
+                    background: rgba(237, 237, 237, 0.98);
+                    color: #222;
+                    padding: 32px 32px 24px 32px;
+                    max-width: 1100px;
+                    width: 96vw;
+                    margin: auto;
+                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+                    position: relative;
+                    font-size: 20px;
+                    line-height: 1.5;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    overscroll-behavior: contain;
+                }
+
+                @media (max-width: 1200px) {
+                    .help-modal-content {
+                        max-width: 98vw;
+                        padding: 18px 2vw 18px 2vw;
+                    }
+
+                    .object-card-list {
+                        gap: 12px;
+                    }
+
+                    .object-card {
+                        min-width: 180px;
+                        max-width: 98vw;
+                    }
+                }
+            </style>
+            <div class="object-card-list">
+                <div class="object-card"><span class="object-card-key">1</span>
+                    <div class="object-card-title"><i class="fas fa-mouse-pointer"></i> 指针</div>
+                    <div class="object-card-section"><strong>功能：</strong>选择、拖动和调整对象。支持多选、框选、复制粘贴、层级调整等操作，是编辑器的基础工具。
+                    </div>
+                    <div class="object-card-section"><strong>用法：</strong>选中对象后可在左侧属性面板编辑详细属性。</div>
+                    <div class="object-card-notice">这不是个GameObject</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">2</span>
+                    <div class="object-card-title"><i class="fas fa-square"></i> 平台</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：平台左上角的坐标，决定平台在关卡中的位置，后续同理</li>
+                        <li><code>width</code>：宽度</li>
+                        <li><code>height</code>：高度</li>
+                        <li><code>ladder</code>：是否为脚手架。设为true时，玩家可上下攀爬</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>绘制可站立的平台（已弃用）或脚手架。平台（已弃用）用于承载玩家，支持碰撞检测，玩家可在其上行走或跳跃。可设置为脚手架，脚手架允许玩家上下移动，脚手架没有弃用，可以正常用。
+                    </div>
+                    <div class="object-card-notice">不要使用平台，已弃用！</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">3</span>
+                    <div class="object-card-title"><i class="fas fa-comment"></i> 互动</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：坐标</li>
+                        <li><code>dialogueId</code>：对话脚本ID</li>
+                        <li><code>spriteId</code>：立绘资源ID</li>
+                        <li><code>hint</code>：提示文本，玩家靠近时显示</li>
+                        <li><code>autoPlay</code>：是否自动触发对话，true为自动，false需玩家操作</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>添加可触发对话的对象。玩家靠近后可显示提示，可设置自动或按交互键E时触发剧情对话。可自定义对话脚本、提示文本和立绘资源，用于剧情推进或信息展示。
+                    </div>
+                    <div class="object-card-notice">对话脚本需在<code>assets/dialogue/</code>目录编写，别忘了写好后更新manifest.json</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">4</span>
+                    <div class="object-card-title"><i class="fas fa-arrows-alt"></i> 移动平台</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>from</code>：起点坐标，平台运动的起始位置</li>
+                        <li><code>to</code>：终点坐标，平台运动的终止位置</li>
+                        <li><code>width</code>：平台宽度</li>
+                        <li><code>height</code>：平台高度</li>
+                        <li><code>interval</code>：完成一次往返运动所需的时间（秒），越小越快</li>
+                        <li><code>moveType</code>：移动方式，可选<code>linear</code>（匀速）、<code>sin</code>（正弦）、<code>still</code>（静止）、<code>random</code>（随机）。
+                        </li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>创建可移动的平台，支持线性、正弦、静止等多种移动方式。玩家站在移动平台上会随平台一起移动，适合制作动态地形或机关。
+                    </div>
+                    <div class="object-card-notice">still移动方式看起来很蠢，但其实是用来和Trigger搭配的。比如踩下按钮开门</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">5</span>
+                    <div class="object-card-title"><i class="fas fa-door-open"></i> 关卡切换</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：切换器的坐标</li>
+                        <li><code>width</code>：区域宽度</li>
+                        <li><code>height</code>：区域高度</li>
+                        <li><code>targetLevel</code>：目标关卡名称，玩家触发后将切换到此关卡</li>
+                        <li><code>force</code>：是否强制切换，true为自动切换，false需玩家操作</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>设置关卡切换触发器。玩家位于触发位置内可自动或按交互键E切换到指定关卡，支持动画过渡。用于关卡入口、出口或特殊传送点。
+                    </div>
+                    <div class="object-card-notice">没啥好说的</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">6</span>
+                    <div class="object-card-title"><i class="fas fa-camera"></i> 摄像机控制</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：坐标</li>
+                        <li><code>width</code>：宽度</li>
+                        <li><code>height</code>：高度</li>
+                        <li><code>paddingX, paddingY</code>：边界扩展距离，决定实际触发的范围。正数表示向外扩展，负数表示向内收缩。</li>
+                        <li><code>pauseSecond</code>：切换时摄像机停顿的时间（秒）</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>添加摄像机边界控制对象（搞不懂就算了，这个是高级控制对象）。玩家进入后会改变摄像机视野限制范围，实现场景分区或特殊镜头效果。支持设置触发边界和切换场景时的停顿时间。
+                    </div>
+                    <div class="object-card-notice">停顿时间是用来防止玩家直冲过去掉下悬崖的</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">7</span>
+                    <div class="object-card-title"><i class="fas fa-gem"></i> 收集品</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：坐标</li>
+                        <li><code>spriteId</code>：收集品的立绘资源ID</li>
+                        <li><code>onlyGhostCanCollect</code>：是否仅幽灵角色可收集，true为仅幽灵，false为所有角色</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>可供玩家收集的物品。玩家碰到后会自动收集。收集时会播放音效，用于奖励、任务或隐藏要素。
+                    </div>
+                    <div class="object-card-notice">那个仅供幽灵玩家收集的参数虽然确实能用，但是玩起来没啥意思，不如删掉</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">8</span>
+                    <div class="object-card-title"><i class="fas fa-exclamation-triangle"></i> 刺儿</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：坐标</li>
+                        <li><code>width</code>：宽度</li>
+                        <li><code>height</code>：高度</li>
+                        <li><code>direction</code>：危险朝向，可选<code>up</code>（向上）、<code>down</code>、<code>left</code>、<code>right</code>。
+                        </li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>放置一些地刺，支持改变刺的方向（上、下、左、右，但是只是视觉效果），适合制作陷阱、障碍区。
+                        如果想让玩家掉下地图就会死亡，可以在下方不远处放一个，别忘了设置为隐藏对象。距离也有讲究，如果放太远就会等半天才死；如果放太近爆炸的贴图会穿帮。
+                    </div>
+                    <div class="object-card-notice">人被杀就会死</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">9</span>
+                    <div class="object-card-title"><i class="fas fa-star"></i> 触发器</div>
+                    <div class="object-card-params"><strong>参数：</strong></div>
+                    <ul style="margin-bottom:6px;">
+                        <li><code>x, y</code>：左上角坐标</li>
+                        <li><code>width</code>：宽度</li>
+                        <li><code>height</code>：高度</li>
+                        <li><code>triggerOnce</code>：是否只触发一次。true为单次，false为可重复</li>
+                        <li><code>onEnter</code>：玩家进入时执行的回调函数</li>
+                        <li><code>onLeave</code>：玩家离开时执行的回调函数</li>
+                    </ul>
+                    <div class="object-card-section">
+                        <strong>用法：</strong>函数触发器（搞不懂就算了，这个是高级控制对象）。玩家进入后该区域可执行自定义函数，想干啥干啥，如机关、剧情、音效等。可设置为一次性或多次触发，可分别设置进入时/离开时的函数。
+                    </div>
+                    <div class="object-card-notice">Trigger是这样的，只要检查玩家在不在区域内，触发对应函数就可以，可是写回调函数要考虑的事情就很多了</div>
+                </div>
+                <div class="object-card"><span class="object-card-key">0</span>
+                    <div class="object-card-title"><i class="fas fa-eraser"></i> 橡皮擦</div>
+                    <div class="object-card-section"><strong>功能：</strong>删除对象。虽然可以撤销，但还是请谨慎操作。</div>
+                    <div class="object-card-section"><strong>用法：</strong>选中后点击画布上的对象即可移除，支持批量删除。</div>
+                    <div class="object-card-notice">那我问你。那我问你，为什么不直接按Delete？</div>
+                </div>
+            </div>
+            <h3>导出</h3>
+            <ul>
+                <li>点击导出后将自动复制到剪贴板，直接粘贴至整个文件即可完成导入</li>
+            </ul>
+            <h3>预览</h3>
+            <ul>
+                <li>点击即可预览游戏运行效果，目前仅支持移动平台动画</li>
+            </ul>
+            <h3>属性面板</h3>
+            <ul>
+                <li>可以在这个面板上编辑各种属性，如位置、大小、类型等。如果不选中对象，则编辑的是整个关卡的元数据</li>
+            </ul>
+            <h3>多关卡管理</h3>
+            <ul>
+                <li>支持多关卡，新建/重命名/删除均在右下方有对应的操作按钮。时刻自动保存。所有编辑内容自动保存到本地，刷新页面不会丢失。不过清空浏览器数据会丢失</li>
+            </ul>
+            <h3>背景绘制模式</h3>
+            <ul>
+                <li>背景使用自动瓦片系统，支持快速绘制和编辑</li>
+            </ul>
+            <h3>快捷键（普通模式）</h3>
+            <table class="help-tool-table" style="max-width:600px;">
+                <thead>
+                    <tr>
+                        <th>操作</th>
+                        <th>快捷键</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>切换工具</td>
+                        <td><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> ... <kbd>8</kbd><kbd>9</kbd><kbd>0</kbd></td>
+                        <td>数字键切换工具（平台、互动等）</td>
+                    </tr>
+                    <tr>
+                        <td>删除选中</td>
+                        <td><kbd>Delete</kbd></td>
+                        <td>删除选中的对象</td>
+                    </tr>
+                    <tr>
+                        <td>全选</td>
+                        <td><kbd>Ctrl+A</kbd></td>
+                        <td>选中所有对象</td>
+                    </tr>
+                    <tr>
+                        <td>复制</td>
+                        <td><kbd>Ctrl+C</kbd></td>
+                        <td>复制选中对象（支持多选）</td>
+                    </tr>
+                    <tr>
+                        <td>粘贴</td>
+                        <td><kbd>Ctrl+V</kbd></td>
+                        <td>粘贴对象（支持多选粘贴）</td>
+                    </tr>
+                    <tr>
+                        <td>撤回/重做</td>
+                        <td><kbd>Ctrl+Z</kbd> / <kbd>Ctrl+Y</kbd></td>
+                        <td>撤回/重做操作</td>
+                    </tr>
+                    <tr>
+                        <td>置底/置顶</td>
+                        <td><kbd>[</kbd> / <kbd>]</kbd></td>
+                        <td>调整选中对象层级</td>
+                    </tr>
+                    <tr>
+                        <td>框选</td>
+                        <td><kbd>Shift+拖动</kbd></td>
+                        <td>按住框选多个对象</td>
+                    </tr>
+                    <tr>
+                        <td>多选</td>
+                        <td><kbd>Shift+点击</kbd></td>
+                        <td>选择多个对象</td>
+                    </tr>
+                    <tr>
+                        <td>自由移动</td>
+                        <td><kbd>Alt</kbd></td>
+                        <td>按住时自由拖动/缩放，<br>不再吸附网格</td>
+                    </tr>
+                    <tr>
+                        <td>打开帮助</td>
+                        <td><kbd>H</kbd></td>
+                        <td>打开本帮助</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h3>快捷键（背景绘制模式）</h3>
+            <table class="help-tool-table" style="max-width:600px;">
+                <thead>
+                    <tr>
+                        <th>操作</th>
+                        <th>快捷键</th>
+                        <th>说明</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>切换模式</td>
+                        <td><kbd>Space</kbd></td>
+                        <td>进入/退出背景绘制模式</td>
+                    </tr>
+                    <tr>
+                        <td>绘制/擦除</td>
+                        <td><kbd>左键</kbd> / <kbd>右键</kbd></td>
+                        <td>左键绘制，右键擦除</td>
+                    </tr>
+                    <tr>
+                        <td>切换瓦片（笔刷）类型</td>
+                        <td><kbd>1~9</kbd></td>
+                        <td>切换当前绘制的瓦片类型</td>
+                    </tr>
+                    <tr>
+                        <td>调整画笔大小</td>
+                        <td><kbd>滚轮</kbd></td>
+                        <td>增大/减小画笔大小</td>
+                    </tr>
+                    <tr>
+                        <td>拖动画布</td>
+                        <td><kbd>Alt+滚轮</kbd></td>
+                        <td>按住时拖动画布</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // 帮助弹窗逻辑
+        const helpBtn = document.getElementById('helpBtn')
+        const helpModal = document.getElementById('helpModal')
+        const helpModalClose = document.getElementById('helpModalClose')
+        helpBtn.addEventListener('click', () => helpModal.style.display = 'flex')
+        helpModalClose.addEventListener('click', () => helpModal.style.display = 'none')
+        addEventListener('click', (e) => {
+            if (e.target === helpModal) helpModal.style.display = 'none'
+        })
+        addEventListener('keydown', e => {
+            if (e.code === 'KeyH') helpModal.style.display = 'flex'
+        })
+    </script>
 </body>
 
 </html>

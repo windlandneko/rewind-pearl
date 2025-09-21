@@ -18,12 +18,12 @@ export const InputEnum = {
 export class Player extends BaseObject {
   color = 'blue'
 
-  gravity = 500 // 重力加速度
-  moveSpeed = 60 // 移动速度 (像素/秒)
-  jumpSpeed = 110 // 跳跃速度 (像素/秒)
+  gravity = 520 // 重力加速度
+  moveSpeed = 56 // 移动速度 (像素/秒)
+  jumpSpeed = 114.514 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
-  maxJumpTime = 0.2 // 跳跃增益时间（秒）
+  maxJumpTime = 0.12 // 跳跃增益时间（秒）
 
   invincibleTime = 4 // 无敌时间 (秒)
 
@@ -57,7 +57,7 @@ export class Player extends BaseObject {
   animationManager = new AnimationManager()
 
   constructor(x, y) {
-    super(x, y, 8, 16)
+    super(x, y, 7, 15)
     this.previousPosition = new Vec2(x, y)
     this.groundCheckBox = {
       r: this.r.add(1, this.height),
@@ -106,14 +106,14 @@ export class Player extends BaseObject {
     const keyLeft = Keyboard.anyActive('A', 'ArrowLeft')
     const keyRight = Keyboard.anyActive('D', 'ArrowRight')
     const keyDown = Keyboard.anyActive('S', 'ArrowDown')
+    const keyJump = Keyboard.anyActive('Space')
     if (keyLeft && !keyRight) {
       this.inputState |= InputEnum.WALK_LEFT
     } else if (keyRight && !keyLeft) {
       this.inputState |= InputEnum.WALK_RIGHT
     }
-    if (keyDown) {
-      this.inputState |= InputEnum.WALK_DOWN
-    }
+    if (keyDown) this.inputState |= InputEnum.WALK_DOWN
+    if (!keyJump && this.jumpKeyPressed) this.inputState |= InputEnum.JUMP_UP
 
     const state = this.inputState
     if (state & InputEnum.INTERACT) {
@@ -123,7 +123,10 @@ export class Player extends BaseObject {
     }
 
     if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
-    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
+    if (state & InputEnum.JUMP_UP) {
+      if (this.jumpKeyPressed) this.v.y = Math.min(0, this.v.y * 0.4)
+      this.jumpKeyPressed = false
+    }
 
     this.walkDown = state & InputEnum.WALK_DOWN
 
@@ -197,7 +200,7 @@ export class Player extends BaseObject {
     const acceleration = new Vec2()
 
     // 重力
-    acceleration.y += this.jumpKeyPressed ? this.gravity * 1 : this.gravity
+    acceleration.y += this.v.y < 0 ? this.gravity * 0.6 : this.gravity
 
     // 速度
     this.v.addTo(acceleration.mul(dt))
@@ -223,14 +226,11 @@ export class Player extends BaseObject {
    */
   #updateJump(dt) {
     // 更新跳跃计时器
+    if (this.v.y >= 0) this.jumpKeyPressed = false
     if (this.jumpKeyPressed) {
-      // 超过最大跳跃时间后停止变高跳跃
-      if (this.jumpTimer >= this.maxJumpTime || this.v.y >= 0) {
-        this.jumpKeyPressed = false
-      }
-
       this.jumpTimer += dt
-      this.v.y = Math.min(this.v.y, -this.currentJumpSpeed)
+      if (this.jumpTimer < this.maxJumpTime && this.v.y < 0)
+        this.v.y = Math.min(this.v.y, -this.currentJumpSpeed)
     }
 
     // 落地，重置N段跳
@@ -273,7 +273,7 @@ export class Player extends BaseObject {
    * @param {number} dt 时间增量
    */
   onHorizontalInput(direction, dt) {
-    const acceleration = this.onGround ? 20 : 12
+    const acceleration = this.onGround ? 14 : 10
     const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.4
 
     // 祥，移动

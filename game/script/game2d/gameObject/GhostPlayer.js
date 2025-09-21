@@ -1,3 +1,4 @@
+import Keyboard from '../../Keyboard.js'
 import { Player, InputEnum } from './Player.js'
 
 /**
@@ -17,7 +18,10 @@ export class GhostPlayer extends Player {
     }
 
     if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
-    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
+    if (state & InputEnum.JUMP_UP) {
+      if (this.v.y < 0) this.v.y = this.v.y * 0.75 + this.gravity * 3 * dt
+      this.jumpKeyPressed = false
+    }
 
     if (state & InputEnum.WALK_LEFT) this.onHorizontalInput(-1, dt)
     else if (state & InputEnum.WALK_RIGHT) this.onHorizontalInput(1, dt)

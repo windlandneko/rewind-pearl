@@ -4,6 +4,7 @@ import Asset from '../../Asset.js'
 export class Collectible extends BaseObject {
   color = '#FFC107'
   bobOffset = 0
+  collected = false
 
   constructor(x, y, spriteId, onlyGhostCanCollect = false) {
     super(x, y, 12, 12)
