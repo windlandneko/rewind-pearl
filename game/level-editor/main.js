@@ -1469,6 +1469,7 @@ canvas.addEventListener('mousedown', event => {
     isBgDrawing = true
     bgDrawType = event.button === 2 ? 0 : currentTileType
     lastPainted = [-1, -1, -1, -1]
+    saveState()
     drawBgTile(mousePos, bgDrawType)
     draw()
     return
@@ -2470,6 +2471,8 @@ function saveState() {
     objects,
     selectedObjects,
     levelData,
+    tilePalette,
+    tileData,
   })
 
   // 添加到撤回栈
@@ -2501,6 +2504,11 @@ function undo() {
   if (prevState.objects) objects = prevState.objects
   if (prevState.selectedObjects) selectedObjects = prevState.selectedObjects
   if (prevState.levelData) levelData = prevState.levelData
+  if (prevState.tileData) tileData = prevState.tileData
+  if (prevState.tilePalette) tilePalette = prevState.tilePalette
+
+  tileHelper.tiles = tileData
+  tileHelper.render(tileCtx)
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
@@ -2530,6 +2538,11 @@ function redo() {
   if (nextState.objects) objects = nextState.objects
   if (nextState.selectedObjects) selectedObjects = nextState.selectedObjects
   if (nextState.levelData) levelData = nextState.levelData
+  if (nextState.tileData) tileData = nextState.tileData
+  if (nextState.tilePalette) tilePalette = nextState.tilePalette
+
+  tileHelper.tiles = tileData
+  tileHelper.render(tileCtx)
 
   // 更新属性面板
   if (selectedObjects.length === 1) {
