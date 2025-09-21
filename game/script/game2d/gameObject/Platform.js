@@ -60,6 +60,7 @@ export class Platform extends BaseObject {
       // 从下方碰撞（撞头）
       player.r.y = this.r.y + this.height
       player.v.y = -player.v.y * 0.1
+      player.v.x = player.v.x * 0.1
     } else if (minOverlap === overlapLeft) {
       // 从左侧碰撞
       player.r.x = this.r.x - player.width

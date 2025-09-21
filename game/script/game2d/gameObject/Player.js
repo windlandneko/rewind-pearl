@@ -20,7 +20,7 @@ export class Player extends BaseObject {
   color = 'blue'
 
   gravity = 500 // 重力加速度
-  moveSpeed = 64 // 移动速度 (像素/秒)
+  moveSpeed = 60 // 移动速度 (像素/秒)
   jumpSpeed = 110 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
@@ -137,17 +137,13 @@ export class Player extends BaseObject {
   isExploding = false
   explodeAnim = null
   explodeAnimTime = 0
-  explodeAnimDuration = (1000 / 120) * 80
 
   update(dt, game) {
     // 死亡动画播放时，暂停输入和物理，仅更新动画
     if (this.isExploding) {
       this.explodeAnim.update(dt)
       this.explodeAnimTime += dt
-      if (
-        this.explodeAnim.isComplete() ||
-        this.explodeAnimTime >= this.explodeAnimDuration
-      ) {
+      if (this.explodeAnim.isComplete()) {
         // 动画播放完毕，重生
         game.tick = 0
         game.maxTick = 0
@@ -175,7 +171,7 @@ export class Player extends BaseObject {
         })
 
         // 触发相机震动效果
-        game.camera.shake(6, 0.6, 100)
+        game.camera.shake(6, 0.3, 100)
 
         // 加载爆炸动画
         const img = Asset.get('sprite/explode')
@@ -202,7 +198,7 @@ export class Player extends BaseObject {
     const acceleration = new Vec2()
 
     // 重力
-    acceleration.y += this.jumpKeyPressed ? this.gravity * 0.5 : this.gravity
+    acceleration.y += this.jumpKeyPressed ? this.gravity * 1 : this.gravity
 
     // 速度
     this.v.addTo(acceleration.mul(dt))
@@ -278,8 +274,8 @@ export class Player extends BaseObject {
    * @param {number} dt 时间增量
    */
   onHorizontalInput(direction, dt) {
-    const acceleration = this.onGround ? 20 : 15
-    const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.3
+    const acceleration = this.onGround ? 20 : 12
+    const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.4
 
     // 祥，移动
     if (direction > 0) {
@@ -340,10 +336,10 @@ export class Player extends BaseObject {
     if (this.isExploding && this.explodeAnim) {
       this.explodeAnim.render(
         ctx,
-        x + (this.width - 48) / 2,
-        y + (this.height - 48) / 2,
-        48,
-        48
+        x + (this.width - 32) / 2,
+        y + (this.height - 32) / 2,
+        32,
+        32
       )
       return
     }
@@ -351,7 +347,7 @@ export class Player extends BaseObject {
     const spriteWidth = 32
     const spriteHeight = 32
     const spriteX = x + (this.width - spriteWidth) / 2
-    const spriteY = y + this.height - spriteHeight - 1
+    const spriteY = y + this.height - spriteHeight
 
     this.animationManager.render(
       ctx,
@@ -360,7 +356,6 @@ export class Player extends BaseObject {
       spriteWidth,
       spriteHeight
     )
-    ctx.globalAlpha = 1.0
 
     if (debug) {
       ctx.strokeStyle = '#00ff00ff'

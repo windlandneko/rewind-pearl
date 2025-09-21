@@ -454,8 +454,6 @@ export class Game {
       }
       // 下
       if (this.player.r.y > this.levelData.height) {
-        this.player.r.x = this.levelData.spawnpoint.x
-        this.player.r.y = this.levelData.spawnpoint.y
         this.player.onDamage()
       }
     }
@@ -526,8 +524,6 @@ export class Game {
     // 绘制背景网格
     if (this.debug) this.#renderBackgroundGrid(ctx)
 
-    ctx.drawImage(this.tileCanvas, 0, 0)
-
     // 按优先级渲染游戏对象
     this.renderGroups.interactables.forEach(obj => {
       if (!obj.hidden) obj.render(ctx, this)
@@ -550,6 +546,8 @@ export class Game {
     this.renderGroups.platforms.forEach(obj => {
       if (!obj.hidden) if (obj.ladder) obj.render(ctx, this)
     })
+
+    ctx.drawImage(this.tileCanvas, 0, 0)
 
     // 渲染玩家
     this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))

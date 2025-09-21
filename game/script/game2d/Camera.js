@@ -28,8 +28,8 @@ export class Camera {
   #shakeOffset = new Vec2(0, 0)
 
   // 持续微震动系统
-  #microShakeIntensity = 2
-  #microShakeFrequency = 0.3
+  #microShakeIntensity = 0.8
+  #microShakeFrequency = 0.2
   #microShakeOffset = new Vec2(0, 0)
   #microShakeTime = 0
 
@@ -222,7 +222,7 @@ export class Camera {
     this.#updateShake(dt)
 
     // 更新微震动效果
-    // this.#updateMicroShake(dt)
+    this.#updateMicroShake(dt)
 
     if (!this.#target) return
 

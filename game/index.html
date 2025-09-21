@@ -12,6 +12,7 @@
 
 <body>
   <main>
+    <!-- 加载界面 -->
     <div class="loading-container">
       <h2 class="loading-title">少女祈祷中</h2>
       <div class="loading-progress-container">
@@ -31,11 +32,13 @@
 
     <canvas id="game-canvas"></canvas>
 
+    <!-- 保存提示 -->
     <div id="save-notification" class="save-notification hidden">
       <div class="save-icon">💾</div>
       <div class="save-text">游戏已保存</div>
     </div>
 
+    <!-- 对话框 -->
     <div class="dialogue-container">
       <div class="dialogue-background"></div>
       <div class="modern-style-text">
@@ -75,9 +78,7 @@
           <button id="save-manager-close" class="save-manager-close">&times;</button>
         </div>
         <div class="save-list-container">
-          <div id="save-list" class="save-list">
-            <!-- 存档列表将在这里动态生成 -->
-          </div>
+          <div id="save-list" class="save-list"></div>
         </div>
       </div>
     </div>

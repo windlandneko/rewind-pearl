@@ -122,15 +122,18 @@ const TOOL_COLOR = {
 }
 
 // 背景块颜色编号
-const TILE_COLOR = Array(10)
-  .fill()
-  .map(
-    () =>
-      '#' +
-      Math.floor(Math.random() * 16777215)
-        .toString(16)
-        .padStart(6, '0')
-  )
+const TILE_COLOR = [
+  '#000000',
+  '#A2B0BE',
+  '#D3CFFF',
+  '#98E8D9',
+  '#B1BCFF',
+  '#D1A570',
+  '#578DFF',
+  '#865642',
+  '#2B4755',
+  '#192C41',
+]
 
 const DIRECTION = {
   NORTH: 0b0001,
@@ -249,7 +252,7 @@ function showProperties(obj) {
 
     for (let i = 0; i < 10; i++) {
       addProperty({
-        label: `#${i + 1}`,
+        label: `瓦片 #${i}`,
         value: tilePalette[i] ?? 'up',
         type: 'select',
         onChange: value => (tilePalette[i] = value),
@@ -741,6 +744,18 @@ function draw() {
       if (t > 0 && TILE_COLOR[t]) {
         ctx.fillStyle = TILE_COLOR[t]
         ctx.fillRect(j * GRID_SIZE, i * GRID_SIZE, GRID_SIZE, GRID_SIZE)
+
+        if (isDrawBgMode) {
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillStyle = t < 6 ? '#0006' : '#fff6'
+          ctx.font = `6px monospace`
+          ctx.fillText(
+            t,
+            j * GRID_SIZE + GRID_SIZE / 2,
+            i * GRID_SIZE + GRID_SIZE / 2 + 0.7
+          )
+        }
       }
     }
   }
@@ -761,12 +776,28 @@ function draw() {
   } else {
     // 绘制当前背景块预览
     if (lastMousePos) {
-      const gridX = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
-      const gridY = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
+      const x = Math.floor(lastMousePos.x / GRID_SIZE) * GRID_SIZE
+      const y = Math.floor(lastMousePos.y / GRID_SIZE) * GRID_SIZE
       ctx.strokeStyle = TILE_COLOR[currentTileType]
-      ctx.lineWidth = 2 / zoom
-      ctx.setLineDash([4 / zoom, 4 / zoom])
-      ctx.strokeRect(gridX, gridY, GRID_SIZE, GRID_SIZE)
+      ctx.lineWidth = 0.8
+      ctx.setLineDash([])
+
+      // 四角的框
+      const d = 2
+      ctx.beginPath()
+      ctx.moveTo(x, y + d)
+      ctx.lineTo(x, y)
+      ctx.lineTo(x + d, y)
+      ctx.moveTo(x + GRID_SIZE - d, y)
+      ctx.lineTo(x + GRID_SIZE, y)
+      ctx.lineTo(x + GRID_SIZE, y + d)
+      ctx.moveTo(x + GRID_SIZE, y + GRID_SIZE - d)
+      ctx.lineTo(x + GRID_SIZE, y + GRID_SIZE)
+      ctx.lineTo(x + GRID_SIZE - d, y + GRID_SIZE)
+      ctx.moveTo(x + d, y + GRID_SIZE)
+      ctx.lineTo(x, y + GRID_SIZE)
+      ctx.lineTo(x, y + GRID_SIZE - d)
+      ctx.stroke()
     }
   }
 
@@ -806,13 +837,15 @@ function drawGrid() {
 
 // 绘制关卡边界
 function drawLevelBounds() {
-  ctx.strokeStyle = 'rgba(153, 153, 153, 0.4)'
-  ctx.lineWidth = 4 / zoom
+  ctx.fillStyle = 'rgba(0, 170, 255, 0.05)'
+  ctx.strokeStyle = 'rgba(0, 170, 255, 0.2)'
+  ctx.lineWidth = 1
+  ctx.fillRect(0, 0, levelData.width, levelData.height)
   ctx.strokeRect(0, 0, levelData.width, levelData.height)
 
-  ctx.strokeStyle = 'rgba(0, 170, 255, 1)'
-  ctx.setLineDash([12 / zoom, 8 / zoom])
-  ctx.lineWidth = 2 / zoom
+  ctx.strokeStyle = 'rgba(0, 137, 78, 1)'
+  ctx.setLineDash([5, 4])
+  ctx.lineWidth = 1
   ctx.strokeRect(
     levelData.cameraBound?.x,
     levelData.cameraBound?.y,
@@ -1965,8 +1998,8 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
   game.tilePalette = ${JSON.stringify(tilePalette)}
 
   game.tileData = [\n    '${tileData
-    .map(row => row.join(''))
-    .join(',\n    ')}',\n  ]
+    .map(row => row.map(i => (i ? i : ' ')).join(''))
+    .join("',\n    '")}',\n  ]
 
   game.sound.playBGM('${levelData.bgm}')
 

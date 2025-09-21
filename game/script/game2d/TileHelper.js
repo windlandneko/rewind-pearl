@@ -39,7 +39,7 @@ export class TileHelper {
       new Array(this.width + 2).fill(-1),
       ...tileData.map(row => [
         -1,
-        ...row.split('').map(c => parseInt(c, 10)),
+        ...row.split('').map(c => (c === ' ' ? 0 : parseInt(c, 10))),
         -1,
       ]),
       new Array(this.width + 2).fill(-1),
@@ -207,7 +207,7 @@ export class TileHelper {
     ctx.canvas.height = this.height * 8
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
-    this.#rand.seed = 1145141919810
+    this.#rand.seed = 114514
 
     for (let i = 1; i <= this.height; i++) {
       for (let j = 1; j <= this.width; j++) {
