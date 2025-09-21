@@ -21,7 +21,7 @@ export function TileTest(game) {
     },
   }
 
-  game.tilePalette = ["Air","BetterCementSnow","ButternutBrick","FadedBrickGrey","PaleLimestone","GlacialIce","Rock","DarkRock","DarkRockMagma","BetterSummitNoSnow"]
+  game.tilePalette = ["Air","ButternutBrick","BetterCementSnow","FadedBrickGrey","PaleLimestone","GlacialIce","Rock","DarkRock","DarkRockMagma","BetterSummitNoSnow"]
 
   game.tileData = [
     "0000000000000000000000000000000000000000",

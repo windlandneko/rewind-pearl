@@ -1964,9 +1964,9 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
 
   game.tilePalette = ${JSON.stringify(tilePalette)}
 
-  game.tileData = [\n    "${tileData
+  game.tileData = [\n    '${tileData
     .map(row => row.join(''))
-    .join('",\n    "')}",\n  ]
+    .join(',\n    ')}',\n  ]
 
   game.sound.playBGM('${levelData.bgm}')
 

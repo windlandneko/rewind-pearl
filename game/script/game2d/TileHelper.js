@@ -1,4 +1,5 @@
 import Asset from '../Asset.js'
+import { PesudoRandom } from '../utils.js'
 
 /**
  * 2D地图图块辅助类
@@ -6,14 +7,26 @@ import Asset from '../Asset.js'
  * @author windlandneko
  */
 export class TileHelper {
-  #tiles
-  #hitbox
-  #tileset = new Map()
-  #paletteMap = new Map()
-  #walls // dis = 1 (边缘)
-  #padding // dis = 2 (过渡区域)
-  #center // dis > 2 (中心区域)
+  #tileset
 
+  /** @type {number[][]} */
+  #tiles
+
+  /** @type {boolean[][]} */
+  #hitbox
+
+  /** @type {Map<string, Image>} */
+  #paletteMap
+
+  /** @type {number[][]} */
+  #distance
+
+  #rand
+
+  /**
+   * @param {number[][]} tileData
+   * @param {string[]} tilePalette
+   */
   constructor(tileData, tilePalette = Array(10).fill('default')) {
     this.#tileset = this.#loadTileSetFromXML(Asset.get('tiles/index'))
 
@@ -36,11 +49,14 @@ export class TileHelper {
 
     this.#generatePaddingAndCenter()
     this.#generateEdges()
+
+    this.#rand = new PesudoRandom()
   }
 
   /**
    * 加载 XML 格式的图块数据
    * @param {Document} xml
+   * @returns {{sound: string, ignores: string[], copy: string[], sets: Map<string, { mask: number[][], tiles: number[][] }>}}
    */
   #loadTileSetFromXML(xml) {
     const root = xml.querySelector('Tileset')
@@ -93,17 +109,14 @@ export class TileHelper {
   }
 
   #generatePaddingAndCenter() {
-    this.#padding = this.#tiles.map(row => row.map(() => false))
-    this.#center = this.#tiles.map(row => row.map(() => false))
-
-    const visited = this.#tiles.map(row => row.map(() => false))
+    this.#distance = this.#tiles.map(row => row.map(() => -1))
     const queue = []
     // 先将所有空气块入队
     for (let i = 1; i <= this.height; i++) {
       for (let j = 1; j <= this.width; j++) {
         if (this.#tiles[i][j] === 0) {
           queue.push([i, j, 0])
-          visited[i][j] = true
+          this.#distance[i][j] = 0
         }
       }
     }
@@ -119,21 +132,12 @@ export class TileHelper {
     ]
     while (queue.length) {
       const [i, j, d] = queue.shift()
-      if (d === 2) this.#padding[i][j] = true
-      if (d > 2) this.#center[i][j] = true
       for (const [di, dj] of dirs) {
-        const ni = i + di,
-          nj = j + dj
-        if (
-          ni >= 0 &&
-          ni < this.height &&
-          nj >= 0 &&
-          nj < this.width &&
-          !visited[ni][nj] &&
-          this.#tiles[ni][nj] > 0
-        ) {
-          queue.push([ni, nj, d + 1])
-          visited[ni][nj] = true
+        const x = i + di
+        const y = j + dj
+        if (this.#distance[x][y] === -1 && this.#tiles[x][y] > 0) {
+          this.#distance[x][y] = d + 1
+          queue.push([x, y, d + 1])
         }
       }
     }
@@ -142,36 +146,23 @@ export class TileHelper {
   #generateEdges() {
     this.edges = []
 
-    this.#walls = this.#hitbox.map(row => [...row])
-    for (let i = 1; i <= this.height; i++) {
-      for (let j = 1; j <= this.width; j++) {
-        if (
-          this.#tiles[i + 1][j] &&
-          this.#tiles[i][j + 1] &&
-          this.#tiles[i - 1][j] &&
-          this.#tiles[i][j - 1]
-        ) {
-          this.#walls[i][j] = false
-        }
-      }
-    }
+    const walls = this.#distance.map(row => row.map(d => d === 1))
 
     for (let i = 1; i <= this.height; i++) {
       for (let j = 1; j <= this.width; j++) {
-        if (!this.#walls[i][j]) continue
+        if (!walls[i][j]) continue
         const x = (j - 1) * 8
         const y = (i - 1) * 8
 
         let r = j
-        while (r <= this.width && this.#walls[i][r]) this.#walls[i][r++] = false
+        while (r <= this.width && walls[i][r]) walls[i][r++] = false
         if (r > j + 1) {
           this.edges.push([x, y, (r - j) * 8, 8])
         } else {
           // try expand vertically
-          this.#walls[i][j] = true
+          walls[i][j] = true
           let r = i
-          while (r <= this.height && this.#walls[r][j])
-            this.#walls[r++][j] = false
+          while (r <= this.height && walls[r][j]) walls[r++][j] = false
           if (r > i) this.edges.push([x, y, 8, (r - i) * 8])
         }
       }
@@ -181,30 +172,29 @@ export class TileHelper {
   #chooseTile(i, j) {
     const { sets, ignores } = this.#tileset
 
-    if (this.#center[i][j] && sets.has('center')) {
+    if (this.#distance[i][j] > 2 && sets.has('center')) {
       const { tiles } = sets.get('center')
-      return tiles[Math.floor(Math.random() * tiles.length)]
-    } else if (this.#padding[i][j] && sets.has('padding')) {
+      return tiles[this.#rand.nextInt(tiles.length)]
+    } else if (this.#distance[i][j] === 2 && sets.has('padding')) {
       const { tiles } = sets.get('padding')
-      return tiles[Math.floor(Math.random() * tiles.length)]
+      return tiles[this.#rand.nextInt(tiles.length)]
     } else {
-      for (const { mask, tiles } of sets.values()) {
+      for (const { tiles, mask } of sets.values()) {
         let match = true
         mask.forEach((row, di) => {
-          row.forEach((val, dj) => {
+          row.forEach((x, dj) => {
             if (
-              val === null ||
+              x === null ||
               ignores.includes(this.#tiles[i + di - 1][j + dj - 1])
             )
               return
-            if (val === 1 && !this.#hitbox[i + di - 1][j + dj - 1])
-              match = false
-            if (val === 0 && this.#hitbox[i + di - 1][j + dj - 1]) match = false
+            if (x === 1 && !this.#hitbox[i + di - 1][j + dj - 1]) match = false
+            if (x === 0 && this.#hitbox[i + di - 1][j + dj - 1]) match = false
           })
         })
         if (!match) continue
 
-        return tiles[Math.floor(Math.random() * tiles.length)]
+        return tiles[this.#rand.nextInt(tiles.length)]
       }
     }
   }
@@ -217,17 +207,18 @@ export class TileHelper {
     ctx.canvas.height = this.height * 8
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
 
+    this.#rand.seed = 1145141919810
+
     for (let i = 1; i <= this.height; i++) {
       for (let j = 1; j <= this.width; j++) {
         if (!this.#hitbox[i][j]) continue
 
         const tile = this.#tiles[i][j]
 
-        const [sx, sy] = this.#chooseTile(i, j)
         const image = this.#paletteMap[tile] ?? Asset.get('tiles/default')
 
-        const tx = (j - 1) * 8
-        const ty = (i - 1) * 8
+        const [sx, sy] = this.#chooseTile(i, j)
+        const [tx, ty] = [(j - 1) * 8, (i - 1) * 8]
         ctx.drawImage(image, sx * 8, sy * 8, 8, 8, tx, ty, 8, 8)
       }
     }

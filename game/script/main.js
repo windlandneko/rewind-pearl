@@ -10,13 +10,13 @@ if (!localStorage.getItem('rewind-pearl-username')) {
 const currentUser = localStorage.getItem('rewind-pearl-username')
 
 async function startNewGame() {
-  Game2D.loadLevel(Levels.SolidTileTest)
+  Game2D.loadLevel(Levels.TileTest)
   Game2D.start(true)
 }
 
 Loading.on('complete', () => {
-  // startNewGame()
-  // return
+  startNewGame()
+  return
   const loadSaveData = localStorage.getItem(
     'rewind-pearl-autosave-' + currentUser
   )
