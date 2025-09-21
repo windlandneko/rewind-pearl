@@ -361,6 +361,9 @@ canvas {
   animation: fadeOut 30s ease-out forwards;
   opacity: 0;
 }
+#header .hint p {
+  line-height: 1.8em;
+}
 
 @keyframes fadeOut {
   from {
