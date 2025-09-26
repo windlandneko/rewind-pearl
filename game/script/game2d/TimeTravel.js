@@ -126,10 +126,6 @@ class TimeTravelManager {
     tmpctx.clearRect(0, 0, game.displayWidth, game.displayHeight)
     tmpctx.save()
 
-    // 应用相机变换
-    tmpctx.scale(game.scale, game.scale)
-    tmpctx.translate(-renderPos.x, -renderPos.y)
-
     tmpctx.beginPath()
     tmpctx.arc(
       playerScreenX,
@@ -139,6 +135,10 @@ class TimeTravelManager {
       Math.PI * 2
     )
     tmpctx.clip()
+
+    // 应用相机变换
+    tmpctx.scale(game.scale, game.scale)
+    tmpctx.translate(-renderPos.x, -renderPos.y)
 
     // 按优先级渲染游戏对象
     game.renderGroups.interactables.forEach(obj => {
