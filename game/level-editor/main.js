@@ -593,12 +593,20 @@ function showProperties(obj) {
           onChange: value => (obj.paddingY = value),
         }
       )
-      addProperty({
-        label: '硬直时间（秒）',
-        value: obj.pauseSecond ?? 1,
-        type: 'number',
-        onChange: value => (obj.pauseSecond = value),
-      })
+      addPropertyPair(
+        {
+          label: '摄像机高度',
+          value: obj.cameraHeight ?? 0,
+          type: 'number',
+          onChange: value => (obj.cameraHeight = value),
+        },
+        {
+          label: '硬直时间（秒）',
+          value: obj.pauseSecond ?? 1,
+          type: 'number',
+          onChange: value => (obj.pauseSecond = value),
+        }
+      )
       break
     case TOOL.collectible:
       addProperty({
@@ -899,10 +907,11 @@ function draw() {
   // 绘制网格
   drawGrid()
 
+  // 绘制背景块
+  if (!isDrawBgMode) ctx.drawImage(tileCanvas, 0, 0)
+
   // 绘制关卡边界
   drawLevelBounds()
-
-  if (!isDrawBgMode) ctx.drawImage(tileCanvas, 0, 0)
 
   // 绘制对象
   objects.forEach(obj => drawObject(obj))
@@ -978,8 +987,8 @@ function drawTileCursor() {
 
 // 绘制网格
 function drawGrid() {
-  ctx.strokeStyle = '#fffb'
-  ctx.lineWidth = 0.5
+  ctx.strokeStyle = '#fff1'
+  ctx.lineWidth = 0.6
 
   // 计算可见区域
   const left = -panOffset.x / zoom
@@ -1010,8 +1019,8 @@ function drawGrid() {
 
 // 绘制关卡边界
 function drawLevelBounds() {
-  ctx.fillStyle = '#192c41ea'
-  ctx.strokeStyle = 'rgba(0, 170, 255, 0.2)'
+  ctx.fillStyle = '#192c415a'
+  ctx.strokeStyle = 'rgba(0, 170, 255, 0.1)'
   ctx.lineWidth = 1
   ctx.fillRect(
     0,
@@ -1929,12 +1938,22 @@ function getObjectAt(pos, moveTop, padding = 6 / zoom) {
         return obj
       }
     } else if (obj.type === TOOL.cameraController) {
+      const lx = obj.x
+      const cx = obj.x + obj.width / 2
+      const rx = obj.x + obj.width
+      const ty = obj.y
+      const cy = obj.y + obj.height / 2
+      const by = obj.y + obj.height
+      const near = (a, b) => Math.abs(a - b) < padding
       // 相机控制器使用顶部标签区域进行点击检测，位置在 [x + width / 2 - 10, y - 6] 宽度20，高度6
       if (
-        pos.x >= obj.x + obj.width / 2 - 10 - padding &&
-        pos.x <= obj.x + obj.width / 2 + 10 + padding &&
-        pos.y >= obj.y - 6 - padding &&
-        pos.y <= obj.y - padding
+        (pos.x >= obj.x + obj.width / 2 - 10 - padding &&
+          pos.x <= obj.x + obj.width / 2 + 10 + padding &&
+          pos.y >= obj.y - 6 - padding &&
+          pos.y <= obj.y + padding) ||
+        ((near(pos.x, lx) || near(pos.x, rx)) &&
+          (near(pos.y, ty) || near(pos.y, cy) || near(pos.y, by))) ||
+        (near(pos.x, cx) && near(pos.y, by))
       ) {
         if (moveTop) {
           objects.splice(i, 1)
@@ -2085,7 +2104,14 @@ function createObject(type, pos) {
       obj = { ...obj, nextStage: 'nextStage', force: true, hidden: true }
       break
     case TOOL.cameraController:
-      obj = { ...obj, paddingX: -16, paddingY: 0, pauseSecond: 1, hidden: true }
+      obj = {
+        ...obj,
+        paddingX: -16,
+        paddingY: 0,
+        pauseSecond: 1,
+        cameraHeight: 0,
+        hidden: true,
+      }
       break
     case TOOL.trigger:
       obj = {
@@ -2294,7 +2320,7 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
           str += `LevelChanger(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.nextStage}', ${obj.force})`
           break
         case TOOL.cameraController:
-          str += `CameraController(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${obj.paddingX}, ${obj.paddingY}, ${obj.pauseSecond})`
+          str += `CameraController(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${obj.paddingX}, ${obj.paddingY}, ${obj.pauseSecond}, ${obj.cameraHeight})`
           break
         case TOOL.collectible:
           str += `Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}', ${
@@ -2407,10 +2433,14 @@ document.addEventListener('keydown', event => {
 
     // 删除多选对象
     if (selectedObjects.length > 0) {
-      objects = objects.filter(o => !selectedObjects.includes(o))
+      objects = objects.filter(
+        o => o.type === 'spawnpoint' || !selectedObjects.includes(o)
+      )
       console.log(`已删除 ${selectedObjects.length} 个对象`)
     } else if (selectedObjects.length === 1) {
-      objects = objects.filter(o => o !== selectedObjects[0])
+      objects = objects.filter(
+        o => o.type === 'spawnpoint' || o !== selectedObjects[0]
+      )
       console.log('已删除对象:', selectedObjects[0].type)
     }
 
@@ -2759,6 +2789,17 @@ function loadLevelByName(name) {
       tileData = Array.from({ length: levelData.tileHeight }, () =>
         Array.from({ length: levelData.tileWidth }, () => 0)
       )
+    }
+
+    // no spawnpoint in objects, create one with spawnpoint data
+    if (!level.objects.find(o => o.type === 'spawnpoint')) {
+      level.objects.unshift({
+        type: 'spawnpoint',
+        x: level.spawnpoint?.x ?? 0,
+        y: level.spawnpoint?.y ?? 0,
+        width: 8,
+        height: 16,
+      })
     }
   }
 

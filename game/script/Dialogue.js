@@ -152,7 +152,7 @@ class Dialogue {
     const event = this.dialogueData.events[this.eventIndex]
 
     if (typeof event === 'string') {
-      this.#onDialogue({ text: event })
+      this.#onDialogue({ ...this.currentSpeaker, text: event })
       return
     }
 

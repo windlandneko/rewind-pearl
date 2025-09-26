@@ -59,18 +59,18 @@ export class Collectible extends BaseObject {
   get state() {
     return {
       ...super.state,
-      bobOffset: this.bobOffset,
-      spriteId: this.spriteId,
-      collected: this.collected,
-      onlyGhostCanCollect: this.onlyGhostCanCollect,
+      b: this.bobOffset,
+      s: this.spriteId,
+      c: this.collected,
+      o: this.onlyGhostCanCollect,
     }
   }
 
   set state(state) {
     super.state = state
-    this.bobOffset = state.bobOffset
-    this.spriteId = state.spriteId
-    this.collected = state.collected
-    this.onlyGhostCanCollect = state.onlyGhostCanCollect
+    this.bobOffset = state.b
+    this.spriteId = state.s
+    this.collected = state.c
+    this.onlyGhostCanCollect = state.o
   }
 }

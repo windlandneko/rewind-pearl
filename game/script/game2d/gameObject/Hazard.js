@@ -108,13 +108,13 @@ export class Hazard extends BaseObject {
   get state() {
     return {
       ...super.state,
-      direction: this.direction,
+      d: this.direction,
     }
   }
 
   set state(state) {
     super.state = state
-    this.direction = state.direction
+    this.direction = state.d
     this.hitbox = {
       r: this.r.add(3, 3),
       width: this.width - 6,

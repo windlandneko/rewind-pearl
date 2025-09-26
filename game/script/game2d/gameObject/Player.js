@@ -20,11 +20,12 @@ export class Player extends BaseObject {
 
   gravity = 520 // 重力加速度
   moveSpeed = 56 // 移动速度 (像素/秒)
-  jumpSpeed = 114.514 // 跳跃速度 (像素/秒)
+  jumpSpeed = 120 // 跳跃速度 (像素/秒)
   jumpKeyPressed = false
   jumpTimer = 0
-  maxJumpTime = 0.12 // 跳跃增益时间（秒）
+  maxJumpTime = 0.16 // 跳跃增益时间（秒）
 
+  /** @deprecated */
   invincibleTime = 4 // 无敌时间 (秒)
 
   onGround = false
@@ -123,10 +124,7 @@ export class Player extends BaseObject {
     }
 
     if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
-    if (state & InputEnum.JUMP_UP) {
-      if (this.jumpKeyPressed) this.v.y = Math.min(0, this.v.y * 0.4)
-      this.jumpKeyPressed = false
-    }
+    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
 
     this.walkDown = state & InputEnum.WALK_DOWN
 
@@ -192,15 +190,14 @@ export class Player extends BaseObject {
 
     this.processInputEvents(dt, game)
 
-    this.previousPosition.x = this.r.x
-    this.previousPosition.y = this.r.y
+    this.previousPosition = this.r.clone()
 
     this.#updateJump(dt)
 
     const acceleration = new Vec2()
 
     // 重力
-    acceleration.y += this.v.y < 0 ? this.gravity * 0.6 : this.gravity
+    acceleration.y += this.gravity
 
     // 速度
     this.v.addTo(acceleration.mul(dt))
@@ -274,7 +271,7 @@ export class Player extends BaseObject {
    */
   onHorizontalInput(direction, dt) {
     const acceleration = this.onGround ? 14 : 10
-    const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.4
+    const targetVelocity = this.onGround ? this.moveSpeed : this.moveSpeed * 1.5
 
     // 祥，移动
     if (direction > 0) {
@@ -289,7 +286,7 @@ export class Player extends BaseObject {
       )
     } else {
       // 停止移动
-      if (this.onGround) this.v.x = 0
+      if (this.onGround) this.v.x *= Math.pow(0.1, 20 * dt)
       else this.v.x *= Math.pow(0.1, 1.1 * dt)
     }
   }
@@ -375,86 +372,108 @@ export class Player extends BaseObject {
           this.groundCheckBox.width,
           this.groundCheckBox.height
         )
+
+      // 绘制速度箭头
+      ctx.save()
+      ctx.strokeStyle = '#00aaff'
+      ctx.fillStyle = '#00aaff'
+      ctx.beginPath()
+      ctx.moveTo(this.r.x + this.width / 2, this.r.y + this.height / 2)
+      ctx.lineTo(
+        this.r.x + this.width / 2 + this.v.x * 0.2,
+        this.r.y + this.height / 2 + this.v.y * 0.2
+      )
+      ctx.stroke()
+
+      // 箭头头部
+      const arrowEndX = this.r.x + this.width / 2 + this.v.x * 0.2
+      const arrowEndY = this.r.y + this.height / 2 + this.v.y * 0.2
+      const angle = Math.atan2(this.v.y, this.v.x)
+      const arrowSize = 3
+      ctx.beginPath()
+      ctx.moveTo(arrowEndX, arrowEndY)
+      ctx.lineTo(
+        arrowEndX - arrowSize * Math.cos(angle - Math.PI / 6),
+        arrowEndY - arrowSize * Math.sin(angle - Math.PI / 6)
+      )
+      ctx.lineTo(
+        arrowEndX - arrowSize * Math.cos(angle + Math.PI / 6),
+        arrowEndY - arrowSize * Math.sin(angle + Math.PI / 6)
+      )
+      ctx.lineTo(arrowEndX, arrowEndY)
+      ctx.fill()
+      ctx.restore()
     }
   }
 
   get state() {
     return {
       ...super.state,
-      gravity: this.gravity,
-      moveSpeed: this.moveSpeed,
-      jumpSpeed: this.jumpSpeed,
-      jumpKeyPressed: this.jumpKeyPressed,
-      jumpTimer: this.jumpTimer,
-      maxJumpTime: this.maxJumpTime,
 
-      invincibleTime: this.invincibleTime,
-
-      onGround: this.onGround,
-      walkDown: this.walkDown,
-      maxHealth: this.maxHealth,
-      health: this.health,
-      score: this.score,
-
-      coyote: this.coyote,
-      coyoteTimer: this.coyoteTimer,
-
-      jumpBuffer: this.jumpBuffer,
-      jumpBufferTimer: this.jumpBufferTimer,
-
-      maxAirJumps: this.maxAirJumps,
-      airJumpSpeed: this.airJumpSpeed,
-      airJumpsCount: this.airJumpsCount,
-
-      previousOnGround: this.previousOnGround,
-      previousPositionX: this.previousPosition.x,
-      previousPositionY: this.previousPosition.y,
-
-      inputState: this.inputState,
-
-      // 动画状态
-      currentAnimationName:
+      P: [
+        this.gravity,
+        this.moveSpeed,
+        this.jumpSpeed,
+        this.jumpKeyPressed,
+        this.jumpTimer,
+        this.maxJumpTime,
+        this.invincibleTime,
+        this.onGround,
+        this.walkDown,
+        this.maxHealth,
+        this.health,
+        this.score,
+        this.coyote,
+        this.coyoteTimer,
+        this.jumpBuffer,
+        this.jumpBufferTimer,
+        this.maxAirJumps,
+        this.airJumpSpeed,
+        this.airJumpsCount,
+        this.previousOnGround,
+        this.previousPosition.x,
+        this.previousPosition.y,
+        this.inputState,
+        // 动画状态
         this.animationManager?.getCurrentAnimationName() || null,
+      ],
     }
   }
 
   set state(state) {
     super.state = state
 
-    this.gravity = state.gravity
-    this.moveSpeed = state.moveSpeed
-    this.jumpSpeed = state.jumpSpeed
-    this.jumpKeyPressed = state.jumpKeyPressed
-    this.jumpTimer = state.jumpTimer
-    this.maxJumpTime = state.maxJumpTime
-
-    this.invincibleTime = state.invincibleTime
-
-    this.onGround = state.onGround
-    this.walkDown = state.walkDown
-    this.maxHealth = state.maxHealth
-    this.health = state.health
-    this.score = state.score
-
-    this.coyote = state.coyote
-    this.coyoteTimer = state.coyoteTimer
-
-    this.jumpBuffer = state.jumpBuffer
-    this.jumpBufferTimer = state.jumpBufferTimer
-
-    this.maxAirJumps = state.maxAirJumps
-    this.airJumpSpeed = state.airJumpSpeed
-    this.airJumpsCount = state.airJumpsCount
-
-    this.previousOnGround = state.previousOnGround
-    this.previousPositionX = state.previousPositionX
-    this.previousPositionY = state.previousPositionY
-
-    this.inputState = state.inputState
+    let currentAnimationName
+    ;[
+      this.gravity,
+      this.moveSpeed,
+      this.jumpSpeed,
+      this.jumpKeyPressed,
+      this.jumpTimer,
+      this.maxJumpTime,
+      this.invincibleTime,
+      this.onGround,
+      this.walkDown,
+      this.maxHealth,
+      this.health,
+      this.score,
+      this.coyote,
+      this.coyoteTimer,
+      this.jumpBuffer,
+      this.jumpBufferTimer,
+      this.maxAirJumps,
+      this.airJumpSpeed,
+      this.airJumpsCount,
+      this.previousOnGround,
+      this.previousPositionX,
+      this.previousPositionY,
+      this.inputState,
+      currentAnimationName,
+    ] = state.P
 
     // 动画状态
-    if (state.currentAnimationName && this.animationManager) {
-      this.animationManager.playAnimation(state.currentAnimationName)
+    if (currentAnimationName && this.animationManager) {
+      this.animationManager.playAnimation(currentAnimationName)
     }
   }
 }

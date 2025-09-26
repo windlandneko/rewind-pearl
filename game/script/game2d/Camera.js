@@ -6,17 +6,12 @@ import Vec2 from './Vector.js'
  * @author windlandneko
  */
 export class Camera {
-  #padding = {
-    left: 200, // 左边距
-    right: 200, // 右边距
-    top: 150, // 上边距
-    bottom: 150, // 下边距
-  }
+  #padding
   #target
   #worldBounds
   viewportWidth
   viewportHeight
-  #lerpFactor
+  #lerpFactor = 0
 
   position = new Vec2(0, 0)
 
@@ -59,10 +54,7 @@ export class Camera {
    * @param {number} bottom - 下边距
    */
   setPadding(left, right, top, bottom) {
-    this.#padding.left = left
-    this.#padding.right = right
-    this.#padding.top = top
-    this.#padding.bottom = bottom
+    this.#padding = { left, right, top, bottom }
   }
 
   /**
@@ -227,49 +219,52 @@ export class Camera {
     if (!this.#target) return
 
     // 目标在屏幕中的位置
-    const targetX = this.#target.r.x - this.position.x + this.#target.width / 2
-    const targetY = this.#target.r.y - this.position.y + this.#target.height / 2
+    const target = this.#target.r
+      .sub(this.targetPosition)
+      .add(this.#target.width / 2, this.#target.height / 2)
 
-    let deltaX = 0
-    let deltaY = 0
+    let delta = new Vec2()
 
-    if (targetX < this.#padding.left) {
+    if (target.x < this.#padding.left) {
       // 目标在左边距外，摄像机需要向左移动
-      deltaX = targetX - this.#padding.left
-    } else if (targetX > this.viewportWidth - this.#padding.right) {
+      delta.x = target.x - this.#padding.left
+    } else if (target.x > this.viewportWidth - this.#padding.right) {
       // 目标在右边距外，摄像机需要向右移动
-      deltaX = targetX - (this.viewportWidth - this.#padding.right)
+      delta.x = target.x - (this.viewportWidth - this.#padding.right)
     }
 
-    if (targetY < this.#padding.top) {
+    if (target.y < this.#padding.top) {
       // 目标在上边距外，摄像机需要向上移动
-      deltaY = targetY - this.#padding.top
-    } else if (targetY > this.viewportHeight - this.#padding.bottom) {
+      delta.y = target.y - this.#padding.top
+    } else if (target.y > this.viewportHeight - this.#padding.bottom) {
       // 目标在下边距外，摄像机需要向下移动
-      deltaY = targetY - (this.viewportHeight - this.#padding.bottom)
+      delta.y = target.y - (this.viewportHeight - this.#padding.bottom)
     }
 
     // 新的摄像机位置
-    let newX = this.position.x + deltaX
-    let newY = this.position.y + deltaY
+    this.targetPosition.addTo(delta)
 
     // 世界边界限制
     if (this.#worldBounds) {
-      newX = Math.max(
+      this.targetPosition.x = Math.max(
         this.#worldBounds.minX,
-        Math.min(newX, this.#worldBounds.maxX - this.viewportWidth)
+        Math.min(
+          this.targetPosition.x,
+          this.#worldBounds.maxX - this.viewportWidth
+        )
       )
-      newY = Math.max(
+      this.targetPosition.y = Math.max(
         this.#worldBounds.minY,
-        Math.min(newY, this.#worldBounds.maxY - this.viewportHeight)
+        Math.min(
+          this.targetPosition.y,
+          this.#worldBounds.maxY - this.viewportHeight
+        )
       )
     }
 
-    // 应用平滑跟随或直接设置位置
-    if (deltaX !== 0 || deltaY !== 0) {
-      this.position.x += (newX - this.position.x) * this.#lerpFactor
-      this.position.y += (newY - this.position.y) * this.#lerpFactor
-    }
+    this.position.addTo(
+      this.targetPosition.sub(this.position).mul(this.#lerpFactor)
+    )
 
     // todo: soft border and hard border
   }
@@ -280,20 +275,27 @@ export class Camera {
    * @param {number} y - Y坐标
    */
   setPosition(x, y) {
-    this.position.x = x
-    this.position.y = y
+    this.targetPosition = new Vec2(x, y)
 
     // 应用世界边界限制
     if (this.#worldBounds) {
-      this.position.x = Math.max(
+      this.targetPosition.x = Math.max(
         this.#worldBounds.minX,
-        Math.min(this.position.x, this.#worldBounds.maxX - this.viewportWidth)
+        Math.min(
+          this.targetPosition.x,
+          this.#worldBounds.maxX - this.viewportWidth
+        )
       )
-      this.position.y = Math.max(
+      this.targetPosition.y = Math.max(
         this.#worldBounds.minY,
-        Math.min(this.position.y, this.#worldBounds.maxY - this.viewportHeight)
+        Math.min(
+          this.targetPosition.y,
+          this.#worldBounds.maxY - this.viewportHeight
+        )
       )
     }
+
+    this.position = this.targetPosition.clone()
   }
 
   /**
@@ -340,41 +342,27 @@ export class Camera {
 
   /**
    * 获取相机的实际渲染位置（包含震动偏移）
-   * @returns {Object} 包含x和y的位置对象
    */
   getRenderPosition() {
-    return {
-      x: this.position.x + this.#shakeOffset.x + this.#microShakeOffset.x,
-      y: this.position.y + this.#shakeOffset.y + this.#microShakeOffset.y,
-    }
+    return this.position.add(this.#shakeOffset).add(this.#microShakeOffset)
   }
 
   /**
    * 将世界坐标转换为屏幕坐标
    * @param {number} worldX - 世界X坐标
    * @param {number} worldY - 世界Y坐标
-   * @returns {{x: number, y: number}}
    */
   worldToScreen(worldX, worldY) {
-    const renderPos = this.getRenderPosition()
-    return {
-      x: worldX - renderPos.x,
-      y: worldY - renderPos.y,
-    }
+    return new Vec2(worldX, worldY).sub(this.getRenderPosition())
   }
 
   /**
    * 将屏幕坐标转换为世界坐标
    * @param {number} screenX - 屏幕X坐标
    * @param {number} screenY - 屏幕Y坐标
-   * @returns {{x: number, y: number}}
    */
   screenToWorld(screenX, screenY) {
-    const renderPos = this.getRenderPosition()
-    return {
-      x: screenX + renderPos.x,
-      y: screenY + renderPos.y,
-    }
+    return new Vec2(screenX, screenY).add(this.getRenderPosition())
   }
 
   /**
@@ -382,12 +370,12 @@ export class Camera {
    * @returns {Object}
    */
   getDebugInfo() {
-    const targetInfo = this.target
+    const targetInfo = this.#target
       ? {
-          x: this.target.r.x,
-          y: this.target.r.y,
-          screenX: this.target.r.x - this.position.x,
-          screenY: this.target.r.y - this.position.y,
+          x: this.#target.r.x,
+          y: this.#target.r.y,
+          screenX: this.#target.r.x - this.position.x,
+          screenY: this.#target.r.y - this.position.y,
         }
       : null
 

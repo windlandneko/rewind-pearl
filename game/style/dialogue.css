@@ -185,8 +185,8 @@
   }
 }
 
-.text span.bold {
-  font-weight: bold;
+.text span.u {
+  text-decoration: underline;
 }
 .text span.italic {
   font-style: italic;

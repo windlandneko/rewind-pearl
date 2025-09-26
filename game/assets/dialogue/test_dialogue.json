@@ -1,0 +1,47 @@
+{
+  "text_style": "touhou",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "wy",
+      "title": "王源",
+      "subtitle": "葬送的芙蓉王",
+      "key": "wangyuan",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "wy"
+    },
+    "这里是测试大厅\n选一个你喜欢的地方进去玩吧",
+    "如果想回到这里\n按下$italic:小键盘上的回车键$",
+    "然后输入“$u:测试大厅$”\n就能回到这里",
+    {
+      "id": "wy",
+      "emotion": "sweat"
+    },
+    "什么？\n你说你没有$italic:小键盘$？",
+    {
+      "id": "wy",
+      "emotion": "angry"
+    },
+    "那你废了\n因为我只认$italic:小键盘的回车键$\n哈哈",
+    {
+      "id": "wy",
+      "emotion": "normal"
+    },
+    "教程结束\n祝你测试愉快",
+    {
+      "id": "wy",
+      "emotion": "smile"
+    },
+    "哦对了\n想知道我的$wow:秘密武器$吗？",
+    "按下$u:右Ctrl键$可以打开$wow:调试模式$",
+    {
+      "id": "wy",
+      "text": "再见！",
+      "wait": 600
+    }
+  ]
+}

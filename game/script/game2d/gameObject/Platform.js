@@ -1,5 +1,8 @@
 import { BaseObject } from './BaseObject.js'
 
+/**
+ * @deprecated 使用瓦片代替
+ */
 export class Platform extends BaseObject {
   color = 'rgba(84, 89, 136, 1)'
   shadowColor = 'rgba(84, 89, 136, 0.5)'
@@ -78,16 +81,16 @@ export class Platform extends BaseObject {
 
     if (this.ladder) {
       ctx.fillStyle = 'rgb(50, 47, 48)'
-      ctx.fillRect(x, y - 2, this.width, 1)
-      ctx.fillRect(x, y + 1, this.width, 1)
-      ctx.fillStyle = 'rgb(174, 133, 99)'
       ctx.fillRect(x, y - 1, this.width, 1)
-      ctx.fillStyle = 'rgb(128, 92, 71)'
+      ctx.fillRect(x, y + 2, this.width, 1)
+      ctx.fillStyle = 'rgb(174, 133, 99)'
       ctx.fillRect(x, y, this.width, 1)
+      ctx.fillStyle = 'rgb(128, 92, 71)'
+      ctx.fillRect(x, y + 1, this.width, 1)
 
       ctx.fillStyle = 'rgb(50, 47, 48)'
-      ctx.fillRect(x - 1, y - 1, 1, 2)
-      ctx.fillRect(x + this.width, y - 1, 1, 2)
+      ctx.fillRect(x - 1, y, 1, 2)
+      ctx.fillRect(x + this.width, y, 1, 2)
     } else {
       ctx.fillStyle = this.shadowColor
       ctx.fillRect(x - 2, y + 1, this.width + 2, this.height)
@@ -110,12 +113,12 @@ export class Platform extends BaseObject {
   get state() {
     return {
       ...super.state,
-      ladder: this.ladder,
+      l: this.ladder,
     }
   }
 
   set state(state) {
     super.state = state
-    this.ladder = state.ladder
+    this.ladder = state.l
   }
 }

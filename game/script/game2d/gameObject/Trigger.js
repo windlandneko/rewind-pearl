@@ -33,7 +33,7 @@ export class Trigger extends BaseObject {
 
     if (!this.lastInteracting && this.interacting) {
       try {
-        await this.enterCallback?.(game, $)
+        await this.enterCallback?.call(this, game, $)
       } catch (e) {
         console.error(e)
         this.triggerOnce = true
@@ -42,7 +42,7 @@ export class Trigger extends BaseObject {
     }
     if (this.lastInteracting && !this.interacting) {
       try {
-        await this.leaveCallback?.(game, $)
+        await this.leaveCallback?.call(this, game, $)
       } catch (e) {
         console.error(e)
         this.triggerOnce = true
@@ -63,20 +63,20 @@ export class Trigger extends BaseObject {
   get state() {
     return {
       ...super.state,
-      enterCallback: this.enterCallback?.toString?.(),
-      leaveCallback: this.leaveCallback?.toString?.(),
-      triggerOnce: this.triggerOnce,
-      interacting: this.interacting,
-      lastInteracting: this.lastInteracting,
+      ec: this.enterCallback?.toString?.(),
+      lc: this.leaveCallback?.toString?.(),
+      to: this.triggerOnce,
+      i: this.interacting,
+      li: this.lastInteracting,
     }
   }
 
   set state(state) {
     super.state = state
-    this.enterCallback = eval(state.enterCallback)
-    this.leaveCallback = eval(state.leaveCallback)
-    this.triggerOnce = state.triggerOnce
-    this.interacting = state.interacting
-    this.lastInteracting = state.lastInteracting
+    this.enterCallback = eval(state.ec)
+    this.leaveCallback = eval(state.lc)
+    this.triggerOnce = state.to
+    this.interacting = state.i
+    this.lastInteracting = state.li
   }
 }

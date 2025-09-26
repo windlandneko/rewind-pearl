@@ -67,9 +67,9 @@ export class Game {
 
     /** @type {HTMLCanvasElement} */
     this.canvas = document.getElementById('game-canvas')
-    /** @type {HTMLCanvasElement} */
+    /** @type {OffscreenCanvas} */
     this.tmpCanvas = new OffscreenCanvas(width, height)
-    /** @type {HTMLCanvasElement} */
+    /** @type {OffscreenCanvas} */
     this.tileCanvas = new OffscreenCanvas(width, height)
 
     /** @type {CanvasRenderingContext2D} */
@@ -154,7 +154,10 @@ export class Game {
 
       Keyboard.onKeydown(['NumpadEnter'], () => {
         const level = prompt('[Debug] 输入关卡名称')
-        if (level) this.changeLevel(level)
+        if (level in Levels) this.changeLevel(level)
+        else if (level) {
+          alert(`[Debug] 关卡 "${level}" 不存在！请确保关卡名称正确且已注册。`)
+        }
       }),
       Keyboard.onKeydown(['RCtrl'], () => {
         this.debug = !this.debug
@@ -250,7 +253,7 @@ export class Game {
       this.render(this.ctx)
       TimeTravel.render(this)
 
-      if (this.debug) this.#renderTimeline(this.ctx)
+      // if (this.debug) this.#renderTimeline(this.ctx)
 
       // 渲染关卡过渡效果
       if (this.transitionOpacity) {
@@ -419,7 +422,9 @@ export class Game {
 
     if (this.preventUpdateUntilTick > 0) {
       this.preventUpdateUntilTick--
-      return
+      this.camera.smoothFactor = 0.05
+    } else {
+      this.camera.smoothFactor = 0.02
     }
 
     TimeTravel.update(dt)
@@ -489,6 +494,7 @@ export class Game {
 
   /**
    * 渲染游戏画面
+   * @param {CanvasRenderingContext2D} ctx - 2D渲染上下文
    */
   render(ctx) {
     this.#updateBackground()
@@ -527,6 +533,7 @@ export class Game {
       if (!obj.hidden) if (obj.ladder) obj.render(ctx, this)
     })
 
+    this.til
     ctx.drawImage(this.tileCanvas, 0, 0)
 
     // 渲染玩家
@@ -581,12 +588,9 @@ export class Game {
     this.camera.target = this.player
 
     // 设置跟随边距
-    const paddingX = width * 0.4
-    const paddingY = height * 0.45
+    const paddingX = width * 0.3
+    const paddingY = height * 0.3
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
-
-    // 设置平滑跟随
-    this.camera.smoothFactor = 0.05
 
     // 设置世界边界
     this.camera.setWorldBounds(
@@ -666,6 +670,8 @@ export class Game {
    * 渲染UI
    */
   #renderDebugUI(ctx) {
+    ctx.textAlign = 'left'
+
     // 渲染生命值、分数等UI元素
     ctx.fillStyle = '#fff'
     ctx.font = '40px SourceHanSerifCN, serif, sans-serif'
@@ -724,42 +730,64 @@ export class Game {
     )
 
     // 摄像机调试信息
+    ctx.fillStyle = '#fff'
     const info = this.camera.getDebugInfo()
     ctx.fillText(
-      `Camera Pos: (${info.position.x}, ${info.position.y})`,
+      `Camera Pos: (${info.position.x.toFixed(2)}, ${info.position.y.toFixed(
+        2
+      )})`,
       0,
       this.displayHeight - 80
     )
+    ctx.fillText(
+      `Camera Target: ${
+        info.target
+          ? `(${info.target.x.toFixed(2)}, ${info.target.y.toFixed(2)})`
+          : 'None'
+      }`,
+      0,
+      this.displayHeight - 100
+    )
+    ctx.fillText(`Camera Lerp: ${info.lerpFactor}`, 0, this.displayHeight - 120)
+    ctx.fillText(
+      `World Bounds: ${
+        info.worldBounds
+          ? `${info.worldBounds.minX},${info.worldBounds.minY},${info.worldBounds.maxX},${info.worldBounds.maxY}`
+          : 'None'
+      }`,
+      0,
+      this.displayHeight - 140
+    )
 
     // 渲染玩家y速度折线图
-    const graphWidth = 2400
-    const graphHeight = 80
-    const graphX = 20
-    const graphY = 580
-    ctx.save()
-    ctx.strokeStyle = '#00bfff'
-    ctx.lineWidth = 6
-    ctx.beginPath()
-    const history = this.player.stateHistory
-    for (let i = Math.max(1, this.tick - 500); i <= this.tick; i++) {
-      const x = graphX + ((i / 500) % 1) * graphWidth
-      const y = graphY + graphHeight / 2 - history.get(i).vy * 1
-      if (i % 500 === 0) ctx.moveTo(x, y)
-      else ctx.lineTo(x, y)
-    }
-    ctx.stroke()
-    // 坐标轴
-    ctx.strokeStyle = '#888'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.moveTo(graphX, graphY + graphHeight / 2)
-    ctx.lineTo(graphX + graphWidth, graphY + graphHeight / 2)
-    ctx.stroke()
-    // 标签
-    ctx.fillStyle = '#fff'
-    ctx.font = '16px FiraCode, monospace'
-    ctx.fillText('玩家Y速度', graphX, graphY - 8)
-    ctx.restore()
+    // const graphWidth = 2400
+    // const graphHeight = 80
+    // const graphX = 20
+    // const graphY = 580
+    // ctx.save()
+    // ctx.strokeStyle = '#00bfff'
+    // ctx.lineWidth = 6
+    // ctx.beginPath()
+    // const history = this.player.stateHistory
+    // for (let i = Math.max(1, this.tick - 500); i <= this.tick; i++) {
+    //   const x = graphX + ((i / 500) % 1) * graphWidth
+    //   const y = graphY + graphHeight / 2 - history.get(i).vy * 1
+    //   if (i % 500 === 0) ctx.moveTo(x, y)
+    //   else ctx.lineTo(x, y)
+    // }
+    // ctx.stroke()
+    // // 坐标轴
+    // ctx.strokeStyle = '#888'
+    // ctx.lineWidth = 1
+    // ctx.beginPath()
+    // ctx.moveTo(graphX, graphY + graphHeight / 2)
+    // ctx.lineTo(graphX + graphWidth, graphY + graphHeight / 2)
+    // ctx.stroke()
+    // // 标签
+    // ctx.fillStyle = '#fff'
+    // ctx.font = '16px FiraCode, monospace'
+    // ctx.fillText('玩家Y速度', graphX, graphY - 8)
+    // ctx.restore()
 
     // 摄像机跟随边距
     ctx.save()

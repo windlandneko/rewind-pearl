@@ -39,7 +39,10 @@ class TimeTravelManager {
 
   update(dt) {
     if (this.state === 'pending') {
-      if (this.deltaTick >= TIME_TRAVEL_CHARGE_TIME) {
+      if (
+        this.deltaTick >=
+        TIME_TRAVEL_CHARGE_TIME * (this.canTimeTravel ? 1 : 0.3)
+      ) {
         if (this.canTimeTravel) {
           this.state = 'success'
           this.#game.globalState.timeTravelUsed++
@@ -47,9 +50,11 @@ class TimeTravelManager {
           this.state = null
         }
       } else {
-        this.radius =
-          (this.canTimeTravel * 40 + 6 + this.deltaTick / 20) * 0.1 +
-          this.radius * 0.9
+        const k = 0.1
+        let target = 50 + this.deltaTick / 20
+        if (!this.canTimeTravel) target = 5 + this.deltaTick / 100
+
+        this.radius = target * k + this.radius * (1 - k)
       }
     } else if (this.state === 'success') {
       this.radius += dt * Math.min(800, this.radius ** 2 / 10)
@@ -60,7 +65,7 @@ class TimeTravelManager {
         this.executeTimeTravel()
       }
     } else {
-      this.radius = Math.max(0, this.radius - dt * 100)
+      this.radius = Math.max(0, this.radius - dt * 50)
     }
   }
 
@@ -109,6 +114,12 @@ class TimeTravelManager {
     const targetState = game.history.get(tick)
     const state = game.exportGameObjects()
 
+    const renderPos = game.camera.getRenderPosition()
+    const playerScreenX =
+      (game.player.r.x + game.player.width / 2 - renderPos.x) * game.scale
+    const playerScreenY =
+      (game.player.r.y + game.player.height / 2 - renderPos.y) * game.scale
+
     game.importGameObjects(targetState)
 
     // 清空预览画布
@@ -117,8 +128,17 @@ class TimeTravelManager {
 
     // 应用相机变换
     tmpctx.scale(game.scale, game.scale)
-    const renderPos = game.camera.getRenderPosition()
     tmpctx.translate(-renderPos.x, -renderPos.y)
+
+    tmpctx.beginPath()
+    tmpctx.arc(
+      playerScreenX,
+      playerScreenY,
+      this.radius * game.scale,
+      0,
+      Math.PI * 2
+    )
+    tmpctx.clip()
 
     // 按优先级渲染游戏对象
     game.renderGroups.interactables.forEach(obj => {
@@ -143,6 +163,8 @@ class TimeTravelManager {
       if (!obj.hidden) if (obj.ladder) obj.render(tmpctx, game)
     })
 
+    tmpctx.drawImage(game.tileCanvas, 0, 0)
+
     // 渲染玩家
     game.ghostPlayers.forEach(ghost => {
       if (!ghost.stateHistory.has(tick)) return
@@ -160,11 +182,6 @@ class TimeTravelManager {
     tmpctx.restore()
 
     game.importGameObjects(state)
-
-    const playerScreenX =
-      (game.player.r.x + game.player.width / 2 - renderPos.x) * game.scale
-    const playerScreenY =
-      (game.player.r.y + game.player.height / 2 - renderPos.y) * game.scale
 
     const gradient = tmpctx.createRadialGradient(
       playerScreenX,
@@ -193,20 +210,6 @@ class TimeTravelManager {
       Math.PI * 2
     )
     tmpctx.fill()
-
-    tmpctx.save()
-    tmpctx.globalCompositeOperation = 'destination-in'
-    tmpctx.fillStyle = 'black'
-    tmpctx.beginPath()
-    tmpctx.arc(
-      playerScreenX,
-      playerScreenY,
-      this.radius * game.scale,
-      0,
-      Math.PI * 2
-    )
-    tmpctx.fill()
-    tmpctx.restore()
 
     ctx.save()
     ctx.globalCompositeOperation = 'destination-out'

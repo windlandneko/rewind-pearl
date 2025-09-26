@@ -93,17 +93,19 @@ export class BaseObject {
    */
   get state() {
     return {
-      type: this.constructor.name,
-      rx: this.r.x,
-      ry: this.r.y,
-      vx: this.v.x,
-      vy: this.v.y,
-      width: this.width,
-      height: this.height,
-      color: this.color,
-      hidden: this.hidden,
-      removed: this.removed,
-      _ref: this._ref,
+      type: this.type,
+      $: [
+        this.r.x,
+        this.r.y,
+        this.v.x,
+        this.v.y,
+        this.width,
+        this.height,
+        this.color,
+        this.hidden,
+        this.removed,
+        this._ref,
+      ],
     }
   }
 
@@ -111,16 +113,18 @@ export class BaseObject {
    * 从状态数据恢复对象
    */
   set state(state) {
-    this.r.x = state.rx
-    this.r.y = state.ry
-    this.v.x = state.vx
-    this.v.y = state.vy
-    this.width = state.width
-    this.height = state.height
-    this.color = state.color
-    this.hidden = state.hidden
-    this.removed = state.removed
-    this._ref = state._ref
+    ;[
+      this.r.x,
+      this.r.y,
+      this.v.x,
+      this.v.y,
+      this.width,
+      this.height,
+      this.color,
+      this.hidden,
+      this.removed,
+      this._ref,
+    ] = state.$
   }
 
   get type() {
