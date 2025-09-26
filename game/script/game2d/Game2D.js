@@ -92,6 +92,7 @@ export class Game {
       resizeCanvas(this.tmpctx, DPR)
     }
     const resizeCanvas = (ctx, DPR) => {
+      ctx.resetTransform()
       ctx.scale(DPR, DPR)
 
       ctx.canvas.width = this.displayWidth
@@ -119,11 +120,13 @@ export class Game {
     })
     PauseManager.on('resume', () => {
       this.isRunning = true
+      resize()
       setTimeout(() => this.#addKeyboardListeners(), 0)
     })
     TimeTravel.game = this
 
     addEventListener('beforeunload', event => {
+      this.saveGame('自动保存', true)
       // if (!this.onSavedExit) event.preventDefault()
     })
   }

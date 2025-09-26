@@ -287,7 +287,7 @@ export class Player extends BaseObject {
     } else {
       // 停止移动
       if (this.onGround) this.v.x *= Math.pow(0.1, 20 * dt)
-      else this.v.x *= Math.pow(0.1, 1.1 * dt)
+      // else this.v.x *= Math.pow(0.1, 1.1 * dt)
     }
   }
 

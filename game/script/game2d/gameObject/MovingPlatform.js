@@ -1,5 +1,6 @@
 import { Platform } from './Platform.js'
 import Vec2 from '../Vector.js'
+import { Player } from './Player.js'
 
 export class MovingPlatform extends Platform {
   timer = 0
@@ -15,7 +16,15 @@ export class MovingPlatform extends Platform {
    * @param {number} interval
    * @param {string} moveType
    */
-  constructor(from, to, width, height, ladder = false, interval = 5, moveType = 'still') {
+  constructor(
+    from,
+    to,
+    width,
+    height,
+    ladder = false,
+    interval = 5,
+    moveType = 'still'
+  ) {
     super(from?.x ?? 0, from?.y ?? 0, width, height, ladder)
     this.r = this.from = from ?? new Vec2()
     this.to = to ?? new Vec2()
@@ -59,7 +68,7 @@ export class MovingPlatform extends Platform {
     }
 
     // 计算平台的移动向量
-    this.v = this.r.sub(oldPosition)
+    this.v = this.r.sub(oldPosition).mul(1 / dt)
   }
 
   /**
@@ -72,7 +81,11 @@ export class MovingPlatform extends Platform {
 
     // 如果玩家站在平台上，让玩家跟随平台移动
     if (this.checkCollision(player.groundCheckBox)) {
-      player.r.addTo(this.v)
+      player.r.addTo(this.v.mul(dt))
+
+      if (player.jumpKeyPressed) {
+        player.v.addTo(this.v)
+      }
     }
   }
 
