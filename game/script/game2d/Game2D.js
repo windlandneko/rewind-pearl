@@ -85,11 +85,13 @@ export class Game {
       this.displayWidth = width * DPR
       this.displayHeight = height * DPR
 
-      if (this.isRunning)
+      if (this.tick > 0)
         this.scale = this.displayHeight / this.camera.viewport.height
 
       resizeCanvas(this.ctx, DPR)
       resizeCanvas(this.tmpctx, DPR)
+
+      if (this.tick > 0) this.render(this.ctx)
     }
     const resizeCanvas = (ctx, DPR) => {
       ctx.resetTransform()
