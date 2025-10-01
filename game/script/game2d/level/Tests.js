@@ -494,7 +494,7 @@ export function 测试大厅(game) {
   game.levelData = {
     introDialogue: 'null',
     background: 'test',
-    spawnpoint: new Vec2(635, 408),
+    spawnpoint: new Vec2(555, 408),
     cameraHeight: 180,
     cameraBound: {
       x: 476,
@@ -605,24 +605,23 @@ export function 测试大厅(game) {
 
   game.gameObjects.push(
 
-    new $.Interactable(616, 408, 'test_dialogue', 'sprite/linggangu', '测试帮助', false),
-    new $.LevelChanger(496, 360, 16, 16, 'Stage1', false),
-    new $.LevelChanger(496, 408, 16, 16, 'HazardTest', false),
-    new $.LevelChanger(520, 360, 16, 16, 'Stage2', false),
-    new $.LevelChanger(520, 408, 16, 16, 'CelesteTileTest', false),
-    new $.LevelChanger(544, 360, 16, 16, 'Stage3', false),
-    new $.LevelChanger(544, 408, 16, 16, 'CameraTest', false),
-    new $.LevelChanger(568, 360, 16, 16, 'Stage4', false),
-    new $.LevelChanger(568, 408, 16, 16, 'MovingPlatformTest', false),
-    new $.LevelChanger(592, 360, 16, 16, 'Stage5', false),
-    new $.LevelChanger(616, 360, 16, 16, 'Stage6', false),
-    new $.LevelChanger(640, 360, 16, 16, 'Stage7', false),
-    new $.LevelChanger(664, 360, 16, 16, 'Stage8', false),
-    new $.LevelChanger(688, 360, 16, 16, 'Stage9', false),
-    new $.Platform(480, 304, 312, 8, true),
-    new $.Platform(480, 328, 312, 8, true),
-    new $.Platform(480, 352, 312, 8, true),
-    new $.Platform(480, 376, 312, 8, true),
-    new $.Platform(480, 400, 312, 8, true)
+    new $.Interactable(528, 408, 16, 16, 'test_dialogue', 'sprite/linggangu', '帮助', false, null),
+    new $.LevelChanger(528, 360, 16, 16, 'HazardTest', false),
+    new $.LevelChanger(528, 384, 16, 16, 'Prologue', false),
+    new $.LevelChanger(552, 360, 16, 16, 'CelesteTileTest', false),
+    new $.LevelChanger(552, 384, 16, 16, 'Stage1', false),
+    new $.LevelChanger(576, 360, 16, 16, 'CameraTest', false),
+    new $.LevelChanger(600, 360, 16, 16, 'MovingPlatformTest', false),
+    new $.MovingPlatform(new Vec2(496, 304), new Vec2(496, 288), 16, 16, false, 5, 'random'),
+    new $.MovingPlatform(new Vec2(496, 352), new Vec2(496, 336), 16, 16, false, 0.2, 'sin'),
+    new $.MovingPlatform(new Vec2(496, 400), new Vec2(496, 384), 16, 16, false, 30, 'linear'),
+    new $.MovingPlatform(new Vec2(760, 304), new Vec2(760, 288), 16, 16, false, 5, 'random'),
+    new $.MovingPlatform(new Vec2(760, 352), new Vec2(760, 336), 16, 16, false, 0.2, 'sin'),
+    new $.MovingPlatform(new Vec2(760, 400), new Vec2(760, 384), 16, 16, false, 30, 'linear'),
+    new $.Platform(520, 304, 232, 8, true),
+    new $.Platform(520, 328, 232, 8, true),
+    new $.Platform(520, 352, 232, 8, true),
+    new $.Platform(520, 376, 232, 8, true),
+    new $.Platform(520, 400, 232, 8, true)
   )
 }

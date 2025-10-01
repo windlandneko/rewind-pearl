@@ -124,7 +124,10 @@ export class Player extends BaseObject {
     }
 
     if (state & InputEnum.JUMP_DOWN) this.onJumpInput()
-    if (state & InputEnum.JUMP_UP) this.jumpKeyPressed = false
+    if (state & InputEnum.JUMP_UP) {
+      this.v.y = Math.min(this.v.y * 0.8, 0)
+      this.jumpKeyPressed = false
+    }
 
     this.walkDown = state & InputEnum.WALK_DOWN
 
@@ -143,7 +146,7 @@ export class Player extends BaseObject {
     if (this.isExploding) {
       this.explodeAnim.update(dt)
       this.explodeAnimTime += dt
-      if (this.explodeAnim.isComplete()) {
+      if (this.explodeAnim.isComplete() && this.explodeAnimTime > 1) {
         // 动画播放完毕，重生
         game.tick = 0
         game.maxTick = 0
@@ -156,6 +159,8 @@ export class Player extends BaseObject {
           game.levelData.spawnpoint.y
         )
         game.camera.target = game.player
+
+        game.gameObjects.forEach(obj => obj.collected = false)
       }
       return
     }
@@ -180,7 +185,7 @@ export class Player extends BaseObject {
           79,
           112,
           112,
-          1000 / 120,
+          1000 / 90,
           false
         )
         this.explodeAnimTime = 0
@@ -287,7 +292,7 @@ export class Player extends BaseObject {
     } else {
       // 停止移动
       if (this.onGround) this.v.x *= Math.pow(0.1, 20 * dt)
-      // else this.v.x *= Math.pow(0.1, 1.1 * dt)
+      else this.v.x *= Math.pow(0.1, 1.0 * dt)
     }
   }
 

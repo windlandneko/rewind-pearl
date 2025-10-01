@@ -19,6 +19,11 @@ export class Hazard extends BaseObject {
       width: this.width - 6,
       height: this.height - 6,
     }
+
+    if (direction === 'up') this.hitbox.r.y += 2
+    else if (direction === 'down') this.hitbox.r.y -= 2
+    else if (direction === 'left') this.hitbox.r.x += 2
+    else if (direction === 'right') this.hitbox.r.x -= 2
   }
 
   interactWithPlayer(player, game) {
@@ -120,5 +125,10 @@ export class Hazard extends BaseObject {
       width: this.width - 6,
       height: this.height - 6,
     }
+
+    if (this.direction === 'up') this.hitbox.r.y += 2
+    else if (this.direction === 'down') this.hitbox.r.y -= 2
+    else if (this.direction === 'left') this.hitbox.r.x += 2
+    else if (this.direction === 'right') this.hitbox.r.x -= 2
   }
 }

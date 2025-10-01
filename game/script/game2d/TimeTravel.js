@@ -65,7 +65,7 @@ class TimeTravelManager {
         this.executeTimeTravel()
       }
     } else {
-      this.radius = Math.max(0, this.radius - dt * 50)
+      this.radius = Math.max(0, this.radius - dt * 150)
     }
   }
 

@@ -1,5 +1,5 @@
 import Asset from '../Asset.js'
-import { PesudoRandom } from '../utils.js'
+import { hash2D } from '../utils.js'
 
 /**
  * 2D地图图块辅助类
@@ -23,8 +23,6 @@ export class TileHelper {
 
   /** @type {boolean[][]} */
   #dirty
-
-  #rng
 
   /**
    * @param {number[][]} tileData
@@ -54,8 +52,6 @@ export class TileHelper {
 
     this.#calculateTileDistance()
     this.#calculateTileEdges()
-
-    this.#rng = new PesudoRandom()
   }
 
   /**
@@ -128,7 +124,7 @@ export class TileHelper {
       [-1, -1],
     ]
     while (queue.length) {
-      const [i, j, d] = queue.shift()
+      const [i, j, d] = queue.pop()
       for (const [di, dj] of dirs) {
         const x = i + di
         const y = j + dj
@@ -177,14 +173,12 @@ export class TileHelper {
   #chooseTile(i, j) {
     const { sets, ignores } = this.#tileset
 
-    this.#rng.seed = i * 31 + j * 17
-
     if (this.#distance[i][j] > 2 && sets.has('center')) {
       const { tiles } = sets.get('center')
-      return tiles[this.#rng.nextInt(tiles.length)]
+      return tiles[hash2D(i, j, tiles.length)]
     } else if (this.#distance[i][j] === 2 && sets.has('padding')) {
       const { tiles } = sets.get('padding')
-      return tiles[this.#rng.nextInt(tiles.length)]
+      return tiles[hash2D(i, j, tiles.length)]
     } else {
       for (const { tiles, mask } of sets.values()) {
         let match = true
@@ -203,7 +197,7 @@ export class TileHelper {
         })
         if (!match) continue
 
-        return tiles[this.#rng.nextInt(tiles.length)]
+        return tiles[hash2D(i, j, tiles.length)]
       }
     }
   }
@@ -224,7 +218,7 @@ export class TileHelper {
    * @param {CanvasRenderingContext2D} ctx
    */
   render(ctx, force = false) {
-    if(this.width == 0) debugger
+    if (this.width == 0) debugger
     if (ctx.canvas.width !== this.width * 8) ctx.canvas.width = this.width * 8
     if (ctx.canvas.height !== this.height * 8)
       ctx.canvas.height = this.height * 8
@@ -249,12 +243,39 @@ export class TileHelper {
 
         const tile = this.#tiles[i][j]
 
-        const [sx, sy] = this.#chooseTile(i, j)
+        const [sx, sy] = this.#chooseTile(i, j) ?? [0, 0]
 
         const image = this.#paletteMap[tile ?? 'default']
         if (!image) continue
 
         ctx.drawImage(image, sx * 8, sy * 8, 8, 8, tx, ty, 8, 8)
+
+        if (this.#distance[i][j] > 0) {
+          for (let dx = 0; dx <= 1; dx++) {
+            for (let dy = 0; dy <= 1; dy++) {
+              const fx = 0.75 - dx * 0.5
+              const fy = 0.75 - dy * 0.5
+              const d00 = this.#distance[i + dy - 1][j + dx - 1]
+              const d01 = this.#distance[i + dy - 1][j + dx]
+              const d10 = this.#distance[i + dy][j + dx - 1]
+              const d11 = this.#distance[i + dy][j + dx]
+
+              // 双线性插值
+              const dist =
+                d00 * (1 - fx) * (1 - fy) +
+                d10 * (1 - fx) * fy +
+                d01 * fx * (1 - fy) +
+                d11 * fx * fy
+
+              const alpha = Math.min(0.6, dist * 0.01)
+              ctx.save()
+              ctx.fillStyle = `rgba(0,0,0,${alpha})`
+              ctx.fillRect(tx + dx * 4, ty + dy * 4, 4, 4)
+
+              ctx.restore()
+            }
+          }
+        }
 
         this.#dirty[i][j] = false
       }

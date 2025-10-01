@@ -57,7 +57,7 @@ export class Platform extends BaseObject {
     if (minOverlap === overlapTop) {
       // 从上方碰撞（着地）
       player.r.y = this.r.y - player.height
-      player.v.y = this.v.y
+      player.v.y = 0
       player.onGround = true
     } else if (minOverlap === overlapBottom) {
       // 从下方碰撞（撞头）
@@ -91,16 +91,16 @@ export class Platform extends BaseObject {
       ctx.fillRect(x - 1, y, 1, 2)
       ctx.fillRect(x + this.width, y, 1, 2)
     } else {
-      ctx.fillStyle = this.shadowColor
-      ctx.fillRect(x - 2, y + 1, this.width + 2, this.height)
-      ctx.fillRect(x - 1, y, this.width, this.height + 2)
-      ctx.fillStyle = this.color
-      ctx.fillRect(x - 1, y, this.width + 2, this.height)
-      ctx.fillRect(x, y - 1, this.width, this.height + 2)
+      ctx.fillStyle = '#A6AFC0'
+      ctx.fillRect(x, y + 1, this.width, this.height - 2)
+      ctx.fillRect(x + 1, y, this.width - 2, this.height)
+      ctx.fillStyle = '#DCE5F2'
+      ctx.fillRect(x + 1, y + 1, this.width - 3, this.height - 4)
+      ctx.fillRect(x + 2, y, this.width - 5, this.height - 2)
     }
 
     if (debug) {
-      ctx.font = '3px Arial'
+      ctx.font = '4px Arial'
       ctx.fillText(
         `(${this.v.x.toFixed(1)}, ${this.v.y.toFixed(1)})`,
         x,

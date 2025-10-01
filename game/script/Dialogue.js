@@ -49,7 +49,9 @@ class Dialogue {
   }
 
   #addKeyboardListeners() {
-    if (keyboard.anyActive('LCtrl', 'RCtrl')) this.#triggerSkip(key, 200)
+    ;['LCtrl', 'RCtrl'].forEach(key => {
+      if (keyboard.isActive(key)) this.#triggerSkip(key, 200)
+    })
 
     this.#keyboardListeners.push(
       keyboard.onKeydown(['Enter', 'Space'], () => {
@@ -83,7 +85,8 @@ class Dialogue {
       return Promise.resolve()
     }
 
-    this.stop()
+    this.stop(true)
+    this.$modernText.textContent = ''
     this.dialogueData = Asset.get('dialogue/' + dialogue)
     this.$dialogue.className = 'dialogue-container'
     this.$dialogue.classList.add(
@@ -107,7 +110,7 @@ class Dialogue {
   /**
    * 停止播放对话
    */
-  stop() {
+  stop(force = false) {
     this.eventIndex = 0
     this.leftCharacter = []
     this.rightCharacter = []
@@ -121,7 +124,7 @@ class Dialogue {
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
 
-    this.onEnd?.()
+    if (!force) setTimeout(() => this.onEnd?.(), 500)
   }
 
   /**
@@ -131,7 +134,7 @@ class Dialogue {
     if (!this.isPlaying) return
     if (!skip && this.isWaiting) return
     if (this.textDisplaying) {
-      this.textCursor = Infinity
+      this.textCursor *= -1
       this.textDisplaying = false
       return
     }
@@ -174,7 +177,7 @@ class Dialogue {
         this.#onBGM(event)
         break
       case 'sound':
-        this.#onSoundEffect(event)
+        if (!skip) this.#onSoundEffect(event)
         break
       default:
         console.warn('[Dialogue] (processEvent) 未知的事件:', event)
@@ -273,37 +276,49 @@ class Dialogue {
       if (this.dialogueData.text_style === 'modern') {
         if (!skip) {
           this.textCursor = 0
-          clearInterval(this.textDisplayHandler)
+          clearTimeout(this.textDisplayHandler)
           this.$modernText.textContent = ''
-          this.textDisplayHandler = setInterval(() => {
-            if (this.textCursor === Infinity) {
-              this.$modernText.textContent = ''
-              this.#parseText(this.$modernText, text)
-            } else {
-              const span = document.createElement('span')
-              let nextLetter = text.charAt(this.textCursor++)
-              if (nextLetter === '\\') {
-                nextLetter = text.charAt(this.textCursor++)
-              } else if (nextLetter === '$') {
-                let divider = text.indexOf(':', this.textCursor)
-                let end = text.indexOf('$', divider)
 
-                if (end === -1) {
-                  nextLetter = '[[ERROR]]'
-                  this.textCursor = text.length
-                } else {
-                  nextLetter = text.slice(divider + 1, end)
-                  span.className = text.slice(this.textCursor, divider)
-                  this.textCursor = end + 1
-                }
-              }
-              span.textContent = nextLetter
-              span.classList.add('appear')
-              this.$modernText.appendChild(span)
+          const textDisplay = () => {
+            if (this.textCursor < 0) {
+              this.#parseText(this.$modernText, text.slice(-this.textCursor))
+              this.textCursor = text.length
             }
+
+            const span = document.createElement('span')
+            let nextLetter = text.charAt(this.textCursor++)
+
+            if (nextLetter === '\\') {
+              nextLetter = text.charAt(this.textCursor++)
+            } else if (nextLetter === '$') {
+              let divider = text.indexOf(':', this.textCursor)
+              let end = text.indexOf('$', divider)
+
+              if (end === -1) {
+                nextLetter = '[[ERROR]]'
+                this.textCursor = text.length
+              } else {
+                nextLetter = text.slice(divider + 1, end)
+                span.className = text.slice(this.textCursor, divider)
+                this.textCursor = end + 1
+              }
+            }
+
+            if (nextLetter === '\n') {
+              this.$modernText.appendChild(document.createElement('br'))
+              this.textDisplayHandler = setTimeout(textDisplay, 250)
+            } else {
+              span.textContent = nextLetter
+              this.$modernText.appendChild(span)
+              this.textDisplayHandler = setTimeout(textDisplay, 32)
+            }
+
             if (this.textCursor >= text.length) {
+              const arrow = document.createElement('span')
+              arrow.className = 'arrow'
+              this.$modernText.appendChild(arrow)
               this.textDisplaying = false
-              clearInterval(this.textDisplayHandler)
+              clearTimeout(this.textDisplayHandler)
               clearTimeout(this.autoNextHandler)
               if (this.dialogueData.auto_next_delay > 0)
                 this.autoNextHandler = setTimeout(
@@ -311,7 +326,9 @@ class Dialogue {
                   this.dialogueData.auto_next_delay
                 )
             }
-          }, 40)
+          }
+
+          this.textDisplayHandler = setTimeout(textDisplay, 40)
           this.textDisplaying = true
         } else {
           this.$modernText.textContent = ''
@@ -481,6 +498,7 @@ class Dialogue {
     this.$touhou.classList.add(this.currentSpeaker.position)
 
     this.$touhou.querySelectorAll('span').forEach(span => span.remove())
+    this.$touhou.querySelectorAll('br').forEach(span => span.remove())
     this.#parseText(this.$touhou, text)
 
     // retrigger animation
@@ -514,7 +532,15 @@ class Dialogue {
         continue
       }
 
-      span.textContent += char
+      if (char === '\n') {
+        $el.appendChild(span)
+        $el.appendChild(document.createElement('br'))
+        span = document.createElement('span')
+      } else {
+        span.textContent = char
+        $el.appendChild(span)
+        span = document.createElement('span')
+      }
     }
     $el.appendChild(span)
   }

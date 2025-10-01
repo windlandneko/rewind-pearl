@@ -4,7 +4,7 @@
   "events": [
     {
       "action": "background",
-      "src": "intro"
+      "id": "intro"
     },
     {
       "action": "add",
@@ -80,7 +80,7 @@
     },
     {
       "action": "bgm",
-      "name": "Gate of steiner"
+      "id": "Gate of steiner"
     },
     {
       "id": null,
@@ -111,7 +111,7 @@
     },
     {
       "action": "background",
-      "src": null
+      "id": null
     },
     {
       "action": "remove",

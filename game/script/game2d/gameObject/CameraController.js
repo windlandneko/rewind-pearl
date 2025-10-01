@@ -67,26 +67,30 @@ export class CameraController extends Trigger {
   get state() {
     return {
       ...super.state,
-      realX: this.realX,
-      realY: this.realY,
-      realWidth: this.realWidth,
-      realHeight: this.realHeight,
-      paddingX: this.paddingX,
-      paddingY: this.paddingY,
-      pauseSecond: this.pauseSecond,
-      cameraHeight: this.cameraHeight,
+      C: [
+        this.realX,
+        this.realY,
+        this.realWidth,
+        this.realHeight,
+        this.paddingX,
+        this.paddingY,
+        this.pauseSecond,
+        this.cameraHeight,
+      ],
     }
   }
 
   set state(state) {
     super.state = state
-    this.realX = state.x
-    this.realY = state.y
-    this.realWidth = state.width
-    this.realHeight = state.height
-    this.paddingX = state.paddingX
-    this.paddingY = state.paddingY
-    this.pauseSecond = state.pauseSecond
-    this.cameraHeight = state.cameraHeight
+    ;[
+      this.realX,
+      this.realY,
+      this.realWidth,
+      this.realHeight,
+      this.paddingX,
+      this.paddingY,
+      this.pauseSecond,
+      this.cameraHeight,
+    ] = state.C
   }
 }

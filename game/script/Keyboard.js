@@ -158,9 +158,12 @@ class Keyboard {
       this.listener.emit(`keyup:${key}`)
     })
 
-    // bugfix: reset all keys on blur
+    // bugfix: reset all keys on focusout
     addEventListener('blur', () => {
-      this.#record.forEach((_, key) => this.#record.set(key, false))
+      this.#record.forEach((_, key) => {
+        this.#record.set(key, false)
+        this.listener.emit(`keyup:${key}`)
+      })
     })
 
     this.listener = new EventListener()

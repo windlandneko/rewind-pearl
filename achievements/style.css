@@ -11,6 +11,8 @@ body {
   min-height: 100vh;
   background: url('../background.png') no-repeat center / cover fixed black;
   color: white;
+
+  user-select: none;
 }
 
 /* 页面容器 */
@@ -24,16 +26,6 @@ body {
 header {
   text-align: center;
   margin-bottom: 3rem;
-  animation: blur-in 2s cubic-bezier(0.075, 0.82, 0.165, 1) forwards;
-}
-
-@keyframes blur-in {
-  0% {
-    filter: blur(16px);
-  }
-  100% {
-    filter: blur(0);
-  }
 }
 
 header h1 {
@@ -90,6 +82,8 @@ header p {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+
+  backdrop-filter: blur(4px);
 }
 
 .achievement-card::before {
@@ -107,6 +101,7 @@ header p {
 }
 
 .achievement-card:hover {
+  border: none;
   background: rgba(0, 0, 0, 0.5);
   border-color: rgba(255, 255, 255, 0.4);
 }
@@ -125,7 +120,9 @@ header p {
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding-top: 1.5rem;
+  padding: 1.5rem;
+  box-sizing: border-box;
+
   border-radius: 15px;
   opacity: 0;
   transition: all 0.3s ease;

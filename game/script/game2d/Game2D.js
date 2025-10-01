@@ -8,6 +8,7 @@ import Keyboard from '../Keyboard.js'
 import TimeTravel from './TimeTravel.js'
 import SoundManager from '../SoundManager.js'
 import PauseManager from '../PauseManager.js'
+import AchievementManager from '../AchievementManager.js'
 import * as Levels from './level/index.js'
 import * as GameConfig from './GameConfig.js'
 import * as GameObject from './gameObject/index.js'
@@ -59,6 +60,7 @@ export class Game {
   #keyboardListeners = []
 
   sound = SoundManager
+  achievement = AchievementManager
   debug = false
 
   constructor() {
@@ -79,7 +81,7 @@ export class Game {
     /** @type {CanvasRenderingContext2D} */
     this.tileCtx = this.tileCanvas.getContext('2d')
 
-    const resize = () => {
+    this.resize = () => {
       const { width, height } = main.getBoundingClientRect()
       const DPR = devicePixelRatio
       this.displayWidth = width * DPR
@@ -90,15 +92,18 @@ export class Game {
 
       resizeCanvas(this.ctx, DPR)
       resizeCanvas(this.tmpctx, DPR)
-
-      if (this.tick > 0) this.render(this.ctx)
     }
     const resizeCanvas = (ctx, DPR) => {
       ctx.resetTransform()
       ctx.scale(DPR, DPR)
 
-      ctx.canvas.width = this.displayWidth
-      ctx.canvas.height = this.displayHeight
+      if (
+        ctx.canvas.width !== this.displayWidth ||
+        ctx.canvas.height !== this.displayHeight
+      ) {
+        ctx.canvas.width = this.displayWidth
+        ctx.canvas.height = this.displayHeight
+      }
 
       ctx.imageSmoothingEnabled = false
       ctx.webkitImageSmoothingEnabled = false
@@ -108,8 +113,8 @@ export class Game {
       ctx.textAlign = 'center'
     }
 
-    resize()
-    addEventListener('resize', resize)
+    this.resize()
+    addEventListener('resize', () => this.resize())
 
     this.canvas.classList.add('hidden')
 
@@ -122,13 +127,13 @@ export class Game {
     })
     PauseManager.on('resume', () => {
       this.isRunning = true
-      resize()
       setTimeout(() => this.#addKeyboardListeners(), 0)
     })
     TimeTravel.game = this
+    AchievementManager.game = this
 
-    addEventListener('beforeunload', event => {
-      this.saveGame('自动保存', true)
+    addEventListener('beforeunload', () => {
+      this.saveGame('自动保存', true, true)
       // if (!this.onSavedExit) event.preventDefault()
     })
   }
@@ -167,6 +172,10 @@ export class Game {
       Keyboard.onKeydown(['RCtrl'], () => {
         this.debug = !this.debug
         window.game = this
+      }),
+
+      Keyboard.onKeydown(['M'], () => {
+        this.#debugExportCanvasImage()
       })
     )
   }
@@ -258,7 +267,7 @@ export class Game {
       this.render(this.ctx)
       TimeTravel.render(this)
 
-      // if (this.debug) this.#renderTimeline(this.ctx)
+      // if (this.debug) this.#debugRenderTimeline(this.ctx)
 
       // 渲染关卡过渡效果
       if (this.transitionOpacity) {
@@ -266,6 +275,7 @@ export class Game {
         this.ctx.fillRect(0, 0, this.displayWidth, this.displayHeight)
       }
     }
+    this.resize()
     renderLoop()
 
     // 初始化渲染组
@@ -332,11 +342,14 @@ export class Game {
     this.start(true)
   }
 
-  saveGame(name = '未命名存档', autosave = false) {
+  saveGame(name = '未命名存档', autosave = false, silent = false) {
     const currentUser = localStorage.getItem('rewind-pearl-username')
     if (!currentUser) {
       console.error('没有登录用户，无法保存游戏')
-      this.showNotification('保存失败：玩家未登录', false)
+      this.showNotification('保存失败：玩家未登录', {
+        icon: '❌',
+        type: 'error',
+      })
       return false
     }
 
@@ -382,11 +395,12 @@ export class Game {
       localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
     }
 
-    this.showNotification('已自动保存', true)
+    if (!silent)
+      this.showNotification('游戏已保存', { icon: '💾', type: 'success' })
     return true
   }
 
-  showNotification(message, success = true) {
+  showNotification(message, { icon = '', type = 'info' } = {}) {
     const notification = document.createElement('div')
     notification.classList.add('save-notification')
 
@@ -397,13 +411,17 @@ export class Game {
 
     const iconElement = document.createElement('span')
     iconElement.classList.add('save-icon')
-    iconElement.textContent = success ? '💾' : '❌'
+    iconElement.textContent = icon
     notification.appendChild(iconElement)
 
     const main = document.querySelector('main')
     main.appendChild(notification)
 
-    notification.style.borderColor = success ? '#4a9eff' : '#ff4a4a'
+    notification.style.borderColor = {
+      success: '#4caf50',
+      error: '#f44336',
+      info: '#2196f3',
+    }[type]
 
     setTimeout(() => notification.classList.add('show'), 0)
     setTimeout(() => notification.classList.remove('show'), 3000)
@@ -427,9 +445,9 @@ export class Game {
 
     if (this.preventUpdateUntilTick > 0) {
       this.preventUpdateUntilTick--
-      this.camera.smoothFactor = 0.05
+      this.camera.smoothFactor = 0.04
     } else {
-      this.camera.smoothFactor = 0.02
+      this.camera.smoothFactor = 0.01
     }
 
     TimeTravel.update(dt)
@@ -502,7 +520,10 @@ export class Game {
    * @param {CanvasRenderingContext2D} ctx - 2D渲染上下文
    */
   render(ctx) {
+    this.resize()
     this.#updateBackground()
+
+    this.camera.renderUpdate()
 
     ctx.clearRect(0, 0, this.displayWidth, this.displayHeight)
     ctx.save()
@@ -548,7 +569,7 @@ export class Game {
     ctx.restore()
 
     // 调试数据
-    if (this.debug) this.#renderDebugUI(ctx)
+    if (this.debug) this.#debugRenderInfo(ctx)
   }
 
   /**
@@ -593,7 +614,7 @@ export class Game {
     this.camera.target = this.player
 
     // 设置跟随边距
-    const paddingX = width * 0.3
+    const paddingX = width * 0.4
     const paddingY = height * 0.3
     this.camera.setPadding(paddingX, paddingX, paddingY, paddingY)
 
@@ -674,7 +695,7 @@ export class Game {
   /**
    * 渲染UI
    */
-  #renderDebugUI(ctx) {
+  #debugRenderInfo(ctx) {
     ctx.textAlign = 'left'
 
     // 渲染生命值、分数等UI元素
@@ -814,7 +835,7 @@ export class Game {
   /**
    * 渲染时间线（在时间回溯模式下）
    */
-  #renderTimeline(ctx) {
+  #debugRenderTimeline(ctx) {
     const timelineHeight = 60
     const timelineY = this.displayHeight - timelineHeight - 20
     const timelineX = 50
@@ -972,6 +993,42 @@ export class Game {
     ctx.fillText(`${this.tick}/${this.maxTick}`, timelineX + 4, timelineY + 1)
 
     ctx.restore()
+  }
+
+  #debugExportCanvasImage() {
+    try {
+      // 将画布转换为 Blob
+      this.canvas.toBlob(blob => {
+        if (!blob) {
+          console.error('无法生成图像')
+          return
+        }
+
+        // 创建下载链接
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+
+        // 生成文件名（包含时间戳）
+        const timestamp = new Date()
+          .toISOString()
+          .replace(/[:.]/g, '-')
+          .slice(0, -5)
+        link.download = `game-screenshot-${timestamp}.png`
+        link.href = url
+
+        // 触发下载
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+
+        // 清理 URL 对象
+        URL.revokeObjectURL(url)
+
+        console.log('图像已导出')
+      }, 'image/png')
+    } catch (error) {
+      console.error('导出图像时出错:', error)
+    }
   }
 
   pauseUpdateUntilTick(tick) {

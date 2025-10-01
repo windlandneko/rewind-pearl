@@ -1,0 +1,57 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "new",
+      "title": "丁真",
+      "subtitle": "疑眼丁真",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "action": "add",
+      "id": "old",
+      "title_color": "#ffb6c1",
+      "title": "丁真喵",
+      "subtitle": "疑演丁真",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "new",
+      "subtitle": "疑眼丁真",
+      "text": "不是哥们，你为什么长得和我一模一样？"
+    },
+    {
+      "id": "old",
+      "text": "我也想知道喵，我刚刚醒来就发现自己在这里了喵！\n好不容易从王源手里死里逃生，结果又被传送到序章了喵！"
+    },
+    {
+      "id": "new",
+      "subtitle": "疑言丁真",
+      "text": "哇，还是猫娘。\n等等，你见到王源了？还跟他打了一架？"
+    },
+    {
+      "id": "old",
+      "subtitle": "遗言丁真",
+      "text": "是的喵，那小子不知道从哪里得到了时间回溯的能力，从未来不断回溯喵。\n我根本打不过这么强的敌人喵！"
+    },
+    {
+      "id": "new",
+      "subtitle": "反演丁真",
+      "text": "时间回溯？\n也就是说，你是从未来回到过去的？"
+    },
+    {
+      "id": "new",
+      "text": "可是我们现在该怎么办？"
+    },
+    {
+      "id": null,
+      "text": "(正当两人不知所措时，这段对话突然被打断了，因为我没写完喵)"
+    }
+  ]
+}

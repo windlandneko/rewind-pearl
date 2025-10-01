@@ -485,6 +485,12 @@ function showProperties(obj) {
         type: 'text',
         onChange: value => (obj.bgm = value),
       })
+      addProperty({
+        label: '初始对话',
+        value: obj.introDialogue ?? '',
+        type: 'text',
+        onChange: value => (obj.introDialogue = value),
+      })
       break
     case TOOL.interactable:
       addProperty({
@@ -511,9 +517,14 @@ function showProperties(obj) {
         type: 'checkbox',
         onChange: value => (obj.autoPlay = value),
       })
+      addProperty({
+        label: '触发函数（结束对话）',
+        value: obj.afterInteract ?? '',
+        type: 'textarea',
+        onChange: value => (obj.afterInteract = value),
+      })
       break
     case TOOL.platform:
-    case TOOL.movingPlatform:
       addProperty({
         label: '脚手架（下蹲穿过）',
         value: obj.ladder ?? false,
@@ -562,6 +573,12 @@ function showProperties(obj) {
         type: 'select',
         onChange: value => (obj.moveType = value),
         options: ['linear', 'sin', 'still', 'random'],
+      })
+      addProperty({
+        label: '脚手架（下蹲穿过）',
+        value: obj.ladder ?? false,
+        type: 'checkbox',
+        onChange: value => (obj.ladder = value),
       })
       break
     case TOOL.levelChanger:
@@ -829,6 +846,15 @@ function switchBgDrawMode() {
 // 数字键切换当前背景块编号
 let spaceKeyDown = false
 addEventListener('keydown', e => {
+  // 如果用户正在输入框中输入，不拦截事件
+  if (
+    document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' ||
+      document.activeElement.tagName === 'TEXTAREA' ||
+      document.activeElement.tagName === 'SELECT')
+  ) {
+    return
+  }
   if (isDrawBgMode && /^[1-9]$/.test(e.key)) {
     currentTileType = parseInt(e.key)
     draw()
@@ -840,6 +866,15 @@ addEventListener('keydown', e => {
   }
 })
 addEventListener('keyup', e => {
+  // 如果用户正在输入框中输入，不拦截事件
+  if (
+    document.activeElement &&
+    (document.activeElement.tagName === 'INPUT' ||
+      document.activeElement.tagName === 'TEXTAREA' ||
+      document.activeElement.tagName === 'SELECT')
+  ) {
+    return
+  }
   if (e.code === 'Space') spaceKeyDown = false
 })
 
@@ -1084,7 +1119,6 @@ function drawObject(obj) {
       ctx.fillStyle = '#2ccc003b'
       ctx.setLineDash([])
       ctx.lineWidth = 0.5
-      console.log(obj)
       ctx.fillRect(
         obj.x - obj.paddingX,
         obj.y - obj.paddingY,
@@ -1813,7 +1847,8 @@ function drawBgTile(mousePos, type) {
         i < levelData.tileHeight &&
         j >= 0 &&
         j < levelData.tileWidth &&
-        (i - x) ** 2 + (j - y) ** 2 <= painterSize ** 2 + 1
+        // (i - x) ** 2 + (j - y) ** 2 <= painterSize ** 2 + 1
+        true
       ) {
         if (tileData[i][j] !== type) tileData[i][j] = type
       }
@@ -2083,6 +2118,7 @@ function createObject(type, pos) {
         spriteId: 'sprite/linggangu',
         hint: '提示文本',
         autoPlay: false,
+        afterInteract: '',
       }
       break
     case TOOL.platform:
@@ -2307,7 +2343,16 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
           })`
           break
         case TOOL.interactable:
-          str += `Interactable(${obj.x}, ${obj.y}, '${obj.dialogue}', '${obj.spriteId}', '${obj.hint}', ${obj.autoPlay})`
+          str += `Interactable(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, '${obj.dialogue}', '${
+            obj.spriteId
+          }', '${obj.hint}', ${obj.autoPlay}, ${
+            obj.afterInteract
+              ? `(game, $) => {\n${obj.afterInteract
+                  .split('\n')
+                  .map(line => '      ' + line)
+                  .join('\n')}\n    }`
+              : 'null'
+          })`
           break
         case TOOL.movingPlatform:
           str += `MovingPlatform(new Vec2(${obj.fromX}, ${
@@ -2323,7 +2368,7 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
           str += `CameraController(${obj.x}, ${obj.y}, ${obj.width}, ${obj.height}, ${obj.paddingX}, ${obj.paddingY}, ${obj.pauseSecond}, ${obj.cameraHeight})`
           break
         case TOOL.collectible:
-          str += `Collectible(${obj.x - 6}, ${obj.y - 6}, '${obj.spriteId}', ${
+          str += `Collectible(${obj.x - 2}, ${obj.y - 2}, '${obj.spriteId}', ${
             obj.onlyGhostCanCollect
           })`
           break

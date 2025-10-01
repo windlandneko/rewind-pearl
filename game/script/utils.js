@@ -115,36 +115,9 @@ export class EventListener {
   }
 }
 
-/**
- * A simple pseudo-random number generator (PRNG)
- * using a linear congruential generator (LCG) algorithm
- */
-export class PesudoRandom {
-  #seed
-
-  constructor(seed = 0) {
-    this.#seed = seed
-  }
-
-  set seed(seed) {
-    this.#seed = seed
-  }
-
-  /**
-   * Get a random number in the range [0, 1)
-   * @returns {number} A random number in the range [0, 1)
-   */
-  next() {
-    this.#seed = (this.#seed * 9301 + 49297) % 233280
-    return this.#seed / 233280
-  }
-
-  /**
-   * Get a random integer in the range [0, n)
-   * @param {number} n
-   * @returns {number}
-   */
-  nextInt(n) {
-    return Math.floor(this.next() * n)
-  }
+export function hash2D(i, j, n) {
+  let h = i * 374761393 + j * 668265263
+  h = (h ^ (h >> 13)) * 1274126177
+  h = h ^ (h >> 16)
+  return Math.abs(h) % n
 }

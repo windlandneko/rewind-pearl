@@ -3,15 +3,26 @@ import Asset from '../../Asset.js'
 import { BaseObject } from './BaseObject.js'
 
 export class Interactable extends BaseObject {
-  isHighlighted = false
+  hintOpacity = 0
   spriteId = null
 
-  constructor(x, y, dialogueId, spriteId, hint = '', autoPlay = false) {
-    super(x, y, 16, 16)
+  constructor(
+    x,
+    y,
+    width,
+    height,
+    dialogueId,
+    spriteId,
+    hint = '',
+    autoPlay = false,
+    afterInteract = null
+  ) {
+    super(x, y, width, height)
     this.dialogueId = dialogueId
     this.spriteId = spriteId
     this.hint = hint
     this.autoPlay = autoPlay
+    this.afterInteract = afterInteract
   }
 
   /**
@@ -21,8 +32,10 @@ export class Interactable extends BaseObject {
    */
   async interactWithPlayer(player, game) {
     if (player.removed) return
-    this.isHighlighted = player.checkCollision(this)
-    if (this.autoPlay && this.isHighlighted && player.onGround) {
+    const k = 0.1
+    const flag = player.checkCollision(this)
+    this.hintOpacity = flag * k + this.hintOpacity * (1 - k)
+    if (this.autoPlay && flag && player.onGround) {
       await this.handleKeyInteraction(player, game)
       this.dialogueId = null
     }
@@ -36,11 +49,23 @@ export class Interactable extends BaseObject {
    */
   async handleKeyInteraction(player, game) {
     if (player.type === 'GhostPlayer') return false
-    if (!player.checkCollision(this) || !this.dialogueId) return false
+    if (!player.checkCollision(this)) return false
 
-    game.stop()
-    await Dialogue.play(this.dialogueId)
-    game.start()
+    if (this.dialogueId) {
+      game.stop()
+      await Dialogue.play(this.dialogueId)
+      game.start()
+    }
+
+    const $ = name => game.ref(name)
+    if (this.afterInteract) {
+      try {
+        await this.afterInteract.call(this, game, $)
+      } catch (e) {
+        console.error(e)
+      }
+    }
+
     return true
   }
 
@@ -59,8 +84,8 @@ export class Interactable extends BaseObject {
     ctx.restore()
 
     // 渲染提示文本
-    if (this.hint && this.isHighlighted) {
-      ctx.fillStyle = 'white'
+    if (this.hint) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.hintOpacity})`
       ctx.font = '5px HarmonyOS Sans SC, serif, sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText(this.hint, this.r.x + this.width / 2, this.r.y - 5)
@@ -71,19 +96,21 @@ export class Interactable extends BaseObject {
     return {
       ...super.state,
       bobOffset: this.bobOffset,
-      isHighlighted: this.isHighlighted,
+      isHighlighted: this.hintOpacity,
       dialogueId: this.dialogueId,
       hint: this.hint,
       spriteId: this.spriteId,
+      aI: this.afterInteract?.toString?.(),
     }
   }
 
   set state(state) {
     super.state = state
     this.bobOffset = state.bobOffset
-    this.isHighlighted = state.isHighlighted
+    this.hintOpacity = state.isHighlighted
     this.dialogueId = state.dialogueId
     this.hint = state.hint
+    this.afterInteract = eval(state.aI)
     this.spriteId = state.spriteId
     if (this.spriteId) this.sprite = Asset.get(this.spriteId)
   }

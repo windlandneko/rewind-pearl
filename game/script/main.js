@@ -1,5 +1,6 @@
 import Loading from './Loading.js'
 import Game2D from './game2d/Game2D.js'
+import AchievementManager from './AchievementManager.js'
 import * as Levels from './game2d/level/index.js'
 
 // 检查用户登录
@@ -10,11 +11,13 @@ if (!localStorage.getItem('rewind-pearl-username')) {
 const currentUser = localStorage.getItem('rewind-pearl-username')
 
 async function startNewGame() {
-  Game2D.loadLevel(Levels.测试大厅)
+  Game2D.loadLevel(Levels.Prologue)
   Game2D.start(true)
 }
 
 Loading.on('complete', () => {
+  AchievementManager.add('dian_ji_ji_song')
+
   if (localStorage.getItem('rewind-pearl-debug-mode')) {
     startNewGame()
     return

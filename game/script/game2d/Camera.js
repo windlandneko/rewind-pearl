@@ -9,9 +9,11 @@ export class Camera {
   #padding
   #target
   #worldBounds
-  viewportWidth
-  viewportHeight
-  #lerpFactor = 0
+  targetViewportWidth
+  targetViewportHeight
+  viewportWidth = 0
+  viewportHeight = 0
+  #lerpFactor = 0.001
 
   position = new Vec2(0, 0)
 
@@ -42,8 +44,8 @@ export class Camera {
    * @param {number} height - 视窗高度
    */
   setViewportSize(width, height) {
-    this.viewportWidth = width
-    this.viewportHeight = height
+    this.targetViewportWidth = width
+    this.targetViewportHeight = height
   }
 
   /**
@@ -228,17 +230,17 @@ export class Camera {
     if (target.x < this.#padding.left) {
       // 目标在左边距外，摄像机需要向左移动
       delta.x = target.x - this.#padding.left
-    } else if (target.x > this.viewportWidth - this.#padding.right) {
+    } else if (target.x > this.targetViewportWidth - this.#padding.right) {
       // 目标在右边距外，摄像机需要向右移动
-      delta.x = target.x - (this.viewportWidth - this.#padding.right)
+      delta.x = target.x - (this.targetViewportWidth - this.#padding.right)
     }
 
     if (target.y < this.#padding.top) {
       // 目标在上边距外，摄像机需要向上移动
       delta.y = target.y - this.#padding.top
-    } else if (target.y > this.viewportHeight - this.#padding.bottom) {
+    } else if (target.y > this.targetViewportHeight - this.#padding.bottom) {
       // 目标在下边距外，摄像机需要向下移动
-      delta.y = target.y - (this.viewportHeight - this.#padding.bottom)
+      delta.y = target.y - (this.targetViewportHeight - this.#padding.bottom)
     }
 
     // 新的摄像机位置
@@ -250,23 +252,30 @@ export class Camera {
         this.#worldBounds.minX,
         Math.min(
           this.targetPosition.x,
-          this.#worldBounds.maxX - this.viewportWidth
+          this.#worldBounds.maxX - this.targetViewportWidth
         )
       )
       this.targetPosition.y = Math.max(
         this.#worldBounds.minY,
         Math.min(
           this.targetPosition.y,
-          this.#worldBounds.maxY - this.viewportHeight
+          this.#worldBounds.maxY - this.targetViewportHeight
         )
       )
     }
 
+    // todo: soft border and hard border
+  }
+
+  renderUpdate() {
     this.position.addTo(
       this.targetPosition.sub(this.position).mul(this.#lerpFactor)
     )
 
-    // todo: soft border and hard border
+    this.viewportWidth +=
+      (this.targetViewportWidth - this.viewportWidth) * this.#lerpFactor
+    this.viewportHeight +=
+      (this.targetViewportHeight - this.viewportHeight) * this.#lerpFactor
   }
 
   /**
@@ -283,17 +292,20 @@ export class Camera {
         this.#worldBounds.minX,
         Math.min(
           this.targetPosition.x,
-          this.#worldBounds.maxX - this.viewportWidth
+          this.#worldBounds.maxX - this.targetViewportWidth
         )
       )
       this.targetPosition.y = Math.max(
         this.#worldBounds.minY,
         Math.min(
           this.targetPosition.y,
-          this.#worldBounds.maxY - this.viewportHeight
+          this.#worldBounds.maxY - this.targetViewportHeight
         )
       )
     }
+
+    this.viewportWidth = this.targetViewportWidth
+    this.viewportHeight = this.targetViewportHeight
 
     this.position = this.targetPosition.clone()
   }
@@ -304,8 +316,8 @@ export class Camera {
   centerOnTarget() {
     if (!this.#target) return
 
-    const centerX = this.#target.r.x - this.viewportWidth / 2
-    const centerY = this.#target.r.y - this.viewportHeight / 2
+    const centerX = this.#target.r.x - this.targetViewportWidth / 2
+    const centerY = this.#target.r.y - this.targetViewportHeight / 2
     this.setPosition(centerX, centerY)
   }
 

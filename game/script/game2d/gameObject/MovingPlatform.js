@@ -5,7 +5,7 @@ import { Player } from './Player.js'
 export class MovingPlatform extends Platform {
   timer = 0
   target = 0
-  color = '#fafafa'
+  color = '#E1EAF7'
 
   /**
    * 移动平台

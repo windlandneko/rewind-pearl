@@ -128,7 +128,7 @@ export class PauseManager {
    * 处理返回标题
    */
   #onReturnToTitle() {
-    if (this.game?.maxTick !== null) this.game.saveGame('自动保存', true)
+    if (this.game?.maxTick !== null) this.game.saveGame('自动保存', true, true)
     this.game.onSavedExit = true
     location.assign('../index.html')
   }
