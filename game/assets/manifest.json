@@ -152,7 +152,9 @@
     "magic": "background/magic.jpg",
     "test": "background/01.data.png",
     "sky": "background/sky.png",
-    "skyrev": "background/skyrev.png",
+    "raincity0": "background/raincity0.png",
+    "raincity1": "background/raincity1.png",
+    "raincity2": "background/raincity2.png",
     "underground": "background/underground.png",
     "home": "background/home.png"
   },

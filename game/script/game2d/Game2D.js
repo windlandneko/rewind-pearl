@@ -118,7 +118,11 @@ export class Game {
 
     this.canvas.classList.add('hidden')
 
-    this.$backgroundImage = document.getElementById('game2d-background')
+    // 背景容器与分层图像（兼容旧的单图方式以及新版固定底图 + 两个图层）
+    this.$backgroundContainer = document.getElementById('game2d-background')
+    this.$bgBase = this.$backgroundContainer?.querySelector('#bg-base')
+    this.$bgLayer1 = this.$backgroundContainer?.querySelector('#bg-layer-1')
+    this.$bgLayer2 = this.$backgroundContainer?.querySelector('#bg-layer-2')
 
     PauseManager.game = this
     PauseManager.on('pause', () => {
@@ -231,9 +235,12 @@ export class Game {
     })
 
     if (this.levelData.background) {
-      this.$backgroundImage.src = Asset.get(
-        `background/${this.levelData.background}`
-      ).src
+      const bg = 'background/' + this.levelData.background
+      if (Asset.has(bg + '0')) {
+        if (Asset.has(bg + '0')) this.$bgBase.src = Asset.get(bg + '0').src
+        if (Asset.has(bg + '1')) this.$bgLayer1.src = Asset.get(bg + '1').src
+        if (Asset.has(bg + '2')) this.$bgLayer2.src = Asset.get(bg + '2').src
+      } else if (Asset.has(bg)) this.$bgBase.src = Asset.get(bg).src
     }
   }
 
@@ -304,8 +311,8 @@ export class Game {
 
   fadeBlack(reverse = false) {
     this.transitionStartTime = performance.now()
-    if (reverse) this.$backgroundImage.classList.remove('hidden')
-    else this.$backgroundImage.classList.add('hidden')
+    if (reverse) this.$backgroundContainer.classList.remove('hidden')
+    else this.$backgroundContainer.classList.add('hidden')
     return new Promise(resolve => {
       const checkTransition = () => {
         const k = 1
@@ -633,30 +640,68 @@ export class Game {
   }
 
   /**
-   * 更新背景位置
+   * 更新背景位置（视差滚动效果）
    */
   #updateBackground() {
     if (!this.levelData.background) return
 
-    // 计算视差位移量（背景移动速度比摄像机慢）
-    const parallaxFactor = 3 // 视差系数，值越小背景移动越慢
-    const renderPos = this.camera.getRenderPosition()
-    const offsetX = -renderPos.x * parallaxFactor
-    const offsetY = -renderPos.y * parallaxFactor
+    const pos = this.camera.getRenderPosition()
+    const levelData = this.levelData
 
-    // 限制位移范围，防止边缘露出
-    const maxOffsetX = this.levelData.tileWidth * GameConfig.GRID_SIZE * 5 // 最大偏移为关卡宽度的5%
-    const maxOffsetY = this.levelData.tileHeight * GameConfig.GRID_SIZE * 5 // 最大偏移为关卡高度的5%
+    // 背景图尺寸（假设为 6000×768）
+    const BG_WIDTH = 6000
+    const BG_HEIGHT = 768
 
-    const clampedOffsetX = Math.max(-maxOffsetX, Math.min(maxOffsetX, offsetX))
-    const clampedOffsetY = Math.max(-maxOffsetY, Math.min(maxOffsetY, offsetY))
+    // 获取世界边界和视窗尺寸
+    const worldWidth = levelData.tileWidth * 8
+    const worldHeight = levelData.tileHeight * 8
+    const viewportWidth = this.camera.targetViewportWidth || 320
+    const viewportHeight = this.camera.targetViewportHeight || 180
 
-    // 应用变换（基础偏移-10% + 视差偏移）
-    this.$backgroundImage.style.transform = `translate(${
-      (clampedOffsetX / this.levelData.tileWidth / GameConfig.GRID_SIZE) * 5
-    }%, ${
-      (clampedOffsetY / this.levelData.tileHeight / GameConfig.GRID_SIZE) * 5
-    }%)`
+    // 计算摄像机在世界中的归一化位置（0-1）
+    const maxCameraX = Math.max(1, worldWidth - viewportWidth)
+    const maxCameraY = Math.max(1, worldHeight - viewportHeight)
+    const cameraProgressX = Math.max(0, Math.min(1, pos.x / maxCameraX))
+    const cameraProgressY = Math.max(0, Math.min(1, pos.y / maxCameraY))
+
+    // 背景图可移动范围
+    // 水平方向：背景宽度远大于视窗，预留足够的视差移动空间
+    const bgDisplayWidth = (BG_WIDTH / BG_HEIGHT) * viewportHeight
+    const bgMaxOffsetX = Math.max(0, (bgDisplayWidth - viewportWidth) / 2)
+
+    // 垂直方向：轻微移动（10%幅度）
+    const bgMaxOffsetY = viewportHeight * 0.05
+
+    // 视差系数：三个图层移动速度不同，制造深度感
+    // 基础层移动最慢（最远），layer2 移动最快（最近）
+    const parallaxFactors = {
+      base: 0.3, // 远景层移动 30% 速度
+      layer1: 0.6, // 中景层移动 60% 速度
+      layer2: 1.0, // 近景层移动 100% 速度（与摄像机同步）
+    }
+
+    // 计算三个图层的偏移量（基于视差系数）
+    const offsetX0 = -bgMaxOffsetX * cameraProgressX * parallaxFactors.base
+    const offsetY0 = -bgMaxOffsetY * cameraProgressY * parallaxFactors.base
+
+    const offsetX1 = -bgMaxOffsetX * cameraProgressX * parallaxFactors.layer1
+    const offsetY1 = -bgMaxOffsetY * cameraProgressY * parallaxFactors.layer1
+
+    const offsetX2 = -bgMaxOffsetX * cameraProgressX * parallaxFactors.layer2
+    const offsetY2 = -bgMaxOffsetY * cameraProgressY * parallaxFactors.layer2
+
+    // 应用 CSS transform
+    // 基础定位：translate(-50%, -50%) 居中
+    // 视差偏移：+ offsetPx 根据摄像机位置动态调整
+    if (this.$bgBase) {
+      this.$bgBase.style.transform = `translate(calc(-50% + ${offsetX0}px), calc(-50% + ${offsetY0}px))`
+    }
+    if (this.$bgLayer1) {
+      this.$bgLayer1.style.transform = `translate(calc(-50% + ${offsetX1}px), calc(-50% + ${offsetY1}px))`
+    }
+    if (this.$bgLayer2) {
+      this.$bgLayer2.style.transform = `translate(calc(-50% + ${offsetX2}px), calc(-50% + ${offsetY2}px))`
+    }
   }
 
   /**

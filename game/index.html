@@ -28,7 +28,12 @@
       <div class="loading-error hidden"></div>
     </div>
 
-    <img id="game2d-background" class="hidden" />
+    <!-- 背景容器：固定底图 + 两个可视差浮动图层 -->
+    <div id="game2d-background" class="hidden">
+      <img id="bg-base" class="bg-image" />
+      <img id="bg-layer-1" class="bg-image layer-1" />
+      <img id="bg-layer-2" class="bg-image layer-2" />
+    </div>
 
     <canvas id="game-canvas"></canvas>
 

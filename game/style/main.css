@@ -90,6 +90,38 @@ main {
   opacity: 0;
 }
 
+/* 分层背景的新样式 */
+#game2d-background {
+  display: block;
+}
+
+#game2d-background .bg-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  z-index: -3;
+  opacity: 1;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+#game2d-background .layer-1 {
+  z-index: -2;
+}
+#game2d-background .layer-2 {
+  z-index: -1;
+}
+
 /* 保存提示样式 */
 .save-notification {
   position: absolute;
