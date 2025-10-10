@@ -34,7 +34,6 @@ import Keyboard from './Keyboard.js'
 ```
 
 #info-box(
-  title: "注意",
   type: "warning",
 )[
   `Keyboard.js` 导出的是一个已实例化的单例对象，可直接使用，无需 `new` 关键字。
@@ -60,7 +59,6 @@ import Keyboard from './Keyboard.js'
 )
 
 #info-box(
-  title: "注意",
   type: "warning",
 )[
   在调用 API 时使用映射后的名称，而非原生代码（如 `KeyA`、`Space`、`ArrowUp`）。
@@ -345,33 +343,23 @@ Keyboard.onKeydown(['Esc', 'P'], () => {
 
 
   ```,
-  explanation: "使用模块提供的映射名称（参见\"支持的按键\[一节），而非原生 `KeyboardEvent.code`。],
+  explanation: "使用模块提供的映射名称（参见\"支持的按键\"一节），而非原生 `KeyboardEvent.code`。",
 )
 
-= 注意事项
+= 技术细节
 
 #info-box(
-  title: "窗口失焦重置",
   type: "warning",
 )[
   当窗口失去焦点时，所有按键状态会自动重置为未按下，并触发对应的 `keyup` 事件。这是为了避免用户切换窗口时按键状态残留导致的游戏逻辑错误。
 ]
 
 #info-box(
-  title: "未知按键警告",
   type: "info",
 )[
-  当用户按下或松开 `KEYMAP` 中未定义的按键时，控制台会输出警告信息。如需支持更多按键，请在 `KEYMAP` 中添加映射。
+  - 当用户按下或松开 `KEYMAP` 中未定义的按键时，控制台会输出警告信息。如需支持更多按键，请在 `KEYMAP` 中添加映射。
+  - 只有已绑定监听器的按键会阻止浏览器默认行为（`preventDefault`），未绑定的按键不受影响。这确保了输入框等元素的正常使用。
 ]
-
-#info-box(
-  title: "默认行为阻止",
-  type: "info",
-)[
-  只有已绑定监听器的按键会阻止浏览器默认行为（`preventDefault`），未绑定的按键不受影响。这确保了输入框等元素的正常使用。
-]
-
-= 技术细节
 
 == 内部实现
 

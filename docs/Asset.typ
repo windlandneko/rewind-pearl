@@ -35,7 +35,6 @@ import Asset from './Asset.js'
 ```
 
 #info-box(
-  title: "注意",
   type: "warning",
 )[
   `Asset.js` 导出的是一个已实例化的单例对象，可直接使用，无需 `new` 关键字。
@@ -91,8 +90,7 @@ import Asset from './Asset.js'
 )
 
 #info-box(
-  title: "注意",
-  type: "info",
+  type: "warning",
 )[
   访问键名使用斜杠 `/` 分隔层级，而非点号 `.`。例如 `Asset.get('background/home')` 而非 `Asset.get('background.home')`。
 ]
@@ -138,7 +136,11 @@ import Asset from './Asset.js'
   }
   await Asset.loadFromManifest(manifest)
   ```,
-  notes: [加载失败的资源会抛出异常，但不会中断其他资源的加载。建议在 `onProgress` 中处理错误。],
+  notes: [
+    加载失败的资源会抛出异常，但不会中断其他资源的加载。建议在 `onProgress` 中处理错误。
+    
+    *并行加载*：`loadFromManifest` 并行加载所有资源，完成顺序不确定。如果需要按特定顺序执行操作，应在所有资源加载完成后（Promise resolve）再进行。
+  ],
 )
 
 #api(
@@ -163,7 +165,11 @@ import Asset from './Asset.js'
   // 手动指定类型
   const textData = await Asset.load('data.txt', 'text')
   ```,
-  notes: [此方法不会将资源添加到缓存中，仅用于临时加载。推荐使用 `loadFromManifest` 统一管理。],
+  notes: [
+    此方法不会将资源添加到缓存中，仅用于临时加载。推荐使用 `loadFromManifest` 统一管理。
+    
+    *路径约定*：manifest 中的路径使用相对于 `basePath` 的相对路径，不要在 manifest 路径中包含 `basePath`，会导致路径重复。
+  ],
 )
 
 == 资源查询
@@ -191,7 +197,11 @@ import Asset from './Asset.js'
   // 获取角色立绘
   const characterImg = Asset.get('character/dingzhen/normal')
   ```,
-  notes: [如果资源不存在，控制台会输出警告信息并返回 `undefined`。使用前建议先用 `has()` 检查。],
+  notes: [
+    如果资源不存在，控制台会输出警告信息并返回 `undefined`。使用前建议先用 `has()` 检查。
+    
+    *内存管理*：所有加载的资源都存储在内存中（Map 结构），直到页面刷新。对于大型游戏，考虑实现资源卸载功能或分场景加载。
+  ],
 )
 
 #api(
@@ -246,7 +256,6 @@ import Asset from './Asset.js'
 )
 
 #info-box(
-  title: "提示：音频克隆",
   type: "info",
 )[
   通过 `Asset.get()` 获取的音频对象是原始对象的引用。在 `SoundManager.js` 中，音效播放时会使用 `cloneNode()` 克隆音频对象，以支持同时播放多个实例。
@@ -473,40 +482,6 @@ async function loadSpecialEffect() {
   ```,
   explanation: [`loadFromManifest` 会自动检查资源是否已加载，避免重复加载浪费资源。],
 )
-
-= 注意事项
-
-#info-box(
-  title: "错误处理",
-  type: "error",
-)[
-  - 加载失败的资源会在 `onProgress` 回调中触发 `type: 'failed'` 事件
-  - 同时会抛出异常，但不会中断其他资源的加载
-  - 建议在 `onProgress` 中收集失败的资源，在加载完成后统一处理
-]
-
-#info-box(
-  title: "资源路径约定",
-  type: "warning",
-)[
-  - manifest 中的路径使用相对于 `basePath` 的相对路径
-  - 访问键名使用斜杠 `/` 分隔层级（如 `'background/home'`）
-  - 不要在 manifest 路径中包含 `basePath`，会导致路径重复
-]
-
-#info-box(
-  title: "加载顺序",
-  type: "warning",
-)[
-  `loadFromManifest` 并行加载所有资源，加载完成的顺序不确定。如果需要按特定顺序执行操作，应在所有资源加载完成后（Promise resolve）再进行。
-]
-
-#info-box(
-  title: "内存管理",
-  type: "info",
-)[
-  所有加载的资源都存储在内存中（Map 结构），直到页面刷新或手动清除。对于大型游戏，考虑实现资源卸载功能或分场景加载。
-]
 
 = 技术细节
 

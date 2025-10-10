@@ -105,7 +105,7 @@ import SaveManager from './SaveManager.js'
     (name: "onLoad", type: "Function", description: [加载存档的回调函数，接收存档数据对象作为参数：`(saveData) => void`]),
     (name: "onDelete", type: "Function", optional: true, description: [删除存档的回调函数，接收存档名称作为参数：`(saveName) => void`]),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import SaveManager from './SaveManager.js'
   
@@ -141,7 +141,7 @@ import SaveManager from './SaveManager.js'
   parameters: (
     (name: "onSave", type: "Function", description: [保存存档的回调函数，接收用户输入的存档名称作为参数：`(saveName) => void`]),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import SaveManager from './SaveManager.js'
   
@@ -529,47 +529,22 @@ class SaveExporter {
   explanation: "提供合理的默认存档名称，方便用户快速保存。",
 )
 
-= 注意事项
-
-#info-box(
-  title: "全局函数污染",
-  type: "warning",
-)[
-  `loadSaveList` 方法会定义全局函数 `window.loadSelectedSave` 和 `window.deleteSave` 用于处理点击事件。这是为了支持 `onclick` 属性的 HTML 事件绑定。在多次调用 `loadSaveList` 时，这些全局函数会被覆盖。
-]
-
-#info-box(
-  title: "用户登录状态",
-  type: "warning",
-)[
-  所有存档操作都依赖于当前用户名（`localStorage['rewind-pearl-username']`）。如果用户未登录，`loadSaveList` 会显示"用户未登录"提示。确保在使用存档系统前完成用户登录流程。
-]
-
-#info-box(
-  title: "存档数据结构",
-  type: "info",
-)[
-  SaveManager 只负责 UI 和交互逻辑，不负责存档数据的生成和验证。存档数据的结构应由游戏主逻辑定义，并确保序列化和反序列化的正确性。
-]
-
-#info-box(
-  title: "页面刷新行为",
-  type: "info",
-)[
-  加载存档时，默认做法是将存档数据写入自动存档槽（`rewind-pearl-autosave-{username}`），然后调用 `location.reload()` 刷新页面。这会导致当前游戏状态丢失，确保在刷新前已保存必要数据。
-]
-
-#info-box(
-  title: "存档数量限制",
-  type: "warning",
-)[
-  `localStorage` 有容量限制（通常 5-10MB），大量存档可能导致存储失败。建议：
-  - 限制单个用户的存档数量（如最多 20 个）
-  - 提供存档清理或自动清理功能
-  - 压缩存档数据或使用 IndexedDB 替代
-]
-
 = 技术细节
+
+#info-box(
+  type: "warning",
+)[
+  - *全局函数污染*：`loadSaveList` 方法会定义全局函数 `window.loadSelectedSave` 和 `window.deleteSave` 用于处理点击事件。这是为了支持 `onclick` 属性的 HTML 事件绑定。在多次调用 `loadSaveList` 时，这些全局函数会被覆盖。
+  - *用户登录状态*：所有存档操作都依赖于当前用户名（`localStorage['rewind-pearl-username']`）。如果用户未登录，`loadSaveList` 会显示"用户未登录"提示。确保在使用存档系统前完成用户登录流程。
+  - *存档数量限制*：`localStorage` 有容量限制（通常 5-10MB），大量存档可能导致存储失败。建议限制单个用户的存档数量（如最多 20 个）、提供存档清理功能、或压缩存档数据。
+]
+
+#info-box(
+  type: "info",
+)[
+  - *存档数据结构*：SaveManager 只负责 UI 和交互逻辑，不负责存档数据的生成和验证。存档数据的结构应由游戏主逻辑定义，并确保序列化和反序列化的正确性。
+  - *页面刷新行为*：加载存档时，默认做法是将存档数据写入自动存档槽（`rewind-pearl-autosave-{username}`），然后调用 `location.reload()` 刷新页面。这会导致当前游戏状态丢失，确保在刷新前已保存必要数据。
+]
 
 == 静态类设计
 

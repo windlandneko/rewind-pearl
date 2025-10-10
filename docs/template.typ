@@ -87,7 +87,7 @@
   )
 
   set text(
-    font: ("New Computer Modern", "HarmonyOS Sans SC"),
+    font: "HarmonyOS Sans SC",
     size: 11pt,
     lang: "zh",
     top-edge: "ascender",
@@ -217,7 +217,7 @@
     breakable: true,
   )[
     // 函数名
-    #text(size: 13pt, weight: "bold", font: ("JetBrains Mono", "HarmonyOS Sans SC"), fill: rgb("#0066cc"))[
+    #text(size: 14pt, weight: "bold", font: ("JetBrains Mono", "HarmonyOS Sans SC"))[
       #name
     ]
 
@@ -226,35 +226,37 @@
       #text(size: 11pt, fill: rgb("#333333"))[#description]
     ]
 
+    #v(0.5em)
+
     // 参数列表
     #if parameters.len() > 0 [
-      #text(size: 11pt, weight: "bold")[参数：]
-      #v(0.3em)
       #for param in parameters [
         #box(width: 100%)[
-          • #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), weight: "bold")[#param.name]
-          #text(fill: rgb("#6a737d"))[#raw(param.type, lang: none)]
+          #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), weight: "bold", fill: rgb("#0c7fd2"))[#param.name]
+          #h(0.3em)
+          #text(font: ("LXGW WenKai Mono", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#param.type]
           #if param.at("optional", default: false) [ #text(fill: rgb("#999999"))[（可选）] ]
 
-          #param.description
+          #v(-0.6em)
+          #h(1em)
+          #text(size: 10pt, fill: rgb("#5c5c5c"))[#param.description]
         ]
       ]
     ]
 
     // 返回值
     #if returns != none [
-      #text(size: 10pt, weight: "bold")[返回值：]
-      #v(0.3em)
-      • #text(fill: rgb("#6a737d"))[#raw(returns.type, lang: none)] — #returns.description
-      #v(0.5em)
+      #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), fill: rgb("#0c7fd2"))[返回值]
+      #h(0.3em)
+      #text(font: ("LXGW WenKai Mono", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#returns.type]
+
+      #v(-0.6em)
+      #h(1em)
+      #text(size: 10pt, fill: rgb("#5c5c5c"))[#returns.description]
     ]
 
     // 示例代码
-    #if example != none [
-      #text(size: 10pt, weight: "bold")[示例：]
-      #v(0.3em)
-      #example
-    ]
+    #example
 
     // 注意事项
     #if notes != none [

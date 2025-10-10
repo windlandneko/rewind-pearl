@@ -38,7 +38,6 @@ import { $, EventListener } from './utils.js'
 ```
 
 #info-box(
-  title: "注意",
   type: "info",
 )[
   `utils.js` 导出的都是独立函数和类，无全局状态。`EventListener` 需要实例化后使用。
@@ -59,11 +58,9 @@ import { $, EventListener } from './utils.js'
   const pauseOverlay = $('#pause-overlay')
   const saveBtn = $('#save-btn')
   
-  if (pauseOverlay) {
-    pauseOverlay.classList.add('show')
-  }
+  pauseOverlay.classList.add('show')
   ```,
-  notes: [推荐用于查询 ID 或唯一类名的元素，查询结果需检查是否为 `null`。],
+  notes: [使用时需保证元素存在，或使用可选链操作符 `?.`。],
 )
 
 #api(
@@ -86,9 +83,9 @@ import { $, EventListener } from './utils.js'
 
 #api(
   name: "wait(ms)",
-  description: "返回一个延时指定毫秒数的 Promise，用于异步流程控制和延迟执行。",
+  description: "返回一个延时指定毫秒数的 Promise。",
   parameters: (
-    (name: "ms", type: "number", description: "延时毫秒数"),
+    (name: "ms", type: "number", description: "需要的延时毫秒数"),
   ),
   returns: (type: "Promise<void>", description: "延时后 resolve 的 Promise"),
   example: ```js
@@ -240,7 +237,7 @@ import { $, EventListener } from './utils.js'
     (name: "event", type: "string", description: "事件名称"),
     (name: "...args", type: "any[]", description: "传递给监听器的参数（可变参数）"),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   const listener = new EventListener()
   
@@ -295,7 +292,7 @@ import { $, EventListener } from './utils.js'
   // 生成伪随机地形
   const tileType = hash2D(x, y, tileTypes.length)
   ```,
-  notes: "基于位运算实现，确保相同坐标总是返回相同值。适合需要确定性随机的场景。",
+  notes: "基于位运算实现，确保相同坐标总是返回相同值。适合伪随机的场景。",
 )
 
 = 使用场景与示例
@@ -458,6 +455,10 @@ class Game {
   const btn = $('#save-btn')
   const overlay = $('#pause-overlay')
   const modal = $('#help-modal')
+
+
+
+
   ```,
   explanation: [使用 `$` 简化 DOM 查询，减少代码冗余，提高可读性。],
 )
@@ -467,6 +468,10 @@ class Game {
   setTimeout(() => {
     console.log('延时执行')
   }, 1000)
+
+
+
+
   ```,
   good: ```js
   import { wait } from './utils.js'
@@ -481,10 +486,16 @@ class Game {
 
 #best-practice(
   bad: ```js
-  window.addEventListener('scroll', () => {
+  addEventListener('scroll', () => {
     // 滚动时每次都执行，性能差
     updateUI()
   })
+
+
+
+
+
+
   ```,
   good: ```js
   import { throttle } from './utils.js'
@@ -493,7 +504,7 @@ class Game {
     updateUI()
   }, 100)
   
-  window.addEventListener('scroll', handleScroll)
+  addEventListener('scroll', handleScroll)
   ```,
   explanation: [使用 `throttle` 限制高频事件的执行频率，提升性能。],
 )
@@ -504,6 +515,11 @@ class Game {
     // 每次输入都触发搜索
     performSearch(input.value)
   })
+
+
+
+
+
   ```,
   good: ```js
   import { debounce } from './utils.js'
@@ -517,67 +533,21 @@ class Game {
   explanation: [使用 `debounce` 延迟执行，等待用户输入完成后再触发操作。],
 )
 
-#best-practice(
-  bad: ```js
-  // 全局事件总线
-  const globalEvents = new EventListener()
-  export default globalEvents
-  ```,
-  good: ```js
-  class Component {
-    #events = new EventListener()
-    
-    on(event, callback) {
-      return this.#events.on(event, callback)
-    }
-    
-    emit(event, ...args) {
-      this.#events.emit(event, ...args)
-    }
-  }
-  ```,
-  explanation: [将 `EventListener` 作为类的私有成员，通过公共方法暴露接口，避免外部直接操作。],
-)
-
-= 注意事项
-
-#info-box(
-  title: "DOM 查询安全性",
-  type: "warning",
-)[
-  使用 `$` 和 `$$` 查询元素时，始终检查返回值是否为 `null`，避免在元素不存在时调用方法导致错误。推荐使用可选链操作符 `?.`。
-]
-
-#info-box(
-  title: "EventListener 内存管理",
-  type: "warning",
-)[
-  使用 `on` 和 `once` 注册监听器后，务必在组件销毁时调用返回的取消函数，避免内存泄漏。特别是在单页应用或场景切换频繁的游戏中。
-]
-
-#info-box(
-  title: "节流与防抖的选择",
-  type: "info",
-)[
-  - *节流（throttle）*：适用于需要持续响应但限制频率的场景，如滚动、鼠标移动、游戏状态更新。首次调用立即执行。
-  - *防抖（debounce）*：适用于需要等待操作完成后执行的场景，如搜索输入、窗口调整。延迟执行，连续调用会重置计时器。
-]
-
-#info-box(
-  title: "hash2D 的确定性",
-  type: "info",
-)[
-  `hash2D` 基于位运算实现，相同的输入总是返回相同的输出。适合需要可重现随机性的场景（如程序化生成），但不适合密码学或安全相关的应用。
-]
-
 = 技术细节
 
-== EventListener 内部实现
+#info-box(
+  type: "warning",
+)[
+  - *DOM 查询*：使用 `$` 和 `$$` 查询元素时，始终检查返回值是否为 `null`，避免在元素不存在时调用方法导致错误。推荐使用可选链操作符 `?.`。
+  - *EventListener 内存管理*：使用 `on` 和 `once` 注册监听器后，务必在组件销毁时调用返回的取消函数，避免内存泄漏。
+]
 
-- *存储结构*：使用私有 `Map<string, Function[]>` 存储事件名与回调函数数组的映射
-- *注册机制*：`on` 方法将回调函数添加到数组，返回闭包形式的取消函数
-- *一次性监听*：`once` 通过包装回调函数实现，触发后自动调用取消函数
-- *触发机制*：`emit` 遍历对应事件的回调数组，依次执行并传递参数
+#info-box(
+  type: "info",
+)[
+  - *节流与防抖的选择*：节流（throttle）适用于需要持续响应但限制频率的场景，如滚动、鼠标移动、游戏状态更新，首次调用立即执行；防抖（debounce）适用于需要等待操作完成后执行的场景，如搜索输入、窗口调整，延迟执行并连续调用会重置计时器。
+  - *hash2D 的确定性*：`hash2D` 基于位运算实现，相同的输入总是返回相同的输出。适合需要可重现随机性的场景（如程序化生成），但不适合密码学或安全相关的应用。
+]
 
 == 依赖关系
 

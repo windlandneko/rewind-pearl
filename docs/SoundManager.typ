@@ -36,7 +36,6 @@ import SoundManager from './SoundManager.js'
 ```
 
 #info-box(
-  title: "注意",
   type: "warning",
 )[
   `SoundManager.js` 导出的是一个已实例化的单例对象，可直接使用，无需 `new` 关键字。
@@ -57,7 +56,7 @@ import SoundManager from './SoundManager.js'
     (name: "options.fadeIn", type: "boolean", optional: true, description: [是否淡入（默认 `true`）]),
     (name: "options.fadeTime", type: "number", optional: true, description: [淡入时长，单位毫秒（默认 `2000`）]),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import SoundManager from './SoundManager.js'
   
@@ -85,7 +84,7 @@ import SoundManager from './SoundManager.js'
   name: "pauseBGM()",
   description: [暂停当前播放的 BGM，保留播放位置。可通过 `resumeBGM()` 恢复播放。],
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   // 游戏暂停时
   SoundManager.pauseBGM()
@@ -103,7 +102,7 @@ import SoundManager from './SoundManager.js'
   name: "resumeBGM()",
   description: "恢复暂停的 BGM 播放，从暂停位置继续。",
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   // 游戏恢复时
   SoundManager.resumeBGM()
@@ -125,7 +124,7 @@ import SoundManager from './SoundManager.js'
     (name: "options.fadeOut", type: "boolean", optional: true, description: [是否淡出（默认 `true`）]),
     (name: "options.fadeTime", type: "number", optional: true, description: [淡出时长，单位毫秒（默认 `2000`）]),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   // 淡出停止（推荐）
   SoundManager.stopBGM()
@@ -150,7 +149,7 @@ import SoundManager from './SoundManager.js'
     (name: "options.single", type: "boolean", optional: true, description: [是否为单实例播放（默认 `true`）。`true` 时，如果已有实例在播放则跳过]),
     (name: "options.volume", type: "number", optional: true, description: [音量大小，范围 0-1（默认 `0.5`）]),
   ),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import SoundManager from './SoundManager.js'
   
@@ -176,7 +175,7 @@ import SoundManager from './SoundManager.js'
   name: "stopSound()",
   description: "停止所有正在播放的音效，并清空音效管理队列。",
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   // 场景切换时停止所有音效
   function changeScene() {
@@ -222,8 +221,7 @@ playBGM(name, options) {
 ```
 
 #info-box(
-  title: "用户体验建议",
-  type: "success",
+  type: "info",
 )[
   推荐在用户点击"开始游戏"按钮后再播放 BGM，避免自动播放被阻止。在加载界面可以不播放音乐，进入游戏主界面后再启动。
 ]
@@ -506,53 +504,22 @@ class Achievement {
   explanation: "在用户交互后播放音频，避免被浏览器自动播放策略阻止。",
 )
 
-= 注意事项
-
-#info-box(
-  title: "浏览器自动播放策略",
-  type: "warning",
-)[
-  - 现代浏览器默认禁止自动播放音频，需要用户交互（点击、按键等）
-  - `SoundManager` 会自动处理此限制，但首次播放建议在用户交互后触发
-  - 如果被阻止，控制台会输出警告信息，并在用户交互后自动播放
-]
-
-#info-box(
-  title: "音频资源命名",
-  type: "info",
-)[
-  - BGM 使用 `playBGM(name)` 时，自动拼接 `audio/` 前缀
-  - 音效使用 `play(name)` 时，自动拼接 `soundEffects/` 前缀
-  - 在 Asset 的 manifest.json 中对应组织资源结构
-]
-
-#info-box(
-  title: "内存管理",
-  type: "info",
-)[
-  - 音效实例在播放结束后会自动清理，无需手动管理
-  - BGM 只保留一个实例，切换时会自动释放旧实例
-  - 调用 `stopSound()` 会立即清空所有音效实例
-]
-
-#info-box(
-  title: "音量范围",
-  type: "warning",
-)[
-  音量参数范围为 0-1，超出范围可能导致播放失败或音量异常。推荐值：
-  - BGM：0.3-0.5
-  - 音效：0.4-0.7
-  - 暂停音效：0.2-0.4
-]
-
-#info-box(
-  title: "淡入淡出性能",
-  type: "info",
-)[
-  淡入淡出基于 `requestAnimationFrame` 实现，性能消耗极低。但同时进行多个淡入淡出操作时，建议控制在 2-3 个以内。
-]
-
 = 技术细节
+
+#info-box(
+  type: "warning",
+)[
+  - *浏览器自动播放策略*：现代浏览器默认禁止自动播放音频，需要用户交互（点击、按键等）。`SoundManager` 会自动处理此限制，但首次播放建议在用户交互后触发。如果被阻止，控制台会输出警告信息，并在用户交互后自动播放。
+  - *音量范围*：音量参数范围为 0-1，超出范围可能导致播放失败或音量异常。推荐值：BGM 0.3-0.5、音效 0.4-0.7、暂停音效 0.2-0.4。
+]
+
+#info-box(
+  type: "info",
+)[
+  - *音频资源命名*：BGM 使用 `playBGM(name)` 时，自动拼接 `audio/` 前缀；音效使用 `play(name)` 时，自动拼接 `soundEffects/` 前缀。在 Asset 的 manifest.json 中对应组织资源结构。
+  - *内存管理*：音效实例在播放结束后会自动清理，无需手动管理；BGM 只保留一个实例，切换时会自动释放旧实例；调用 `stopSound()` 会立即清空所有音效实例。
+  - *淡入淡出性能*：淡入淡出基于 `requestAnimationFrame` 实现，性能消耗极低。但同时进行多个淡入淡出操作时，建议控制在 2-3 个以内。
+]
 
 == 内部状态
 

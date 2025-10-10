@@ -36,7 +36,6 @@ import PauseManager from './PauseManager.js'
 ```
 
 #info-box(
-  title: "注意",
   type: "warning",
 )[
   `PauseManager.js` 导出的是一个已实例化的单例对象（类名为 `PauseManager`），可直接使用，无需 `new` 关键字。
@@ -88,7 +87,7 @@ import PauseManager from './PauseManager.js'
   name: "pause()",
   description: [暂停游戏，显示暂停菜单。暂停 BGM 并播放暂停音效，触发 `pause` 事件。],
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
   
@@ -111,7 +110,7 @@ import PauseManager from './PauseManager.js'
   name: "resume()",
   description: [恢复游戏，隐藏暂停菜单。恢复 BGM 播放，触发 `resume` 事件。],
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
   
@@ -130,7 +129,7 @@ import PauseManager from './PauseManager.js'
   name: "toggle()",
   description: "切换暂停状态。如果当前已暂停则恢复，如果未暂停则暂停。",
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
   
@@ -185,7 +184,7 @@ import PauseManager from './PauseManager.js'
   name: "showHelp()",
   description: "显示帮助模态框，并设置 ESC 键处理器为关闭帮助。",
   parameters: (),
-  returns: (type: "void", description: "无返回值"),
+  returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
   
@@ -581,56 +580,23 @@ class ParticleSystem {
   explanation: [在主循环中检查 `isPaused` 状态，暂停时跳过游戏逻辑更新。],
 )
 
-= 注意事项
-
-#info-box(
-  title: "HTML 元素依赖",
-  type: "warning",
-)[
-  PauseManager 依赖特定 ID 的 HTML 元素（如 `#pause-overlay`、`#save-manager-modal` 等）。确保这些元素在页面中存在，否则会导致功能失效。使用可选链 `?.` 避免报错。
-]
-
-#info-box(
-  title: "游戏实例引用",
-  type: "warning",
-)[
-  必须在游戏初始化时设置 `PauseManager.game = this`，否则存档保存、加载和退出功能无法正常工作。
-]
-
-#info-box(
-  title: "ESC 键监听器管理",
-  type: "info",
-)[
-  PauseManager 内部动态管理 ESC 键监听器，避免在外部重复注册 ESC 键监听，否则可能导致行为冲突。
-]
-
-#info-box(
-  title: "事件执行顺序",
-  type: "info",
-)[
-  `pause` 和 `resume` 事件的监听器按注册顺序依次执行。如果有多个模块需要响应暂停/恢复事件，确保注册顺序正确。
-]
-
-#info-box(
-  title: "页面刷新行为",
-  type: "warning",
-)[
-  - 加载存档后会调用 `location.reload()` 刷新页面
-  - 返回标题前会自动保存游戏（如果 `maxTick` 不为 `null`）
-  - 刷新前会设置 `onSavedExit = true` 避免重复自动保存
-]
-
-#info-box(
-  title: "模态框关闭逻辑",
-  type: "info",
-)[
-  存档管理器和帮助界面支持三种关闭方式：
-  1. 点击关闭按钮（`×`）
-  2. 按 ESC 键
-  3. 点击模态框背景（遮罩层）
-]
-
 = 技术细节
+
+#info-box(
+  type: "warning",
+)[
+  - *HTML 元素依赖*：PauseManager 依赖特定 ID 的 HTML 元素（如 `#pause-overlay`、`#save-manager-modal` 等）。确保这些元素在页面中存在，否则会导致功能失效。使用可选链 `?.` 避免报错。
+  - *游戏实例引用*：必须在游戏初始化时设置 `PauseManager.game = this`，否则存档保存、加载和退出功能无法正常工作。
+  - *页面刷新行为*：加载存档后会调用 `location.reload()` 刷新页面；返回标题前会自动保存游戏（如果 `maxTick` 不为 `null`）；刷新前会设置 `onSavedExit = true` 避免重复自动保存。
+]
+
+#info-box(
+  type: "info",
+)[
+  - *ESC 键监听器管理*：PauseManager 内部动态管理 ESC 键监听器，避免在外部重复注册 ESC 键监听，否则可能导致行为冲突。
+  - *事件执行顺序*：`pause` 和 `resume` 事件的监听器按注册顺序依次执行。如果有多个模块需要响应暂停/恢复事件，确保注册顺序正确。
+  - *模态框关闭*：存档管理器和帮助界面支持三种关闭方式：点击关闭按钮（`×`）、按 ESC 键、点击模态框背景（遮罩层）。
+]
 
 == 类结构
 
