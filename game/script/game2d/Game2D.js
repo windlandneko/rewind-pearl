@@ -335,6 +335,7 @@ export class Game {
 
     const levelName = levelData.name || 'Level1'
 
+    Object.assign(this.levelData, levelData)
     this.loadLevel(Levels[levelName])
     Object.assign(this.levelData, levelData)
 
