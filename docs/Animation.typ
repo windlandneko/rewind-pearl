@@ -102,15 +102,15 @@ import SpriteAnimation from './Sprite.js'
 class Character {
   constructor() {
     this.animManager = new AnimationManager()
-    
+
     // 添加所有动画状态
     this.animManager.addAnimation('idle', new SpriteAnimation(...))
     this.animManager.addAnimation('walk', new SpriteAnimation(...))
     this.animManager.addAnimation('attack', new SpriteAnimation(...))
-    
+
     this.animManager.playAnimation('idle')
   }
-  
+
   update(dt) {
     // 根据游戏状态切换动画
     if (this.isAttacking) {
@@ -120,10 +120,10 @@ class Character {
     } else {
       this.animManager.playAnimation('idle')
     }
-    
+
     this.animManager.update(dt)
   }
-  
+
   render(ctx) {
     this.animManager.render(ctx, this.x, this.y, 64, 64)
   }

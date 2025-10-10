@@ -50,13 +50,13 @@ const tileData = [
 <Tileset ignores="0">
   <!-- 中心图块 -->
   <set mask="center" tiles="0,0; 1,0; 2,0; 3,0" />
-  
+
   <!-- 四周都有图块的情况 -->
   <set mask="111-111-111" tiles="4,0" />
-  
+
   <!-- 上方和左侧有图块 -->
   <set mask="11-11-0" tiles="0,1" />
-  
+
   <!-- 更多图块模式... -->
 </Tileset>
 ```
@@ -90,7 +90,7 @@ const tileData = [
   example: ```js
   // 首次渲染
   tiles.render(tileCtx, true)
-  
+
   // 后续只渲染变化部分
   tiles.render(tileCtx)
   ```,
@@ -106,7 +106,7 @@ const tileData = [
   example: ```js
   // 修改地图
   tileHelper.tiles = newTileData
-  
+
   // 下次渲染时会自动更新变化的部分
   tileHelper.render(ctx)
   ```,
@@ -185,15 +185,15 @@ class Level {
       levelData.tiles,
       levelData.tilePalette || ['default']
     )
-    
+
     // 创建离屏画布
     this.tileCanvas = document.createElement('canvas')
     this.tileCtx = this.tileCanvas.getContext('2d')
-    
+
     // 首次渲染
     this.tiles.render(this.tileCtx, true)
   }
-  
+
   render(ctx) {
     // 直接绘制预渲染的地图
     ctx.drawImage(this.tileCanvas, 0, 0)
@@ -209,13 +209,13 @@ class Game {
     // 修改地图数据
     const tileX = Math.floor(x / 8)
     const tileY = Math.floor(y / 8)
-    
+
     const newTiles = this.currentTiles.map(row => [...row])
     newTiles[tileY][tileX] = 0  // 变为空气
-    
+
     // 更新渲染器
     this.tileHelper.tiles = newTiles
-    
+
     // 下次渲染时自动更新
     this.tileHelper.render(this.tileCtx)
   }
@@ -231,7 +231,7 @@ class Game {
 ```js
 #calculateTileDistance() {
   const queue = []
-  
+
   // 初始化：所有空气块距离为 0
   for (let i = 1; i <= this.height; i++) {
     for (let j = 1; j <= this.width; j++) {
@@ -241,7 +241,7 @@ class Game {
       }
     }
   }
-  
+
   // BFS 扩散
   while (queue.length) {
     const [i, j, d] = queue.pop()
@@ -264,13 +264,13 @@ class Game {
 for (let i = 1; i <= this.height; i++) {
   for (let j = 1; j <= this.width; j++) {
     if (!walls[i][j]) continue
-    
+
     // 尝试水平扩展
     let r = j
     while (r <= this.width && walls[i][r]) {
       walls[i][r++] = false
     }
-    
+
     // 如果扩展长度 > 1，添加为边缘
     if (r > j + 1) {
       this.edges.push([x, y, (r - j) * 8, 8])

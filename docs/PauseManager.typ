@@ -90,14 +90,14 @@ import PauseManager from './PauseManager.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   // 按 ESC 键暂停游戏
   Keyboard.onKeydown('Esc', () => {
     if (!PauseManager.isPaused) {
       PauseManager.pause()
     }
   })
-  
+
   // 点击暂停按钮
   pauseButton.addEventListener('click', () => {
     PauseManager.pause()
@@ -113,12 +113,12 @@ import PauseManager from './PauseManager.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   // 点击继续按钮恢复游戏
   resumeButton.addEventListener('click', () => {
     PauseManager.resume()
   })
-  
+
   // 在暂停菜单中按 ESC 键恢复
   // (PauseManager 内部自动处理)
   ```,
@@ -132,12 +132,12 @@ import PauseManager from './PauseManager.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   // 按 P 键切换暂停状态
   Keyboard.onKeydown('P', () => {
     PauseManager.toggle()
   })
-  
+
   // 游戏手柄按钮
   gamepad.on('start', () => {
     PauseManager.toggle()
@@ -158,7 +158,7 @@ import PauseManager from './PauseManager.js'
   returns: (type: "Function", description: "返回取消监听的函数"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   class Game {
     constructor() {
       // 监听暂停事件
@@ -166,7 +166,7 @@ import PauseManager from './PauseManager.js'
         this.stopGameLoop()
         this.hideGameUI()
       })
-      
+
       // 监听恢复事件
       PauseManager.on('resume', () => {
         this.startGameLoop()
@@ -187,12 +187,12 @@ import PauseManager from './PauseManager.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   // 点击帮助按钮
   helpButton.addEventListener('click', () => {
     PauseManager.showHelp()
   })
-  
+
   // 在游戏中按 F1 显示帮助
   Keyboard.onKeydown('F1', () => {
     PauseManager.showHelp()
@@ -210,7 +210,7 @@ import PauseManager from './PauseManager.js'
   returns: (type: "boolean", description: [`true` 表示已暂停，`false` 表示运行中]),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   // 在游戏主循环中检查
   function gameLoop() {
     if (!PauseManager.isPaused) {
@@ -219,7 +219,7 @@ import PauseManager from './PauseManager.js'
     }
     requestAnimationFrame(gameLoop)
   }
-  
+
   // 条件性暂停
   if (!PauseManager.isPaused && someCondition) {
     PauseManager.pause()
@@ -235,13 +235,13 @@ import PauseManager from './PauseManager.js'
   returns: (type: "Object", description: "游戏实例对象"),
   example: ```js
   import PauseManager from './PauseManager.js'
-  
+
   class Game {
     constructor() {
       // 设置游戏实例引用
       PauseManager.game = this
     }
-    
+
     saveGame(saveName, silent = false, isAuto = false) {
       // 保存逻辑
     }
@@ -295,17 +295,17 @@ import PauseManager from './PauseManager.js'
 pause() {
   // 暂停 BGM
   SoundManager.pauseBGM()
-  
+
   // 播放暂停音效
   SoundManager.play('pause', { volume: 0.3 })
-  
+
   // ... 显示菜单
 }
 
 resume() {
   // 恢复 BGM
   SoundManager.resumeBGM()
-  
+
   // ... 隐藏菜单
 }
 ```
@@ -318,20 +318,20 @@ resume() {
 #onLoadGame() {
   const saveList = $('#save-list')
   this.$saveManagerModal?.classList.add('show')
-  
+
   // 使用 SaveManager 加载存档列表
   SaveManager.loadSaveList(saveList, saveData => {
     const currentUser = localStorage.getItem('rewind-pearl-username')
-    
+
     // 将选中的存档写入自动存档槽
     localStorage.setItem(
       'rewind-pearl-autosave-' + currentUser,
       JSON.stringify(saveData)
     )
-    
+
     // 标记为已保存退出，避免重复自动保存
     this.game.onSavedExit = true
-    
+
     // 刷新页面重新加载游戏
     location.reload()
   })
@@ -349,29 +349,29 @@ class Game {
   constructor() {
     // 设置游戏实例引用
     PauseManager.game = this
-    
+
     // 监听暂停/恢复事件
     PauseManager.on('pause', () => {
       console.log('游戏已暂停')
       this.stopPhysics()
     })
-    
+
     PauseManager.on('resume', () => {
       console.log('游戏已恢复')
       this.startPhysics()
     })
   }
-  
+
   loop(timestamp) {
     // 暂停时不更新游戏逻辑
     if (!PauseManager.isPaused) {
       this.update(timestamp)
       this.render()
     }
-    
+
     requestAnimationFrame((t) => this.loop(t))
   }
-  
+
   saveGame(saveName, silent = false, isAuto = false) {
     // 实现保存逻辑
   }
@@ -392,12 +392,12 @@ class Game {
         PauseManager.pause()
       }
     })
-    
+
     // P 键切换暂停
     Keyboard.onKeydown('P', () => {
       PauseManager.toggle()
     })
-    
+
     // F1 显示帮助
     Keyboard.onKeydown('F1', () => {
       if (!PauseManager.isPaused) {
@@ -456,7 +456,7 @@ class ExtendedPauseManager {
         this.#hideSaveManagerModal()
       }
     })
-    
+
     // 帮助界面点击背景关闭
     $('#help-modal')?.addEventListener('click', (event) => {
       if (event.target.id === 'help-modal') {
@@ -464,13 +464,13 @@ class ExtendedPauseManager {
       }
     })
   }
-  
+
   static #hideSaveManagerModal() {
     $('#save-manager-modal')?.classList.remove('show')
     // 恢复 ESC 键为恢复游戏
     PauseManager.#setEscKeyHandler(() => PauseManager.resume())
   }
-  
+
   static #hideHelpModal() {
     $('#help-modal')?.classList.remove('show')
     PauseManager.#setEscKeyHandler(() => PauseManager.resume())
@@ -487,22 +487,22 @@ class ParticleSystem {
   constructor() {
     this.particles = []
     this.isPaused = false
-    
+
     PauseManager.on('pause', () => {
       this.isPaused = true
       // 可选：冻结粒子
       this.particles.forEach(p => p.freeze())
     })
-    
+
     PauseManager.on('resume', () => {
       this.isPaused = false
       this.particles.forEach(p => p.unfreeze())
     })
   }
-  
+
   update(dt) {
     if (this.isPaused) return
-    
+
     this.particles.forEach(p => p.update(dt))
   }
 }
@@ -603,28 +603,28 @@ class ParticleSystem {
 ```js
 export class PauseManager {
   #listener = new EventListener()  // 事件系统
-  
+
   constructor() {
     this.isPaused = false
     this.game = null
     this.escKeyHandler = null
-    
+
     // 缓存 DOM 元素
     this.$pauseOverlay = $('#pause-overlay')
     this.$saveManagerModal = $('#save-manager-modal')
     this.$helpModal = $('#help-modal')
-    
+
     // 绑定按钮事件
     this.#bindButtonEvents()
   }
-  
+
   // 公共方法
   pause() { /* ... */ }
   resume() { /* ... */ }
   toggle() { /* ... */ }
   on(event, listener) { /* ... */ }
   showHelp() { /* ... */ }
-  
+
   // 私有方法
   #onSaveGame() { /* ... */ }
   #onLoadGame() { /* ... */ }
@@ -689,7 +689,7 @@ constructor() {
   $('#title-btn')?.addEventListener('click', () => this.#onReturnToTitle())
   $('#help-close')?.addEventListener('click', () => this.#hideHelpModal())
   $('#save-manager-close')?.addEventListener('click', () => this.#hideSaveManagerModal())
-  
+
   // 点击背景关闭模态框
   this.$saveManagerModal?.addEventListener('click', event => {
     if (event.target === this.$saveManagerModal) this.#hideSaveManagerModal()
@@ -708,10 +708,10 @@ constructor() {
   if (this.game?.maxTick !== null) {
     this.game.saveGame('自动保存', true, true)
   }
-  
+
   // 标记为已保存退出
   this.game.onSavedExit = true
-  
+
   // 跳转到主页
   location.assign('../index.html')
 }

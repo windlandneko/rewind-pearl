@@ -40,7 +40,6 @@
 )
 
 #info-box(
-  title: "重要提示",
   type: "warning",
 )[
   这是一个警告信息框
@@ -64,12 +63,6 @@
   // 好的写法
   ```,
   explanation: "解释为什么这样更好",
-)
-
-#doc-footer(
-  version: "1.0",
-  date: "2025年10月8日",
-  authors: ("作者1", "作者2"),
 )
 */
 

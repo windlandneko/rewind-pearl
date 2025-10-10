@@ -89,7 +89,7 @@ import Achievement from './AchievementManager.js'
   if (player.jumpCount === 1) {
     Achievement.add('first_jump')
   }
-  
+
   // 完成第一章
   if (currentChapter === 1 && chapterCompleted) {
     Achievement.add('complete_chapter1')
@@ -97,9 +97,9 @@ import Achievement from './AchievementManager.js'
   ```,
   notes: [
     如果成就已解锁，不会重复触发通知和音效。
-    
+
     *用户登录状态*：所有成就操作都依赖于当前用户名（`localStorage['rewind-pearl-username']`）。如果用户未登录，操作会返回 `false`。确保在使用成就系统前完成用户登录流程。
-    
+
     *通知系统依赖*：内部调用了 `this.game.showNotification()` 和 `this.game.sound.play('challenge_complete')`。需要确保：
     1. `Achievement.game` 已正确设置为游戏实例
     2. 游戏实例实现了 `showNotification` 方法
@@ -119,9 +119,9 @@ import Achievement from './AchievementManager.js'
   if (Achievement.has('first_jump')) {
     console.log('玩家已解锁首次跳跃成就')
   }
-  
+
   // 条件性解锁隐藏成就
-  if (Achievement.has('complete_chapter1') && 
+  if (Achievement.has('complete_chapter1') &&
       Achievement.has('collect_all_items')) {
     Achievement.add('perfect_chapter1')
   }
@@ -164,7 +164,7 @@ import Achievement from './AchievementManager.js'
   const unlocked = Achievement.values()
   console.log('已解锁成就:', unlocked)
   // 输出: ['first_jump', 'complete_chapter1']
-  
+
   // 计算解锁进度
   const progress = (unlocked.length / totalAchievements) * 100
   ```,
@@ -191,9 +191,9 @@ class Player {
 class Game {
   completeChapter(chapterNumber) {
     Achievement.add(`complete_chapter${chapterNumber}`)
-    
+
     // 检查是否完成所有章节
-    const allCompleted = [1, 2, 3, 4, 5].every(num => 
+    const allCompleted = [1, 2, 3, 4, 5].every(num =>
       Achievement.has(`complete_chapter${num}`)
     )
     if (allCompleted) {
@@ -208,15 +208,15 @@ class Game {
 ```js
 function renderAchievementPage() {
   const unlocked = Achievement.values()
-  
+
   allAchievements.forEach(achievement => {
     const isUnlocked = unlocked.includes(achievement.id)
     const element = createAchievementElement(achievement, isUnlocked)
     container.appendChild(element)
   })
-  
+
   // 显示进度
-  document.getElementById('progress').textContent = 
+  document.getElementById('progress').textContent =
     `${unlocked.length} / ${allAchievements.length}`
 }
 ```
@@ -290,7 +290,7 @@ class Game {
   constructor() {
     Achievement.game = this
   }
-  
+
   showNotification(message, options) {
     // 实现通知显示逻辑
   }

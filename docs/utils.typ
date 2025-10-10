@@ -57,7 +57,7 @@ import { $, EventListener } from './utils.js'
   example: ```js
   const pauseOverlay = $('#pause-overlay')
   const saveBtn = $('#save-btn')
-  
+
   pauseOverlay.classList.add('show')
   ```,
   notes: [使用时需保证元素存在，或使用可选链操作符 `?.`。],
@@ -95,7 +95,7 @@ import { $, EventListener } from './utils.js'
     await wait(2000)  // 等待 2 秒
     console.log('结束')
   }
-  
+
   // 链式调用
   wait(1000).then(() => {
     console.log('1 秒后执行')
@@ -119,9 +119,9 @@ import { $, EventListener } from './utils.js'
   const handleScroll = throttle(() => {
     console.log('处理滚动')
   }, 200)
-  
+
   window.addEventListener('scroll', handleScroll)
-  
+
   // 限制游戏状态更新频率
   const updateStatus = throttle((status) => {
     game.updateUI(status)
@@ -144,16 +144,16 @@ import { $, EventListener } from './utils.js'
     console.log('搜索:', query)
     performSearch(query)
   }, 500)
-  
+
   input.addEventListener('input', (e) => {
     handleSearch(e.target.value)
   })
-  
+
   // 窗口大小调整防抖
   const handleResize = debounce(() => {
     game.resize()
   }, 300)
-  
+
   window.addEventListener('resize', handleResize)
   ```,
   notes: "适用于需要等待用户操作完成后才执行的场景，如搜索框输入、窗口调整。",
@@ -171,7 +171,7 @@ import { $, EventListener } from './utils.js'
   example: ```js
   class Game {
     #listener = new EventListener()
-    
+
     start() {
       this.#listener.emit('game:start')
     }
@@ -190,15 +190,15 @@ import { $, EventListener } from './utils.js'
   returns: (type: "Function", description: "返回取消监听的函数，调用后移除该监听器"),
   example: ```js
   const listener = new EventListener()
-  
+
   // 注册监听器
   const remove = listener.on('data:update', (data) => {
     console.log('数据更新:', data)
   })
-  
+
   // 触发事件
   listener.emit('data:update', { value: 42 })
-  
+
   // 取消监听
   remove()
   ```,
@@ -215,15 +215,15 @@ import { $, EventListener } from './utils.js'
   returns: (type: "Function", description: "返回取消监听的函数，可在触发前手动移除"),
   example: ```js
   const listener = new EventListener()
-  
+
   // 注册一次性监听器
   listener.once('game:ready', () => {
     console.log('游戏已准备好')
   })
-  
+
   // 第一次触发会执行
   listener.emit('game:ready')
-  
+
   // 第二次触发不会执行（已自动移除）
   listener.emit('game:ready')
   ```,
@@ -240,11 +240,11 @@ import { $, EventListener } from './utils.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   const listener = new EventListener()
-  
+
   listener.on('player:move', (x, y, direction) => {
     console.log(`玩家移动到 (${x}, ${y})，方向：${direction}`)
   })
-  
+
   // 触发事件并传递多个参数
   listener.emit('player:move', 100, 200, 'right')
   ```,
@@ -260,9 +260,9 @@ import { $, EventListener } from './utils.js'
   returns: (type: "boolean", description: [`true` 表示没有监听器，`false` 表示至少有一个监听器]),
   example: ```js
   const listener = new EventListener()
-  
+
   console.log(listener.isEmpty('test'))  // true
-  
+
   listener.on('test', () => {})
   console.log(listener.isEmpty('test'))  // false
   ```,
@@ -288,7 +288,7 @@ import { $, EventListener } from './utils.js'
       drawTexture(i, j, textures[textureIndex])
     }
   }
-  
+
   // 生成伪随机地形
   const tileType = hash2D(x, y, tileTypes.length)
   ```,
@@ -306,18 +306,18 @@ import { $, EventListener } from './utils.js'
 
 export class PauseManager {
   #listener = new EventListener()
-  
+
   constructor() {
     // 快速查询 DOM 元素
     this.$pauseOverlay = $('#pause-overlay')
     this.$saveManagerModal = $('#save-manager-modal')
     this.$helpModal = $('#help-modal')
-    
+
     // 绑定事件
     $('#resume-btn')?.addEventListener('click', () => this.resume())
     $('#save-btn')?.addEventListener('click', () => this.#onSaveGame())
   }
-  
+
   pause() {
     this.$pauseOverlay.classList.add('show')
     this.#listener.emit('pause')
@@ -338,7 +338,7 @@ class Dialogue {
     await wait(duration)  // 等待指定时间
     this.hide()
   }
-  
+
   async playSequence(lines) {
     for (const line of lines) {
       await this.showText(line.text, line.duration)
@@ -358,16 +358,16 @@ import { EventListener } from './utils.js'
 // 暂停管理器
 class PauseManager {
   #listener = new EventListener()
-  
+
   on(event, callback) {
     return this.#listener.on(event, callback)
   }
-  
+
   pause() {
     this.isPaused = true
     this.#listener.emit('pause')
   }
-  
+
   resume() {
     this.isPaused = false
     this.#listener.emit('resume')
@@ -381,7 +381,7 @@ class Game {
     PauseManager.on('pause', () => {
       this.stopGameLoop()
     })
-    
+
     PauseManager.on('resume', () => {
       this.startGameLoop()
     })
@@ -425,7 +425,7 @@ import { EventListener } from './utils.js'
 
 class Game {
   #listener = new EventListener()
-  
+
   constructor() {
     // 资源加载完成后只执行一次
     this.#listener.once('assets:loaded', () => {
@@ -433,7 +433,7 @@ class Game {
       console.log('游戏启动')
     })
   }
-  
+
   async loadAssets() {
     await Asset.loadFromManifest('./assets/')
     this.#listener.emit('assets:loaded')
@@ -451,7 +451,7 @@ class Game {
   ```,
   good: ```js
   import { $ } from './utils.js'
-  
+
   const btn = $('#save-btn')
   const overlay = $('#pause-overlay')
   const modal = $('#help-modal')
@@ -475,7 +475,7 @@ class Game {
   ```,
   good: ```js
   import { wait } from './utils.js'
-  
+
   async function run() {
     await wait(1000)
     console.log('延时执行')
@@ -499,11 +499,11 @@ class Game {
   ```,
   good: ```js
   import { throttle } from './utils.js'
-  
+
   const handleScroll = throttle(() => {
     updateUI()
   }, 100)
-  
+
   addEventListener('scroll', handleScroll)
   ```,
   explanation: [使用 `throttle` 限制高频事件的执行频率，提升性能。],
@@ -523,11 +523,11 @@ class Game {
   ```,
   good: ```js
   import { debounce } from './utils.js'
-  
+
   const handleInput = debounce(() => {
     performSearch(input.value)
   }, 500)
-  
+
   input.addEventListener('input', handleInput)
   ```,
   explanation: [使用 `debounce` 延迟执行，等待用户输入完成后再触发操作。],

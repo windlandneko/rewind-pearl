@@ -138,7 +138,7 @@ import Asset from './Asset.js'
   ```,
   notes: [
     加载失败的资源会抛出异常，但不会中断其他资源的加载。建议在 `onProgress` 中处理错误。
-    
+
     *并行加载*：`loadFromManifest` 并行加载所有资源，完成顺序不确定。如果需要按特定顺序执行操作，应在所有资源加载完成后（Promise resolve）再进行。
   ],
 )
@@ -167,7 +167,7 @@ import Asset from './Asset.js'
   ```,
   notes: [
     此方法不会将资源添加到缓存中，仅用于临时加载。推荐使用 `loadFromManifest` 统一管理。
-    
+
     *路径约定*：manifest 中的路径使用相对于 `basePath` 的相对路径，不要在 manifest 路径中包含 `basePath`，会导致路径重复。
   ],
 )
@@ -199,7 +199,7 @@ import Asset from './Asset.js'
   ```,
   notes: [
     如果资源不存在，控制台会输出警告信息并返回 `undefined`。使用前建议先用 `has()` 检查。
-    
+
     *内存管理*：所有加载的资源都存储在内存中（Map 结构），直到页面刷新。对于大型游戏，考虑实现资源卸载功能或分场景加载。
   ],
 )

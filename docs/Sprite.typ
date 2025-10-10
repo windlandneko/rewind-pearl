@@ -43,7 +43,7 @@
   returns: (type: "SpriteAnimation", description: "动画实例"),
   example: ```js
   import Asset from './Asset.js'
-  
+
   const sheet = Asset.get('character/player/run')
   const runAnim = new SpriteAnimation(sheet, 8, 32, 32, 100, true)
   ```,
@@ -126,9 +126,9 @@ import Asset from './Asset.js'
 class Player {
   constructor() {
     this.animManager = new AnimationManager()
-    
+
     // 添加多个动画状态
-    this.animManager.addAnimation('idle', 
+    this.animManager.addAnimation('idle',
       new SpriteAnimation(Asset.get('character/player/idle'), 4, 32, 32, 150)
     )
     this.animManager.addAnimation('run',
@@ -137,10 +137,10 @@ class Player {
     this.animManager.addAnimation('jump',
       new SpriteAnimation(Asset.get('character/player/jump'), 6, 32, 32, 80, false)
     )
-    
+
     this.animManager.playAnimation('idle')
   }
-  
+
   update(dt) {
     // 根据状态切换动画
     if (this.isMoving) {
@@ -148,10 +148,10 @@ class Player {
     } else {
       this.animManager.playAnimation('idle')
     }
-    
+
     this.animManager.update(dt)
   }
-  
+
   render(ctx) {
     this.animManager.render(ctx, this.x, this.y, 64, 64)
   }
@@ -173,7 +173,7 @@ explosionAnim.play()
 
 function update(dt) {
   explosionAnim.update(dt)
-  
+
   if (explosionAnim.isComplete()) {
     // 动画播放完毕，移除特效
     removeEffect()

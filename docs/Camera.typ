@@ -108,7 +108,7 @@
   example: ```js
   // 爆炸效果
   camera.shake(20, 0.8, 60)
-  
+
   // 轻微震动
   camera.shake(5, 0.3, 40)
   ```,
@@ -206,13 +206,13 @@
 class Game {
   constructor() {
     this.camera = new Camera()
-    
+
     // 基础配置
     this.camera.setViewportSize(800, 600)
     this.camera.setPadding(200, 200, 150, 150)
     this.camera.setWorldBounds(0, 0, 3200, 2400)
     this.camera.smoothFactor = 0.1
-    
+
     // 设置跟随目标
     this.camera.target = this.player
     this.camera.centerOnTarget()
@@ -226,18 +226,18 @@ class Game {
 render() {
   const ctx = this.ctx
   const renderPos = this.camera.getRenderPosition()
-  
+
   ctx.save()
   ctx.scale(this.scale, this.scale)
   ctx.translate(-renderPos.x, -renderPos.y)
-  
+
   // 渲染游戏对象
   this.gameObjects.forEach(obj => {
     if (this.camera.isInView(obj)) {
       obj.render(ctx)
     }
   })
-  
+
   ctx.restore()
 }
 ```
@@ -249,7 +249,7 @@ class Explosion {
   explode() {
     // 触发震动
     game.camera.shake(15, 0.6, 50)
-    
+
     // 播放音效
     SoundManager.play('explosion')
   }
@@ -279,15 +279,15 @@ renderUpdate() {
   // 双线性插值噪声
   const xi = Math.floor(x), yi = Math.floor(y)
   const xf = x - xi, yf = y - yi
-  
+
   const n00 = this.#noise(xi, yi)
   const n01 = this.#noise(xi, yi + 1)
   const n10 = this.#noise(xi + 1, yi)
   const n11 = this.#noise(xi + 1, yi + 1)
-  
+
   const nx0 = this.#smoothStep(n00, n10, xf)
   const nx1 = this.#smoothStep(n01, n11, xf)
-  
+
   return this.#smoothStep(nx0, nx1, yf)
 }
 ```

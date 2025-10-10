@@ -173,10 +173,10 @@
 class Player {
   update(dt) {
     const velocity = new Vec2(0, 0)
-    
+
     if (Keyboard.isActive('A')) velocity.addTo(-5, 0)
     if (Keyboard.isActive('D')) velocity.addTo(5, 0)
-    
+
     this.r.addTo(velocity.mul(dt))
   }
 }

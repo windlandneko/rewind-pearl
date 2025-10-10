@@ -59,10 +59,10 @@ import SoundManager from './SoundManager.js'
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import SoundManager from './SoundManager.js'
-  
+
   // 基础用法
   SoundManager.playBGM('Home')
-  
+
   // 自定义选项
   SoundManager.playBGM('Gate of steiner', {
     loop: true,
@@ -70,7 +70,7 @@ import SoundManager from './SoundManager.js'
     fadeIn: true,
     fadeTime: 3000
   })
-  
+
   // 无淡入效果
   SoundManager.playBGM('Memories of Memories', {
     fadeIn: false,
@@ -88,7 +88,7 @@ import SoundManager from './SoundManager.js'
   example: ```js
   // 游戏暂停时
   SoundManager.pauseBGM()
-  
+
   // 进入设置界面时
   function openSettings() {
     SoundManager.pauseBGM()
@@ -106,7 +106,7 @@ import SoundManager from './SoundManager.js'
   example: ```js
   // 游戏恢复时
   SoundManager.resumeBGM()
-  
+
   // 关闭设置界面时
   function closeSettings() {
     hideSettingsMenu()
@@ -128,10 +128,10 @@ import SoundManager from './SoundManager.js'
   example: ```js
   // 淡出停止（推荐）
   SoundManager.stopBGM()
-  
+
   // 自定义淡出时长
   SoundManager.stopBGM({ fadeOut: true, fadeTime: 1000 })
-  
+
   // 立即停止（无淡出）
   SoundManager.stopBGM({ fadeOut: false })
   ```,
@@ -146,25 +146,30 @@ import SoundManager from './SoundManager.js'
   parameters: (
     (name: "name", type: "string", description: [音效资源名称（Asset 中的键名，不含路径前缀 `soundEffects/`）]),
     (name: "options", type: "Object", optional: true, description: "播放选项"),
-    (name: "options.single", type: "boolean", optional: true, description: [是否为单实例播放（默认 `true`）。`true` 时，如果已有实例在播放则跳过]),
+    (
+      name: "options.single",
+      type: "boolean",
+      optional: true,
+      description: [是否为单实例播放（默认 `true`）。`true` 时，如果已有实例在播放则跳过],
+    ),
     (name: "options.volume", type: "number", optional: true, description: [音量大小，范围 0-1（默认 `0.5`）]),
   ),
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import SoundManager from './SoundManager.js'
-  
+
   // 单实例播放（默认）
   SoundManager.play('footstep')  // 连续调用只会播放一次
-  
+
   // 多实例播放
   SoundManager.play('gunshot', { single: false })  // 可同时播放多次
-  
+
   // 自定义音量
   SoundManager.play('explosion', {
     single: false,
     volume: 0.8
   })
-  
+
   // 暂停音效播放
   SoundManager.play('pause', { volume: 0.3 })
   ```,
@@ -182,7 +187,7 @@ import SoundManager from './SoundManager.js'
     SoundManager.stopSound()
     loadNewScene()
   }
-  
+
   // 游戏结束时
   function gameOver() {
     SoundManager.stopSound()
@@ -234,20 +239,20 @@ playBGM(name, options) {
 #fadeAudio(audio, startVolume, endVolume, duration, callback) {
   const startTime = performance.now()
   const volumeDiff = endVolume - startVolume
-  
+
   const updateVolume = () => {
     const elapsed = performance.now() - startTime
     const progress = Math.min(elapsed / duration, 1)
-    
+
     audio.volume = startVolume + volumeDiff * progress
-    
+
     if (progress < 1) {
       requestAnimationFrame(updateVolume)
     } else if (callback) {
       callback()
     }
   }
-  
+
   requestAnimationFrame(updateVolume)
 }
 ```
@@ -265,11 +270,11 @@ play(name, { single = true, volume = 0.5 } = {}) {
       return
     }
   }
-  
+
   const sound = Asset.get('soundEffects/' + name)
   const audio = sound.cloneNode()  // 克隆以支持多实例
   audio.play()
-  
+
   // 播放结束后自动清理
   audio.addEventListener('ended', () => {
     const arr = this.sounds.get(name)
@@ -292,7 +297,7 @@ class Game {
   async start() {
     // 等待资源加载完成
     await Asset.loadFromManifest('./assets/')
-    
+
     // 播放主题曲
     SoundManager.playBGM('Home', {
       loop: true,
@@ -300,7 +305,7 @@ class Game {
       fadeIn: true,
       fadeTime: 2000
     })
-    
+
     this.startGameLoop()
   }
 }
@@ -313,7 +318,7 @@ class Game {
   changeScene(sceneName) {
     // 停止当前 BGM（淡出）
     SoundManager.stopBGM({ fadeOut: true, fadeTime: 1500 })
-    
+
     // 稍微延迟后播放新 BGM
     setTimeout(() => {
       const bgmName = this.getBGMForScene(sceneName)
@@ -323,7 +328,7 @@ class Game {
       })
     }, 1500)
   }
-  
+
   getBGMForScene(sceneName) {
     const bgmMap = {
       home: 'Home',
@@ -345,18 +350,18 @@ class PauseManager {
   pause() {
     // 暂停游戏音乐
     SoundManager.pauseBGM()
-    
+
     // 播放暂停音效
     SoundManager.play('pause', { volume: 0.3 })
-    
+
     this.isPaused = true
     this.$pauseOverlay.classList.add('show')
   }
-  
+
   resume() {
     this.isPaused = false
     this.$pauseOverlay.classList.remove('show')
-    
+
     // 恢复游戏音乐
     SoundManager.resumeBGM()
   }
@@ -373,26 +378,26 @@ class Player {
     if (this.onGround) {
       this.velocityY = -10
       this.onGround = false
-      
+
       // 播放跳跃音效
       SoundManager.play('jump', { volume: 0.5 })
     }
   }
-  
+
   onDamage() {
     this.health -= 10
-    
+
     // 播放受伤音效
     SoundManager.play('hurt', { volume: 0.6 })
-    
+
     if (this.health <= 0) {
       this.die()
     }
   }
-  
+
   collectItem() {
     this.score += 100
-    
+
     // 播放收集音效（可多实例）
     SoundManager.play('collect', {
       single: false,
@@ -411,23 +416,23 @@ class Achievement {
   add(id) {
     const user = this.#username
     if (!user) return false
-    
+
     const allData = this.#getAllData()
     if (!allData[user]) allData[user] = {}
-    
+
     if (!allData[user][id]) {
       this.game.showNotification(`成就已解锁：${id}`, {
         icon: '🏆',
         type: 'success',
       })
-      
+
       // 播放成就解锁音效
       SoundManager.play('challenge_complete')
-      
+
       allData[user][id] = true
       this.#save(allData)
     }
-    
+
     return true
   }
 }
@@ -480,7 +485,7 @@ class Achievement {
   // 根据音效类型选择单实例或多实例
   // 单实例：角色语音、UI 音效
   SoundManager.play('button_click')
-  
+
   // 多实例：枪声、爆炸声
   SoundManager.play('gunshot', { single: false })
   ```,

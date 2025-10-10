@@ -102,15 +102,24 @@ import SaveManager from './SaveManager.js'
   description: "在指定容器中渲染存档列表 UI，并绑定加载和删除事件。",
   parameters: (
     (name: "container", type: "HTMLElement", description: "存档列表的容器元素"),
-    (name: "onLoad", type: "Function", description: [加载存档的回调函数，接收存档数据对象作为参数：`(saveData) => void`]),
-    (name: "onDelete", type: "Function", optional: true, description: [删除存档的回调函数，接收存档名称作为参数：`(saveName) => void`]),
+    (
+      name: "onLoad",
+      type: "Function",
+      description: [加载存档的回调函数，接收存档数据对象作为参数：`(saveData) => void`],
+    ),
+    (
+      name: "onDelete",
+      type: "Function",
+      optional: true,
+      description: [删除存档的回调函数，接收存档名称作为参数：`(saveName) => void`],
+    ),
   ),
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import SaveManager from './SaveManager.js'
-  
+
   const saveList = document.getElementById('save-list')
-  
+
   SaveManager.loadSaveList(
     saveList,
     // 加载存档回调
@@ -139,12 +148,16 @@ import SaveManager from './SaveManager.js'
   name: "showSavePrompt(onSave)",
   description: "显示存档命名提示框，用户输入存档名称后触发回调。",
   parameters: (
-    (name: "onSave", type: "Function", description: [保存存档的回调函数，接收用户输入的存档名称作为参数：`(saveName) => void`]),
+    (
+      name: "onSave",
+      type: "Function",
+      description: [保存存档的回调函数，接收用户输入的存档名称作为参数：`(saveName) => void`],
+    ),
   ),
   returns: (type: "null", description: "无返回值"),
   example: ```js
   import SaveManager from './SaveManager.js'
-  
+
   // 在暂停菜单的保存按钮点击时
   document.getElementById('save-btn').addEventListener('click', () => {
     SaveManager.showSavePrompt((saveName) => {
@@ -152,7 +165,7 @@ import SaveManager from './SaveManager.js'
       game.saveGame(saveName)
     })
   })
-  
+
   // 快速保存（使用默认名称）
   function quickSave() {
     const defaultName = `快速存档_${Date.now()}`
@@ -171,15 +184,15 @@ import SaveManager from './SaveManager.js'
   returns: (type: "string", description: [格式化后的时间字符串，如 `2025/01/15 14:30`]),
   example: ```js
   import SaveManager from './SaveManager.js'
-  
+
   const timestamp = 1736922645000
   const formatted = SaveManager.formatTime(timestamp)
   console.log(formatted)  // "2025/01/15 14:30"
-  
+
   // 显示存档时间
   const saveTime = SaveManager.formatTime(saveData.timestamp)
   document.getElementById('save-time').textContent = `保存于：${saveTime}`
-  
+
   // 处理无效时间戳
   const invalid = SaveManager.formatTime(null)
   console.log(invalid)  // "未知时间"
@@ -202,15 +215,15 @@ import SaveManager from './SaveManager.js'
         <span class="save-level">第一章 - 开端</span>
       </div>
     </div>
-    <button class="delete-save-btn" 
+    <button class="delete-save-btn"
             onclick="event.stopPropagation(); deleteSave('player1', 0)">
       删除
     </button>
   </div>
-  
+
   <!-- 无存档时 -->
   <div class="no-saves">暂无存档</div>
-  
+
   <!-- 用户未登录时 -->
   <div class="no-saves">用户未登录</div>
 </div>
@@ -229,7 +242,7 @@ class PauseManager {
   #onLoadGame() {
     const saveList = document.getElementById('save-list')
     this.$saveManagerModal?.classList.add('show')
-    
+
     SaveManager.loadSaveList(saveList, (saveData) => {
       const currentUser = localStorage.getItem('rewind-pearl-username')
       // 将选中的存档写入自动存档
@@ -243,7 +256,7 @@ class PauseManager {
       location.reload()
     })
   }
-  
+
   #onSaveGame() {
     SaveManager.showSavePrompt((saveName) => {
       this.game.saveGame(saveName)
@@ -261,9 +274,9 @@ class MainMenu {
   showLoadGameMenu() {
     const modal = document.getElementById('load-game-modal')
     const saveList = document.getElementById('save-list')
-    
+
     modal.classList.add('show')
-    
+
     SaveManager.loadSaveList(
       saveList,
       (saveData) => {
@@ -278,7 +291,7 @@ class MainMenu {
       }
     )
   }
-  
+
   loadGameFromSave(saveData) {
     const currentUser = localStorage.getItem('rewind-pearl-username')
     localStorage.setItem(
@@ -302,7 +315,7 @@ class Game {
       console.warn('用户未登录，无法保存')
       return false
     }
-    
+
     // 构建存档数据
     const saveData = {
       timestamp: Date.now(),
@@ -313,31 +326,31 @@ class Game {
       playerData: this.player.serialize(),
       gameState: this.serialize()
     }
-    
+
     // 获取现有存档列表
     const savingsData = localStorage.getItem('rewind-pearl-savings')
     const savings = savingsData ? JSON.parse(savingsData) : {}
     if (!savings[currentUser]) savings[currentUser] = []
-    
+
     // 添加新存档
     savings[currentUser].push({
       name: saveName,
       data: saveData
     })
-    
+
     // 保存到 localStorage
     localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
-    
+
     if (!silent) {
       this.showNotification(`存档"${saveName}"保存成功`, {
         type: 'success',
         icon: '💾'
       })
     }
-    
+
     return true
   }
-  
+
   quickSave() {
     const saveName = `快速存档_${SaveManager.formatTime(Date.now())}`
     this.saveGame(saveName)
@@ -422,19 +435,19 @@ class SaveExporter {
     const savingsData = localStorage.getItem('rewind-pearl-savings')
     const savings = JSON.parse(savingsData)
     const save = savings[currentUser][saveIndex]
-    
+
     const json = JSON.stringify(save, null, 2)
     const blob = new Blob([json], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
-    
+
     const a = document.createElement('a')
     a.href = url
     a.download = `${save.name}.json`
     a.click()
-    
+
     URL.revokeObjectURL(url)
   }
-  
+
   // 导入存档
   importSave(file) {
     const reader = new FileReader()
@@ -444,13 +457,13 @@ class SaveExporter {
         const currentUser = localStorage.getItem('rewind-pearl-username')
         const savingsData = localStorage.getItem('rewind-pearl-savings')
         const savings = savingsData ? JSON.parse(savingsData) : {}
-        
+
         if (!savings[currentUser]) savings[currentUser] = []
         savings[currentUser].push(save)
-        
+
         localStorage.setItem('rewind-pearl-savings', JSON.stringify(savings))
         alert('存档导入成功')
-        
+
         // 重新加载存档列表
         const saveList = document.getElementById('save-list')
         SaveManager.loadSaveList(saveList, loadCallback, deleteCallback)
@@ -638,7 +651,7 @@ SaveManager 负责前端交互，游戏主逻辑负责数据的序列化和反�
 ```js
 window.deleteSave = (username, saveIndex) => {
   // ... 删除逻辑
-  
+
   // 重新加载列表以刷新 UI
   this.loadSaveList(container, onLoad, onDelete)
 }
