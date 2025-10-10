@@ -118,9 +118,7 @@
   }
 
   show heading.where(level: 3): it => {
-    v(1em)
     text(size: 12pt, fill: rgb("#4a90e2"), it.body)
-    v(0.4em)
   }
 
   show link: underline
