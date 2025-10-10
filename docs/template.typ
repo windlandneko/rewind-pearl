@@ -11,13 +11,11 @@
 #show: initialize-document
 
 #title-page(
-  title: "Module.js 文档",
+  title: "Module.js",
   subtitle: "模块说明",
   authors: ("作者1", "作者2"),
   date: "2025年10月8日",
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 
@@ -71,17 +69,21 @@
 // 1. 页面与排版设置
 // ============================================================================
 
-#let initialize-document(body) = {
+#let initialize-document(
+  title: "",
+  subtitle: "",
+  project: "rewind-pearl",
+  authors: (),
+  date: datetime.today().display("[year]年[month]月[day]日"),
+) = body => {
   set page(
     paper: "a4",
-    margin: (left: 2cm, right: 2cm, top: 2cm, bottom: 2cm),
-    numbering: "1",
-    number-align: center,
+    margin: (left: 1.5cm, right: 1.5cm, top: 2cm, bottom: 2cm),
   )
 
   set text(
     font: "HarmonyOS Sans SC",
-    size: 11pt,
+    size: 12pt,
     lang: "zh",
     top-edge: "ascender",
     bottom-edge: "descender",
@@ -89,7 +91,7 @@
 
   set par(
     justify: true,
-    leading: 0.65em,
+    leading: 0.4em,
     first-line-indent: 0em,
   )
 
@@ -101,7 +103,7 @@
     block(
       width: 100%,
     )[
-      #text(size: 20pt)[#it]
+      #text(font: ("New Computer Modern", "HarmonyOS Sans SC"), size: 22pt)[#it]
       #v(-0.5em)
       #line(length: 100%, stroke: 1pt + black)
     ]
@@ -109,14 +111,15 @@
   }
 
   show heading.where(level: 2): it => {
+    v(-0.2em)
     align(center)[
-      #text(size: 14pt, weight: "bold", fill: rgb("#2c5aa0"), it.body)
+      #text(size: 15pt, fill: rgb("#2c5aa0"), it.body)
     ]
   }
 
   show heading.where(level: 3): it => {
     v(1em)
-    text(size: 12pt, weight: "bold", fill: rgb("#4a90e2"), it.body)
+    text(size: 12pt, fill: rgb("#4a90e2"), it.body)
     v(0.4em)
   }
 
@@ -139,54 +142,79 @@
       inset: (x: 4pt, y: 1.5pt),
       radius: 2pt,
       baseline: 3pt,
-      text(font: ("JetBrains Mono", "Consolas"), size: 9.5pt, fill: rgb("#d73a49"), it),
+      text(font: ("JetBrains Mono", "Consolas", "HarmonyOS Sans SC"), size: 9.5pt, fill: rgb("#d73a49"), it),
     )
   }
 
-  body
-}
-
-// ============================================================================
-// 2. 封面组件
-// ============================================================================
-
-#let metadata(
-  title: "",
-  subtitle: "",
-  project: "rewind-pearl",
-  authors: (),
-  date: datetime.today().display("[year]年[month]月[day]日"),
-) = {
-  set page(numbering: none)
-
   align(center)[
-    #v(3cm)
-    #text(size: 28pt, weight: "bold", fill: rgb("#1a1a1a"))[#title]
-    #v(0.5em)
-    #text(size: 14pt, fill: rgb("#666666"))[#subtitle]
+    #v(5cm)
 
-    #v(4cm)
+    // 标题
+    #text(size: 36pt, weight: "bold", fill: rgb("#1a1a1a"))[#title]
 
+    #text(size: 18pt, fill: rgb("#666666"), style: "italic")[#subtitle]
 
+    #v(5cm)
 
-    #align(center + bottom)[
+    // 底部信息
+    #v(1em)
+    #line(length: 50%, stroke: 0.5pt + rgb("#acacac"))
+    #v(0.2em)
 
-      #if authors.len() > 0 [
-        #text(size: 15pt, weight: "bold")[Contributors]
-        #v(-0.6em)
-        #text(size: 12pt, font: ("JetBrains Mono", "Consolas", "HarmonyOS Sans SC"))[#authors.join(", ")]
-        #v(8em)
-      ]
+    #grid(
+      columns: (auto, auto),
+      column-gutter: 3em,
+      [
+        #text(size: 11pt, fill: rgb("#999999"))[贡献者]
 
-      #text(size: 14pt, fill: rgb("#999999"), font: ("JetBrains Mono", "Consolas", "HarmonyOS Sans SC"))[#project]
+        #text(size: 13pt, font: ("JetBrains Mono", "Consolas", "HarmonyOS Sans SC"), weight: "bold")[
+          #authors.join(" · ")
+        ]
+      ],
+      [
+        #text(size: 11pt, fill: rgb("#999999"))[项目]
 
-      #text(size: 12pt, fill: rgb("#999999"))[
-        #if date != none [ 文档生成时间：#date ]
-      ]
+        #text(size: 13pt, font: ("JetBrains Mono", "Consolas", "HarmonyOS Sans SC"), weight: "bold")[
+          #project
+        ]
+      ],
+    )
+
+    #v(1.5em)
+    #text(size: 11pt, fill: rgb("#999999"))[
+      #if date != none [ 文档生成于#date ]
     ]
+
+    #v(0.2em)
+    #line(length: 50%, stroke: 0.5pt + rgb("#acacac"))
   ]
 
+  set page(
+    numbering: none,
+    header: none,
+
+    footer: [
+      #line(length: 100%, stroke: 1pt + black)
+      #v(-1em)
+      #title
+      #h(1fr)
+      #context counter(page).display(
+        "第1页，共1页",
+        both: true,
+      )
+    ],
+  )
+
+  counter(page).update(1)
+
   pagebreak()
+
+  heading("目录", numbering: none)
+  columns(2)[
+    #outline(title: none, indent: auto)
+  ]
+
+  body
 }
 
 // ============================================================================
@@ -200,18 +228,19 @@
   returns: none,
   example: none,
   notes: none,
+  name_as_title: false,
 ) = {
   block(
     width: 100%,
-    fill: rgb("#f9fcff"),
+    fill: rgb("#f9fcff71"),
     inset: 1.2em,
-    radius: 4pt,
+    radius: 6pt,
     stroke: 1pt + rgb("#64a5ea"),
     breakable: true,
   )[
     // 函数名
-    #text(size: 14pt, weight: "bold", font: ("JetBrains Mono", "HarmonyOS Sans SC"))[
-      #name
+    #text(size: 13pt, weight: "bold", font: ("JetBrains Mono", "HarmonyOS Sans SC"))[
+      #if name_as_title [== #name ] else [#name]
     ]
 
     // 描述
@@ -219,33 +248,41 @@
       #text(size: 11pt, fill: rgb("#333333"))[#description]
     ]
 
-    #v(0.5em)
-
     // 参数列表
     #if parameters.len() > 0 [
+      #line(length: 100%, stroke: 1pt + rgb("#cfddec"))
+      #v(-0.3em)
+
       #for param in parameters [
         #box(width: 100%)[
-          #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), weight: "bold", fill: rgb("#0c7fd2"))[#param.name]
+          #h(0.5em)
+          #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), weight: 500)[#param.name]
           #h(0.3em)
-          #text(font: ("LXGW WenKai Mono", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#param.type]
-          #if param.at("optional", default: false) [ #text(fill: rgb("#999999"))[（可选）] ]
+          #text(font: ("Fira Code", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#param.type
+            #if param.at("optional", default: false) [ #text(fill: rgb("#999999"))[(可选)] ]
+          ]
 
-          #v(-0.6em)
-          #h(1em)
+          #v(-0.4em)
+          #h(2em)
           #text(size: 10pt, fill: rgb("#5c5c5c"))[#param.description]
+          #v(0.3em)
         ]
       ]
     ]
 
     // 返回值
     #if returns != none [
-      #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), fill: rgb("#0c7fd2"))[返回值]
+      #h(0.5em)
+      #text(font: ("JetBrains Mono", "HarmonyOS Sans SC"), fill: rgb("#0c7fd2"), weight: 500)[返回值]
       #h(0.3em)
-      #text(font: ("LXGW WenKai Mono", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#returns.type]
+      #text(font: ("Fira Code", "HarmonyOS Sans SC"), weight: 300, fill: rgb("#6a737d"))[#returns.type]
 
       #v(-0.6em)
-      #h(1em)
+      #h(2em)
       #text(size: 10pt, fill: rgb("#5c5c5c"))[#returns.description]
+
+      #v(-0.3em)
+      #line(length: 100%, stroke: 1pt + rgb("#dee2e6"))
     ]
 
     // 示例代码
@@ -261,7 +298,8 @@
         radius: 4pt,
         stroke: 1pt + rgb("#ffe066"),
       )[
-        #text(size: 9pt, weight: "bold", fill: rgb("#996600"))[💡 注意：]
+        #text(size: 9pt, weight: "bold", fill: rgb("#996600"))[💡 注意]
+
         #text(size: 9pt, fill: rgb("#666600"))[#notes]
       ]
     ]
@@ -275,18 +313,28 @@
 // ============================================================================
 
 #let info-box(
-  title: "信息",
   content,
+  title: none,
   type: "info", // info, warning, success, error
 ) = {
   let colors = (
+    tip: (bg: rgb("#f0f8ff"), border: rgb("#91caff"), icon: "💡"),
     info: (bg: rgb("#e7f3ff"), border: rgb("#b9e0ff"), icon: "ℹ️"),
     warning: (bg: rgb("#fff9e6"), border: rgb("#ff9800"), icon: "⚠️"),
     success: (bg: rgb("#e8f5e9"), border: rgb("#4caf50"), icon: "✅"),
     error: (bg: rgb("#ffebee"), border: rgb("#f44336"), icon: "❌"),
   )
 
-  let color = colors.at(type)
+  let title = if title != none [#title] else [#(
+      tip: "提示",
+      info: "信息",
+      warning: "警告",
+      success: "成功",
+      error: "错误",
+    ).at(type, default: "信息")
+  ]
+
+  let color = colors.at(type, default: colors.info)
 
   block(
     width: 100%,
@@ -298,7 +346,7 @@
   )[
     #text(size: 14pt)[#color.icon]
     #text(size: 11pt, weight: "bold")[#title]
-    #v(0.4em)
+
     #content
   ]
   v(0.6em)
@@ -316,14 +364,14 @@
 ) = {
   set table(
     stroke: (x, y) => if y == 0 {
-      (bottom: 1.5pt + rgb("#2c5aa0"))
+      (bottom: 0.8pt + rgb("#77777757"))
     } else {
       (bottom: 0.5pt + rgb("#e0e0e0"))
     },
     fill: (x, y) => if y == 0 {
-      rgb("#e8f4f8")
+      rgb("#f3f3f3")
     } else if calc.rem(y, 2) == 0 {
-      rgb("#f9f9f9")
+      rgb("#fafafa")
     } else {
       white
     },
@@ -402,7 +450,6 @@
     )
 
     #if explanation != "" [
-      #v(0.6em)
       #line(length: 100%, stroke: 0.5pt + rgb("#dee2e6"))
       #text(size: 9.5pt, fill: rgb("#666666"))[#explanation]
     ]

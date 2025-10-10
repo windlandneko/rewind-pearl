@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "Camera.js 文档",
+#show: initialize-document(
+  title: "Camera.js",
   subtitle: "2D 摄像机系统",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

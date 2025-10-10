@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "Animation.js 文档",
+#show: initialize-document(
+  title: "Animation.js",
   subtitle: "动画状态管理器",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

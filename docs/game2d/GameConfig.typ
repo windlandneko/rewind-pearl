@@ -5,10 +5,8 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "GameConfig.js 文档",
+#show: initialize-document(
+  title: "GameConfig.js",
   subtitle: "游戏配置常量",
   authors: ("windlandneko",),
 )

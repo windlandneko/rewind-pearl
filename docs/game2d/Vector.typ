@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "Vector.js 文档",
+#show: initialize-document(
+  title: "Vector.js",
   subtitle: "2D 向量数学库",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "SaveManager.js 文档",
+#show: initialize-document(
+  title: "SaveManager.js",
   subtitle: "存档管理系统",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

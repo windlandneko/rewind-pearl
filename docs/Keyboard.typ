@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "Keyboard.js 文档",
+#show: initialize-document(
+  title: "Keyboard.js",
   subtitle: "键盘输入管理系统",
   authors: ("windlandneko", "ri-nai"),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 
@@ -343,7 +339,7 @@ Keyboard.onKeydown(['Esc', 'P'], () => {
 
 
   ```,
-  explanation: "使用模块提供的映射名称（参见\"支持的按键\"一节），而非原生 `KeyboardEvent.code`。",
+  explanation: "使用模块提供的映射名称（参见\"支持的按键\[一节），而非原生 `KeyboardEvent.code`。],
 )
 
 = 技术细节

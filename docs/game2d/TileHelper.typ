@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "TileHelper.js 文档",
+#show: initialize-document(
+  title: "TileHelper.js",
   subtitle: "地图图块渲染系统",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

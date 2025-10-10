@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "utils.js 文档",
+#show: initialize-document(
+  title: "utils.js",
   subtitle: "工具函数与事件系统",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 

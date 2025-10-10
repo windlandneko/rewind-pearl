@@ -5,15 +5,11 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "AchievementManager.js 文档",
+#show: initialize-document(
+  title: "AchievementManager.js",
   subtitle: "成就系统",
   authors: ("windlandneko",),
 )
-
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 
@@ -109,7 +105,7 @@ import Achievement from './AchievementManager.js'
 
 #api(
   name: "has(id)",
-  description: "查询指定成就是否已解锁。如果当前用户未登录，返回 `false`。",
+  description: [查询指定成就是否已解锁。如果当前用户未登录，返回 `false`。],
   parameters: (
     (name: "id", type: "string", description: "成就的唯一标识符"),
   ),
@@ -236,7 +232,7 @@ function renderAchievementPage() {
   }
   Achievement.add(ACHIEVEMENTS.FIRST_JUMP)
   ```,
-  explanation: "使用常量定义成就 ID，避免拼写错误，便于维护。推荐使用小写字母和下划线命名，如 `first_jump`、`complete_chapter1`，避免特殊字符。",
+  explanation: [使用常量定义成就 ID，避免拼写错误，便于维护。推荐使用小写字母和下划线命名，如 `first_jump`、`complete_chapter1`，避免特殊字符。],
 )
 
 #best-practice(

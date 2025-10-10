@@ -5,15 +5,12 @@
 
 #import "template.typ": *
 
-#show: initialize-document
-
-#metadata(
-  title: "Sprite.js 文档",
+#show: initialize-document(
+  title: "Sprite.js",
   subtitle: "精灵图动画系统",
   authors: ("windlandneko",),
 )
 
-#outline(title: "目录", indent: auto)
 
 = 模块介绍
 
@@ -30,7 +27,7 @@
 = API 参考
 
 #api(
-  name: "new SpriteAnimation(spriteSheet, frameCount, frameWidth, frameHeight, frameDuration, loop)",
+  name: "new SpriteAnimation(spriteSheet, frameCount, frameWidth?, frameHeight?, frameDuration?, loop?)",
   description: "创建精灵图动画实例。",
   parameters: (
     (name: "spriteSheet", type: "HTMLImageElement", description: "精灵图图片对象"),
