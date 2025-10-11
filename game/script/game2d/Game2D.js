@@ -225,7 +225,6 @@ export class Game {
       this.levelData.spawnpoint.x,
       this.levelData.spawnpoint.y
     )
-    this.#setupCamera(this.levelData)
 
     this.tileHelper = new TileHelper(this.tileData, this.tilePalette)
     this.tileHelper.render(this.tileCtx)
@@ -245,6 +244,8 @@ export class Game {
   }
 
   async start(initial = false) {
+    this.#setupCamera(this.levelData)
+
     // 初始提示
     if (!localStorage.getItem('rewind-pearl-showhelp')) {
       PauseManager.showHelp()
@@ -335,7 +336,6 @@ export class Game {
 
     const levelName = levelData.name || 'Level1'
 
-    this.levelData = levelData
     this.loadLevel(Levels[levelName])
     Object.assign(this.levelData, levelData)
 
@@ -453,7 +453,7 @@ export class Game {
 
     if (this.preventUpdateUntilTick > 0) {
       this.preventUpdateUntilTick--
-      this.camera.smoothFactor = 0.04
+      this.camera.smoothFactor = 0.03
     } else {
       this.camera.smoothFactor = 0.01
     }
@@ -619,6 +619,8 @@ export class Game {
 
     // 设置摄像机参数
     this.camera.setViewportSize(width, height)
+    this.camera.viewportWidth = this.camera.targetViewportWidth
+    this.camera.viewportHeight = this.camera.targetViewportHeight
     this.camera.target = this.player
 
     // 设置跟随边距
