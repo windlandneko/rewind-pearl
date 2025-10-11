@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 精灵图动画系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Sprite.js",

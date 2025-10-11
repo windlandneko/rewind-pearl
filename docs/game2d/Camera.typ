@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 2D 摄像机系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Camera.js",

@@ -149,10 +149,11 @@
 
     // 标题
     #text(size: 36pt, weight: "bold", fill: rgb("#1a1a1a"))[#title]
+    #v(-2em)
 
     #text(size: 18pt, fill: rgb("#666666"), style: "italic")[#subtitle]
 
-    #v(5cm)
+    #v(8cm)
 
     // 底部信息
     #v(1em)

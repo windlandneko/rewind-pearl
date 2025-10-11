@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 时间回溯系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "TimeTravel.js",

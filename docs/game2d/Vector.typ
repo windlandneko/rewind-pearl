@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 2D 向量数学库
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Vector.js",

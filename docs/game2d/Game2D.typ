@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 核心游戏管理器
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Game2D.js",

@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 游戏对象系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "GameObject",
@@ -24,7 +24,7 @@ import * as $ from './gameObject/index.js'
 const platform = new $.Platform(0, 0, 100, 10)
 const interactable = new $.Interactable(50, 50, 16, 16, 'dialogue_id', 'sprite_id')
 ```
-
+·
 == 游戏对象类型
 
 游戏对象系统包含以下类型：
@@ -394,13 +394,14 @@ class BaseObject {
 == 构造函数
 
 #api(
-  name: "new Collectible(x, y, spriteId, onlyGhostCanCollect)",
+  name: "new Collectible(x, y, spriteId, onlyGhostCanCollect, onCollect)",
   description: "创建收集品",
   parameters: (
     (name: "x", type: "number", description: "X 坐标"),
     (name: "y", type: "number", description: "Y 坐标"),
     (name: "spriteId", type: "string", description: "立绘资源 ID"),
     (name: "onlyGhostCanCollect", type: "boolean", optional: true, description: "是否仅幽灵玩家可收集（默认 false）"),
+    (name: "onCollect", type: "function", optional: true, description: "收集后的回调函数"),
   ),
   example: ```js
   // 普通收集品

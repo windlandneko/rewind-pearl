@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 玩家角色系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Player & GhostPlayer",
@@ -189,7 +189,8 @@ if (this.jumpBufferTimer > 0) {
 ```js
 // 在触发器中给予玩家二段跳能力
 new $.Trigger(100, 100, 32, 32, true, (game, $) => {
-  game.player.maxAirJumps = 1  // 允许一次空中跳跃
+  game.player.maxAirJumps = 1  // 允许二段跳
+  game.player.maxAirJumps = 2  // 允许三段跳
 }, null)
 
 // 或者在关卡开始时设置
@@ -413,7 +414,7 @@ ghost.lifetimeEnd = game.tick
 *注意*：
 - 当前游戏中玩家只有 1 点生命，受到任何伤害都会死亡
 - `maxHealth` 保留用于未来扩展
-- `score` 系统目前未实现，但框架已预留
+- `score` 目前没什么用
 
 = 使用示例
 

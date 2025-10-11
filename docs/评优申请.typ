@@ -25,17 +25,19 @@
 
 本项目具备以下显著优势，申请评优：
 
-1. *工作量巨大*：20000+ 行代码，56+ 个文件，完整的游戏引擎和工具链
+1. *工作量巨大*：28000+ 行纯代码#footnote[去除空行、注释等的纯代码行数]，130+ 个文件，完整的游戏引擎和工具链，*均为一人完成*
 2. *技术方案先进*：模块化架构、双循环设计、性能优化、创新玩法
-3. *文档完善*：10+ 份技术文档（Typst 格式），详细的 API 说明和开发日志
-4. *功能完整*：游戏引擎、对话系统、存档系统、成就系统、关卡编辑器等
-5. *视觉设计优秀*：响应式设计、像素风格、视差背景、流畅动画
+3. *文档完善*：20+ 份技术文档（Typst/PDF 格式），详细的 API 说明和开发日志
+4. *功能完整*：*游戏引擎*、*对话系统*、*关卡编辑器*、存档系统、成就系统等
+5. *视觉设计优秀*：响应式设计、像素风格、视差背景、*全过程流畅动画过渡*
 6. *兼容性良好*：支持主流浏览器和操作系统，适配多种分辨率
-7. *创新性强*：时间回溯机制、幽灵玩家、多结局分支
+7. *创新性强*：*时间回溯机制*、多结局分支
 
 = 工作量说明
 
 == 代码统计
+
+TODO
 
 #styled-table(
   columns: (2fr, 1fr, 1fr, 2fr),
@@ -542,7 +544,7 @@ renderLoop()
 
 *优势*：
 - 逻辑更新频率固定，保证物理模拟的精度和一致性
-- 渲染频率自适应，充分利用硬件性能（可达 144+ FPS）
+- 渲染频率自适应，充分利用硬件性能（可达 1000+ FPS）
 - 逻辑与渲染解耦，便于调试和性能分析
 
 === 碰撞检测与响应
@@ -596,24 +598,22 @@ if (overlapX < overlapY) {
 ```js
 // 导出游戏对象
 exportGameObjects() {
-  return this.gameObjects.map(obj => ({
-    type: obj.constructor.name,  // 对象类型
-    ...obj.export()              // 对象状态
-  }))
+  return this.gameObjects.map(obj => obj.state)
 }
 
 // 导入游戏对象
 importGameObjects(data) {
   this.gameObjects = data.map(objData => {
-    const Class = GameObject[objData.type]  // 获取类
-    return Class.import(objData)             // 重建对象
+    const obj = new GameObject[objData.type]
+    obj.state = objData.state
+    return obj
   })
   this.#updateRenderGroups()  // 更新渲染组缓存
 }
 
 // 对象导出示例
 class Platform extends BaseObject {
-  export() {
+  get state() {
     return {
       x: this.x,
       y: this.y,
@@ -623,12 +623,12 @@ class Platform extends BaseObject {
     }
   }
 
-  static import(data) {
-    return new Platform(
-      data.x, data.y,
-      data.width, data.height,
-      data.ladder
-    )
+  set state(state) {
+    this.x = state.x
+    this.y = state.y
+    this.width = state.width
+    this.height = state.height
+    this.ladder = state.ladder
   }
 }
 ```
@@ -1066,15 +1066,12 @@ fadeBlack(reverse = false) {
 
 == 字体设计
 
-- *中文*：HarmonyOS Sans SC（鸿蒙字体）
-- *英文*：JetBrains Mono（等宽字体）
-- *对话*：SourceHanSerifCN（思源宋体）
+- *中文*：#text(font: "HarmonyOS Sans SC")[HarmonyOS Sans SC（鸿蒙字体）]
+- *英文*：#text(font: ("JetBrains Mono", "HarmonyOS Sans SC"))[JetBrains Mono（等宽字体）]
+- *对话*：#text(font: "Source Han Serif")[SourceHanSerifCN（思源宋体）]
 
 ```css
-@font-face {
-  font-family: 'HarmonyOS Sans SC';
-  src: url('font/HarmonyOS_Sans_SC.woff2') format('woff2');
-}
+@import url('font.css');
 
 body {
   font-family: 'HarmonyOS Sans SC', sans-serif;
@@ -1144,7 +1141,6 @@ code, pre {
 - *张振宇*：技术总监/主程序员，负责全部开发工作
 - *牛浩羽*：测试主管，负责功能测试和反馈
 - *吴楠*：美术设计，负责所有美术资源和界面设计
--
 
 == 协作流程
 

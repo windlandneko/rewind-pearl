@@ -1,34 +1,194 @@
-# Copilot Instructions for rewind-pearl
+# Rewind Pearl - AI Coding Assistant Instructions
 
-## 项目架构概览
-- 本项目为多页面 Web 游戏，主入口为 `index.html`，核心游戏逻辑在 `game/` 目录下。
-- 主要分区：
-  - `game/`：游戏主模块，含资源、脚本、样式、关卡编辑器等。
-  - `about/`：成员个人页面，风格各异，独立维护。
-  - `achievements/`：成就展示页面。
-  - `docs/`：开发文档与计划。
+## Project Overview
+**Rewind Pearl (再见珍珠)** is a 2D platformer puzzle game with time-travel mechanics, built entirely from scratch with vanilla JavaScript (no frameworks). The game combines platforming, visual novel dialogue, and a unique time-rewind system.
 
-## 游戏模块结构
-- `game/script/`：核心 JS 逻辑，推荐从 `main.js`、`Game2D.js`、`Dialogue.js` 入手理解主循环、事件处理、对话系统。
-- `game/assets/`：资源文件，分为 `character/`（角色）、`dialogue/`（对话脚本）、`background/`、`audio/` 等，统一在 `manifest.json` 中进行声明。
-- `game/assets/dialogue/README.md`：详细说明对话脚本 JSON 规范，编写剧情时务必遵循。
-- `game/style/`：游戏相关 CSS，按功能拆分。
+## Architecture
 
-## 项目约定与模式
-- **游戏脚本模块化**，每个功能独立 JS 文件，避免全局变量污染。
-- **资源命名规范**：角色资源需与脚本 `key` 字段一致，图片、音频等按用途归类。
-- **对话事件驱动**：剧情推进依赖 JSON 事件流，详见 `Dialogue.js`。
-- **样式标记**：对话文本支持 `$样式类名:文本内容$`，详见对话脚本规范。
+### Core Game Loop (Dual-Loop Architecture)
+The engine uses **separate logic and render loops** (`game/script/game2d/Game2D.js`):
+- **Logic Loop**: Fixed timestep at 120 FPS via `setInterval` (see `GameConfig.UPDATE_PER_SECOND`)
+- **Render Loop**: Variable framerate using `requestAnimationFrame`
+- **Why**: Ensures consistent physics simulation regardless of display refresh rate
 
-## 重要文件/目录
-- `game/script/main.js`：游戏入口，初始化主循环。
-- `game/script/Game2D.js`：2D 游戏核心逻辑。
-- `game/script/Dialogue.js`：对话系统，解析 JSON 剧本。
-- `game/assets/dialogue/`：所有 JSON 格式剧情脚本。
-- `game/assets/character/`：角色立绘资源。
-- `game/assets/background/`：场景背景资源。
+### Singleton Pattern
+Most managers are **singleton exports** (not classes to instantiate):
+```javascript
+// ✅ Correct usage
+import Dialogue from './Dialogue.js'
+Dialogue.play('chapter1_intro')
 
-## 其他说明
-- **无统一测试框架**，调试以浏览器为主。
-- **无后端/数据库集成**，所有数据本地存储。
-- **无外部依赖**：游戏模块不依赖第三方库。
+// ❌ Wrong - don't instantiate
+import Dialogue from './Dialogue.js'
+const d = new Dialogue() // This won't work
+```
+
+Examples: `Asset`, `Dialogue`, `SoundManager`, `Keyboard`, `Game2D`, `TimeTravel`, `PauseManager`, `AchievementManager`
+
+### Game Object System
+All game entities inherit from `BaseObject` (`game/script/game2d/gameObject/BaseObject.js`):
+- **Position**: Use `Vec2` for `r` (position) and `v` (velocity)
+- **State Management**: Implement `get state()` and `set state()` for time-travel serialization
+- **Lifecycle**: `update(dt, game)`, `render(ctx, game)`, `interactWithPlayer(player, game)`
+- **Export/Import**: Must implement for save system compatibility
+
+```javascript
+// Example: Creating a new game object
+export class MyObject extends BaseObject {
+  update(dt, game) { /* physics/logic */ }
+  render(ctx, game) { /* drawing */ }
+  
+  // Required for time-travel
+  get state() { return { ...super.state, myProp: this.myProp } }
+  set state(data) { super.state = data; this.myProp = data.myProp }
+}
+```
+
+## Critical Systems
+
+### Resource Management (`Asset.js`)
+- **Declarative**: All assets defined in `game/assets/manifest.json`
+- **Nested Keys**: Access via slash notation: `Asset.get('character/dingzhen/normal')`
+- **Auto-loading**: Based on file extensions (`.png` → Image, `.mp3` → Audio, `.json` → JSON)
+
+### Dialogue System (`Dialogue.js`)
+- **Event-driven**: JSON files in `game/assets/dialogue/` define event sequences
+- **Two Styles**: `"text_style": "modern"` (VN-style) or `"touhou"` (bubble-style)
+- **Text Markup**: Use `$style:text$` for inline styles (e.g., `$wow:emphasized$`, `$shake:animated$`)
+- **Shortcuts**: String-only events reuse the last speaker's ID
+
+Example dialogue event:
+```json
+{
+  "action": "add",
+  "id": "alice",
+  "key": "alice",
+  "title": "Alice",
+  "position": "left",
+  "emotion": "normal"
+}
+```
+
+### Level Design Pattern
+Levels are **functions** that mutate the `game` object (`game/script/game2d/level/*.js`):
+```javascript
+export function MyLevel(game) {
+  game.levelData = {
+    introDialogue: 'chapter1_intro',  // Dialogue key
+    background: 'raincity',            // Background image key
+    spawnpoint: new Vec2(100, 200),
+    cameraHeight: 180,
+    cameraBound: { x: 0, y: 0, width: 320, height: 180 },
+    tileWidth: 160, tileHeight: 90
+  }
+  
+  game.tilePalette = [/* ordered tile names */]
+  game.tileData = [/* ASCII art map */]
+  
+  game.sound.playBGM('Home')
+  game.gameObjects.push(
+    new Platform(100, 200, 50, 16),
+    new Collectible(150, 180, 'mushroom')
+  )
+}
+```
+
+### Time Travel System (`TimeTravel.js`)
+- **Snapshots**: Every frame stores game state in `game.history` (Map<tick, state>)
+- **Rewind**: Creates a `GhostPlayer` from history and resets `game.tick`
+- **Ghosts**: Replay recorded actions from `stateHistory`
+- **Limit**: `MAX_SNAPSHOTS_COUNT` in `GameConfig.js` (600 seconds)
+
+### Rendering Groups Optimization
+Game objects are **cached by type** in `game.renderGroups` to avoid per-frame filtering:
+- When adding/removing objects, call `game.updateRenderGroups()`
+- Render loop iterates groups instead of checking `instanceof`
+
+## Development Workflows
+
+### Running the Game
+1. **Local Server Required**: Use `VSCode Live Server` or similar (no file:// protocol)
+2. **Entry Points**:
+   - Main game: `/game/index.html`
+   - Level editor: `/game/level-editor/index.html`
+   - User login: `/login/index.html`
+3. **Debug Mode**: Set `localStorage.setItem('rewind-pearl-debug-mode', 'true')` in console
+   - Shows collision boxes, coordinates, velocity vectors
+   - Enables level jump (Numpad Enter → type level name)
+
+### Level Editor
+- **Export**: Generates JavaScript code for levels
+- **Import**: Paste generated code into `game/script/game2d/level/`
+- **Tiles**: 80+ tiles from Celeste asset pack, defined in `tiles/index.xml`
+
+### Testing Specific Systems
+- **Dialogue**: Edit JSON in `game/assets/dialogue/`, see `docs/对话脚本编写指南.typ`
+- **Objects**: Test levels in `game/script/game2d/level/Tests.js`
+- **Time Travel**: Play `Prologue` level, press Q+E to charge/activate
+
+## Coding Conventions
+
+### Naming
+- **Private Fields**: Use `#` prefix (e.g., `#assets`, `#keyboardListeners`)
+- **Chinese OK**: Level names, dialogue keys, comments can use Chinese
+- **JSDoc**: Add for public APIs, especially in core systems
+
+### File Organization
+- **Managers**: Singleton classes in `game/script/*.js`
+- **Game Objects**: Class exports in `game/script/game2d/gameObject/*.js`
+- **Levels**: Named function exports in `game/script/game2d/level/*.js`
+- **Assets**: Organized by type in `game/assets/` with `manifest.json`
+
+### State Serialization Pattern
+Objects needing time-travel/save support use getter/setter pairs:
+```javascript
+get state() {
+  return {
+    ...super.state,
+    P: [this.prop1, this.prop2, this.prop3]  // Array to minimize size
+  }
+}
+
+set state(data) {
+  super.state = data
+  if (data.P) {
+    [this.prop1, this.prop2, this.prop3] = data.P
+  }
+}
+```
+
+### Canvas Contexts
+- `game.ctx`: Main visible canvas
+- `game.tmpctx`: Offscreen for effects/time-travel preview
+- `game.tileCtx`: Offscreen for pre-rendered tile map (performance)
+
+## Key Integration Points
+
+### Adding New Game Objects
+1. Create class in `game/script/game2d/gameObject/YourObject.js` extending `BaseObject`
+2. Export in `game/script/game2d/gameObject/index.js`
+3. Add to `renderGroups` logic if needed (for performance)
+4. Use in levels: `new GameObject.YourObject(...)`
+
+### Adding New Levels
+1. Create `game/script/game2d/level/YourLevel.js` with exported function
+2. Export in `game/script/game2d/level/index.js`
+3. Reference in level changers: `new LevelChanger(x, y, w, h, Levels.YourLevel)`
+
+### Adding Achievements
+1. Define in `AchievementManager.js` achievements object
+2. Trigger with `game.achievement.add('achievement_id')`
+3. Add to achievements page: `/achievements/index.html`
+
+## Common Pitfalls
+
+1. **Don't mutate `game.gameObjects` during iteration** - use `obj.removed = true` instead
+2. **Canvas coordinates**: World coordinates need camera translation: `ctx.translate(-camera.x, -camera.y)`
+3. **Asset keys**: Use forward slashes, not dots: `character/alice/normal` not `character.alice.normal`
+4. **Dialogue events**: String-only events must follow an event with `"id"` set
+5. **Time travel**: Only objects with `state` getter/setter will restore correctly
+
+## Documentation
+- **Typst Docs**: Comprehensive Chinese documentation in `docs/*.typ` (build with Typst)
+- **Inline Help**: Level editor has built-in help (click help button in toolbar)
+- **Dialogue Format**: See `game/assets/dialogue/README.md` (if exists) or examples in `prologue/`

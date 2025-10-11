@@ -7,7 +7,7 @@
 
 #show: initialize-document(
   title: "对话脚本编写指南",
-  subtitle: "剧本创作参考文档",
+  subtitle: "Dialogue.js",
   authors: ("windlandneko",),
 )
 
@@ -50,7 +50,7 @@ game/assets/dialogue/
   columns: (1.5fr, 3fr),
   headers: ([属性], [说明]),
   rows: (
-    ([`text_style`], [对话显示风格：`"modern[`（现代风格，逐字显示）或 `]touhou"`（东方风格，气泡对话）]),
+    ([`text_style`], [对话显示风格：`"modern"`（现代风格，逐字显示）或 `"touhou"`（东方风格，气泡对话）]),
     ([`auto_next_delay`], [自动推进延迟（毫秒），设为 `null` 表示需要玩家手动推进]),
     ([`events`], [事件列表，按顺序执行]),
   ),
@@ -519,7 +519,7 @@ game/assets/dialogue/
   bad: ```json
   {
     "id": "alice",
-    "emotion": "happy123"
+    "emotion": "happy happy happy"
   }
   ```,
   good: ```json

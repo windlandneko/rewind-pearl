@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 地图图块系统
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "TileHelper.js",

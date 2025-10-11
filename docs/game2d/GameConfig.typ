@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 游戏配置常量
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "GameConfig.js",

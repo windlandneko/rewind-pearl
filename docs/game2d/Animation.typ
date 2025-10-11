@@ -3,7 +3,7 @@
 // rewind-pearl 游戏引擎 - 动画状态管理器
 // ============================================================================
 
-#import "template.typ": *
+#import "../template.typ": *
 
 #show: initialize-document(
   title: "Animation.js",
