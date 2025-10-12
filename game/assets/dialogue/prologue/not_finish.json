@@ -1,0 +1,19 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "add",
+      "id": "zhishiqie",
+      "title": "芝士企鹅",
+      "subtitle": "码头引导者",
+      "key": "zhishiqie",
+      "emotion": "unhappy",
+      "position": "right"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "没收集全！"
+    }
+  ]
+}

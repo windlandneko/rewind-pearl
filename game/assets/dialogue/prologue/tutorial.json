@@ -40,31 +40,24 @@
     {
       "id": "dingzhen",
       "emotion": "confused",
-      "text": "你会说话？？"
+      "text": "芝士企鹅？？"
     },
     {
       "id": "zhishiqie",
       "emotion": "happy",
-      "text": "没错！窝是芝士企鹅，\n专门负责接待像泥这样的客人~"
+      "text": "没错！窝是企鹅，\n泥也是来跟我组乐队的吗？"
     },
     {
       "id": "dingzhen",
       "emotion": "angry",
-      "text": "客人？\n别跟我来这套！快告诉我这是哪里！"
-    },
-    {
-      "id": "dingzhen",
-      "text": "还有，我要怎么才能回去？\n我还得拍戏呢！"
+      "text": "乐队？别跟我来这套！快告诉我这是哪里！\n还有，我要怎么才能回去？我还得拍戏呢！"
     },
     {
       "id": "zhishiqie",
       "emotion": "normal",
       "text": "唉呀，泥先别急~\n窝慢慢跟泥解释......"
     },
-    {
-      "id": "zhishiqie",
-      "text": "这里是一个特殊的时空，\n是被某种强大的力量所创造出来的。"
-    },
+    "这里是一个特殊的时空，\n是被某种强大的力量所创造出来的。",
     {
       "id": "dingzhen",
       "emotion": "thinking",
@@ -122,7 +115,7 @@
     {
       "id": "zhishiqie",
       "emotion": "normal",
-      "text": "所以说这里的$italic:物理规则不同$捏~\n泥在空中的时候按空格，就能再跳一次捏！"
+      "text": "所以说这里的$italic:物理规则不同$捏~"
     },
     {
       "id": "dingzhen",
@@ -132,22 +125,22 @@
     {
       "id": "zhishiqie",
       "emotion": "happy",
-      "text": "看来泥已经掌握基本操作了捏~\n窝就知道泥是个聪明的孩子捏！"
+      "text": "看来泥已经掌握基本操作了捏~\n窝知道泥很急，但是泥先别急，窝还得提醒泥几点——\n"
     },
     {
       "id": "zhishiqie",
       "emotion": "normal",
-      "text": "窝知道泥很急，但是泥先别急，窝还得提醒泥几点——\n在这个世界里，你不会受到摔落伤害，不过$italic:掉进深渊$会直接死亡，\n所以一定要小心脚下捏！"
+      "text": "在这个世界里，你不会受到摔落伤害，不过$italic:掉进深渊$会直接死亡，\n所以一定要小心脚下捏！"
     },
     {
       "id": "dingzhen",
       "emotion": "shock",
-      "text": "死亡？！\n真的会死吗？！"
+      "text": "人被杀就会死？！有点恐怖了兄弟。"
     },
     {
       "id": "zhishiqie",
       "emotion": "unhappy",
-      "text": "那倒不会，泥可以无限复活。\n但是会很痛的捏！"
+      "text": "放心，泥可以无限复活，但是会回到出生点捏~"
     },
     {
       "id": "zhishiqie",
@@ -172,37 +165,28 @@
     {
       "id": "dingzhen",
       "emotion": "normal",
-      "text": "（啥也没记住）\n所以，我现在该怎么做？"
+      "text": "（啥也没记住）"
     },
+    "所以，我现在该怎么做？",
     {
       "id": "zhishiqie",
       "emotion": "angry",
-      "text": "泥需要先帮窝找到所有的$wow:灵感菇$！"
-    },
-    {
-      "id": "dingzhen",
-      "emotion": "confused",
-      "text": "灵感菇？那是什么东西？"
-    },
-    {
-      "id": "zhishiqie",
-      "emotion": "normal",
-      "text": "那是一种美味的蘑菇，能够帮助窝打开$wow:时空之门$捏。\n只有拿到灵感菇，\n窝才能送泥离开这里！"
+      "text": "泥需要先帮窝找到所有的灵感菇！那是一种美味的蘑菇，能够帮助窝找回失散的好友捏。\n只有拿到灵感菇，\n窝才会送泥离开这里！"
     },
     {
       "id": "dingzhen",
       "emotion": "thinking",
-      "text": "灵感菇......时空之门......听起来很玄乎啊。\n不过既然这是唯一的办法，那我就去找找看吧！"
+      "text": "灵感菇......听起来很玄乎啊。\n不过既然这是唯一的办法，那我就去找找看吧！"
     },
     {
       "id": "zhishiqie",
       "emotion": "happy",
-      "text": "这才对嘛！出口在右边，沿着这条路一直走就能到捏~\n记住，AD移动，空格跳跃，小心危险捏！"
+      "text": "这才对嘛！出口在右边，沿着这条路一直走就能到捏~\n记住，A、D移动，空格跳跃，小心危险捏！"
     },
     {
       "id": "dingzhen",
       "emotion": "smile",
-      "text": "知道了知道了。那我出发了！"
+      "text": "知道了知道了..."
     },
     {
       "id": "zhishiqie",

@@ -49,7 +49,6 @@ export class Collectible extends BaseObject {
       } catch (e) {
         console.error(e)
       }
-      game.sound.play('lgods' + Math.ceil(Math.random() * 4))
 
       if (this.spriteId === 'sprite/strawberry') {
         let count = game.globalState.strawberry || 0
@@ -63,6 +62,7 @@ export class Collectible extends BaseObject {
           icon: '🍓',
           type: 'info',
         })
+        game.sound.play('cardget')
       }
     }
   }

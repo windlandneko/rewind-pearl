@@ -504,6 +504,11 @@ export function 测试大厅(game) {
     },
     tileWidth: 160,
     tileHeight: 90,
+    onUpdate: null,
+
+    collectId: null,
+    collectCount: 0,
+    collectTotal: 0,
   }
 
   game.tilePalette = ["Air","GlacialIce","BetterCementSnow","BalatroSilver","FadedBrickGrey","Rock","DarkRock","BetterSummitNoSnow","DarkRockMagma","ButternutBrick"]
@@ -605,6 +610,30 @@ export function 测试大厅(game) {
 
   game.gameObjects.push(
 
+    new $.Collectible(662, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(662, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(662, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(662, 414, 'sprite/strawberry', false, null),
+    new $.Collectible(678, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(678, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(678, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(678, 414, 'sprite/strawberry', false, null),
+    new $.Collectible(694, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(694, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(694, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(694, 414, 'sprite/strawberry', false, null),
+    new $.Collectible(710, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(710, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(710, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(710, 414, 'sprite/strawberry', false, null),
+    new $.Collectible(726, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(726, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(726, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(726, 414, 'sprite/strawberry', false, null),
+    new $.Collectible(742, 342, 'sprite/strawberry', false, null),
+    new $.Collectible(742, 366, 'sprite/strawberry', false, null),
+    new $.Collectible(742, 390, 'sprite/strawberry', false, null),
+    new $.Collectible(742, 414, 'sprite/strawberry', false, null),
     new $.Interactable(528, 408, 16, 16, 'test_dialogue', 'sprite/linggangu', '帮助', false, null),
     new $.LevelChanger(528, 360, 16, 16, 'HazardTest', false),
     new $.LevelChanger(528, 384, 16, 16, 'Prologue', false),

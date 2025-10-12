@@ -5,6 +5,7 @@ import SpriteAnimation from '../Sprite.js'
 import Asset from '../../Asset.js'
 import Keyboard from '../../Keyboard.js'
 import { MAX_SNAPSHOTS_COUNT } from '../GameConfig.js'
+import SoundManager from '../../SoundManager.js'
 
 export const InputEnum = {
   INTERACT: 1 << 0,
@@ -146,7 +147,7 @@ export class Player extends BaseObject {
     if (this.isExploding) {
       this.explodeAnim.update(dt)
       this.explodeAnimTime += dt
-      if (this.explodeAnim.isComplete() && this.explodeAnimTime > 1) {
+      if (this.explodeAnim.isComplete() && this.explodeAnimTime > 2) {
         // 动画播放完毕，重生
         game.tick = 0
         game.maxTick = 0
@@ -154,10 +155,11 @@ export class Player extends BaseObject {
         game.ghostPlayers = []
         game.globalState.timeTravelUsed = 0
 
-        game.player = new Player(
-          game.levelData.spawnpoint.x,
-          game.levelData.spawnpoint.y
-        )
+        this.removed = false
+        this.isExploding = false
+        this.health = this.maxHealth
+        this.r.x = game.levelData.spawnpoint.x
+        this.r.y = game.levelData.spawnpoint.y
         game.camera.target = game.player
       }
       return
@@ -168,12 +170,12 @@ export class Player extends BaseObject {
         this.removed = true
         this.isExploding = true
 
-        game.sound.play('pldead00', {
+        game.sound.play('die', {
           volume: 0.3,
         })
 
         // 触发相机震动效果
-        game.camera.shake(6, 0.3, 100)
+        game.camera.shake(6, 0.4, 100)
 
         // 加载爆炸动画
         const img = Asset.get('sprite/explode')
@@ -182,7 +184,7 @@ export class Player extends BaseObject {
           79,
           112,
           112,
-          1000 / 90,
+          1000 / 60,
           false
         )
         this.explodeAnimTime = 0
@@ -264,6 +266,7 @@ export class Player extends BaseObject {
     this.v.y = Math.min(this.v.y, -speed)
     this.jumpKeyPressed = true
     this.jumpTimer = 0
+    SoundManager.play('jump')
   }
 
   /**

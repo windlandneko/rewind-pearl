@@ -474,24 +474,40 @@ function showProperties(obj) {
           onChange: value => (obj.cameraBound.height = parseFloat(value)),
         }
       )
-      addProperty({
-        label: '背景图片ID',
-        value: obj.background ?? '',
-        type: 'text',
-        onChange: value => (obj.background = value),
-      })
-      addProperty({
-        label: '背景音乐ID',
-        value: obj.bgm ?? '',
-        type: 'text',
-        onChange: value => (obj.bgm = value),
-      })
+      addPropertyPair(
+        {
+          label: '背景图片ID',
+          value: obj.background ?? '',
+          type: 'text',
+          onChange: value => (obj.background = value),
+        },
+        {
+          label: '背景音乐ID',
+          value: obj.bgm ?? '',
+          type: 'text',
+          onChange: value => (obj.bgm = value),
+        }
+      )
       addProperty({
         label: '初始对话',
         value: obj.introDialogue ?? '',
         type: 'text',
         onChange: value => (obj.introDialogue = value),
       })
+      addPropertyPair(
+        {
+          label: '收集物ID',
+          value: obj.collectId ?? '',
+          type: 'text',
+          onChange: value => (obj.collectId = value),
+        },
+        {
+          label: '收集物总数',
+          value: obj.collectTotal ?? 0,
+          type: 'number',
+          onChange: value => (obj.collectTotal = parseFloat(value)),
+        }
+      )
       addProperty({
         label: 'update函数',
         value: obj.onUpdate ?? '',
@@ -2449,6 +2465,10 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
             .join('\n')}\n    }`
         : 'null'
     },
+
+    collectId: ${levelData.collectId ? `'${levelData.collectId}'` : 'null'},
+    collectCount: 0,
+    collectTotal: ${levelData.collectTotal ?? 0},
   }
 
   game.tilePalette = ${JSON.stringify(tilePalette)}

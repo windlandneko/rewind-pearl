@@ -2,6 +2,7 @@ import Asset from './Asset.js'
 import keyboard from './Keyboard.js'
 import PauseManager from './PauseManager.js'
 import SoundManager from './SoundManager.js'
+import { $ } from './utils.js'
 
 /**
  * Dialogue Manager
@@ -20,12 +21,17 @@ class Dialogue {
   isPlaying = false
   isWaiting = false
 
-  $dialogue = document.querySelector('.dialogue-container')
-  $modernTitle = document.querySelector('.dialogue-container .title')
-  $modernSubtitle = document.querySelector('.dialogue-container .subtitle')
-  $modernText = document.querySelector('.dialogue-container .text')
-  $touhou = document.querySelector('.dialogue-container .touhou-style-text')
-  $background = document.querySelector('.dialogue-background')
+  $dialogue = $('.dialogue-container')
+
+  $modern = $('.dialogue-container .modern-style-text')
+  $touhou = $('.dialogue-container .touhou-style-text')
+
+  $modernSpeakerBox = $('.dialogue-container .speaker-box')
+  $modernTitle = $('.dialogue-container .title')
+  $modernSubtitle = $('.dialogue-container .subtitle')
+  $modernText = $('.dialogue-container .text')
+
+  $background = $('.dialogue-background')
 
   #keyboardListeners = []
 
@@ -257,19 +263,10 @@ class Dialogue {
       this.$modernSubtitle.textContent = character?.subtitle ?? ''
       if (emotion) this.#updateCharacterEmotion(character, emotion)
 
-      this.$modernText.classList.remove('narration')
-      this.$touhou.classList.remove('narration')
-
-      this.$modernTitle.style.visibility = 'visible'
-      this.$modernSubtitle.style.visibility = 'visible'
+      this.$modern.classList.remove('narration')
     } else {
       this.#updatePosition()
-      this.$modernTitle.textContent = '-'
-      this.$modernSubtitle.textContent = '-'
-      this.$modernTitle.style.visibility = 'hidden'
-      this.$modernSubtitle.style.visibility = 'hidden'
-      this.$modernText.classList.add('narration')
-      this.$touhou.classList.add('narration')
+      this.$modern.classList.add('narration')
     }
 
     if (text === null) {

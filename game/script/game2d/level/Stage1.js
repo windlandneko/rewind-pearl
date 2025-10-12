@@ -4,7 +4,7 @@ import Vec2 from '../Vector.js'
 export function Stage1(game) {
   game.levelData = {
     introDialogue: 'null',
-    background: 'test',
+    background: 'sky',
     spawnpoint: new Vec2(99, 1144),
     cameraHeight: 180,
     cameraBound: {
@@ -15,6 +15,11 @@ export function Stage1(game) {
     },
     tileWidth: 60,
     tileHeight: 160,
+    onUpdate: null,
+
+    collectId: null,
+    collectCount: 0,
+    collectTotal: 0,
   }
 
   game.tilePalette = ["Air","Basalt","BetterCementSnow","PaleLimestone","FadedBrickGrey","Rock","DarkRock","BetterSummitNoSnow","DarkRockMagma","ButternutBrick"]
@@ -182,16 +187,14 @@ export function Stage1(game) {
     '111111111111111111111111111111111111111111111111111111111111',
   ]
 
-  game.sound.playBGM('test')
+  game.sound.playBGM('')
 
   game.gameObjects.push(
 
-    new $.Interactable(192, 1136, 24, 24, 'dialogue', 'sprite/zhishiqie/happy', '提示文本', false, (game, $) => {
+    new $.Interactable(192, 1136, 24, 24, 'dialogue', 'sprite/zhishiqie/happy', '提示文本', false, async (game, $) => {
       game.player.maxAirJumps = 1
-      game.player.jumpSpeed *= 1.2
-      game.player.airJumpSpeed *= 1.2
-      game.player.moveSpeed *= 1.1
+      game.player.jumpSpeed *= 2
       game.sound.play('bonus')
-    })
+    }).ref('boot')
   )
 }

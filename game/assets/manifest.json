@@ -138,7 +138,8 @@
       "wake_up": "dialogue/prologue/wake_up.json",
       "tutorial": "dialogue/prologue/tutorial.json",
       "easter_egg": "dialogue/prologue/easter_egg.json",
-      "finish": "dialogue/prologue/finish.json"
+      "finish": "dialogue/prologue/finish.json",
+      "not_finish": "dialogue/prologue/not_finish.json"
     }
   },
   "background": {
@@ -148,7 +149,8 @@
     "litang": "background/litang.png",
     "magic": "background/magic.jpg",
     "test": "background/01.data.png",
-    "sky": "background/sky.png",
+    "sky0": "background/sky0.png",
+    "sky1": "background/sky1.png",
     "raincity0": "background/raincity0.png",
     "raincity1": "background/raincity1.png",
     "raincity2": "background/raincity2.png",
@@ -171,6 +173,8 @@
   "soundEffects": {
     "challenge_complete": "soundEffects/challenge_complete.mp3",
     "mysterygo": "soundEffects/mysterygo.mp3",
+    "jump": "soundEffects/jump.mp3",
+    "die": "soundEffects/die.mp3",
     "big": "soundEffects/big.mp3",
     "bonus": "soundEffects/bonus.mp3",
     "bonus2": "soundEffects/bonus2.mp3",

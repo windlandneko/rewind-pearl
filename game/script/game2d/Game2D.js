@@ -240,8 +240,11 @@ export class Game {
       const bg = 'background/' + this.levelData.background
       if (Asset.has(bg + '0')) {
         if (Asset.has(bg + '0')) this.$bgBase.src = Asset.get(bg + '0').src
+        else this.$bgBase.src = null
         if (Asset.has(bg + '1')) this.$bgLayer1.src = Asset.get(bg + '1').src
+        else this.$bgLayer1.src = null
         if (Asset.has(bg + '2')) this.$bgLayer2.src = Asset.get(bg + '2').src
+        else this.$bgLayer2.src = null
       } else if (Asset.has(bg)) this.$bgBase.src = Asset.get(bg).src
     }
   }
@@ -351,7 +354,7 @@ export class Game {
   loadGame({ levelData, gameObjects, player, globalState }) {
     this.stop()
 
-    const levelName = levelData.name || 'Level1'
+    const levelName = levelData.name || 'Backroom'
 
     this.loadLevel(Levels[levelName])
     Object.assign(this.levelData, levelData)
@@ -679,9 +682,9 @@ export class Game {
     const pos = this.camera.getRenderPosition()
     const levelData = this.levelData
 
-    // 背景图尺寸（假设为 6000×768）
-    const BG_WIDTH = 6000
-    const BG_HEIGHT = 768
+    // 背景图尺寸
+    const BG_WIDTH = this.$bgBase.naturalWidth
+    const BG_HEIGHT = this.$bgBase.naturalHeight
 
     // 获取世界边界和视窗尺寸
     const worldWidth = levelData.tileWidth * 8
@@ -796,11 +799,11 @@ export class Game {
     // 绘制文本
     ctx.save()
     ctx.fillStyle = '#fff'
-    ctx.font = `${8 * scale}px Fira Code, serif, sans-serif`
+    ctx.font = `${7 * scale}px Fira Code, serif, sans-serif`
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
     ctx.strokeStyle = '#000'
-    ctx.lineWidth = 1.2 * scale
+    ctx.lineWidth = 1 * scale
 
     const text = `${strawberryCount}`
     ctx.strokeText(text, uiX + 7 * scale, uiY + 1 * scale)
@@ -817,12 +820,12 @@ export class Game {
     ctx.save()
 
     const uiX = 12 * scale
-    const uiY = 36 * scale
+    const uiY = 24 * scale
 
     ctx.translate(uiX, uiY)
 
     const sprite = Asset.get(this.levelData.collectId)
-    const width = 14 * scale
+    const width = 10 * scale
     const height = (sprite.height / sprite.width) * width
     ctx.drawImage(sprite, -width / 2, -height / 2, width, height)
 
@@ -831,16 +834,16 @@ export class Game {
     // 绘制文本
     ctx.save()
     ctx.fillStyle = '#fff'
-    ctx.font = `${8 * scale}px Fira Code, serif, sans-serif`
+    ctx.font = `${7 * scale}px Fira Code, serif, sans-serif`
     ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
     ctx.strokeStyle = '#000'
-    ctx.lineWidth = 1.2 * scale
+    ctx.lineWidth = 1 * scale
 
     const count = this.levelData.collectCount || 0
     const total = this.levelData.collectTotal || 0
 
-    const text = `${count} / ${total}`
+    const text = `${count}/${total}`
     ctx.strokeText(text, uiX + 7 * scale, uiY + 1 * scale)
     ctx.fillText(text, uiX + 7 * scale, uiY + 1 * scale)
 

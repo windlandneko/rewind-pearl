@@ -23,7 +23,7 @@
   display: table;
 }
 .dialogue-container.modern .modern-style-text {
-  display: block;
+  display: flex;
 }
 
 .dialogue-background > img {
@@ -123,22 +123,37 @@
 
 .modern-style-text {
   position: absolute;
-  bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 1.5rem 2rem;
-  min-height: 30%;
+  bottom: 0;
   z-index: 100;
   display: none;
 
   font-size: 1.3rem;
   line-height: 1.5;
+  margin: 0 auto;
+  padding: 2rem;
+
+  flex-direction: column;
+  align-items: center;
+  width: 70vw;
 }
 
-.modern-style-text .text.narration, .text span.narration {
-  color: rgba(255, 255, 255, 0.7);
+.modern-style-text .speaker-box {
+  background: black;
+  border: 3px solid white;
+  padding: 1rem 1.5rem;
+  opacity: 1;
+  transition: transform 0.3s ease;
+  transform: translateY(0);
+  align-self: flex-start;
+  margin-left: 1.2rem;
+  margin-bottom: -0.4rem;
+  height: 5rem;
+}
+
+.modern-style-text.narration .speaker-box {
+  transform: translateY(100px);
 }
 
 .modern-style-text .title {
@@ -168,6 +183,29 @@
   white-space: nowrap;
 }
 
+.modern-style-text .text-box {
+  background: black;
+  border: 3px solid white;
+  padding: 1.2rem 1.5rem;
+  min-height: 22vh;
+  width: 100%;
+  border-radius: 8px;
+  z-index: 1;
+  transition: border-color 0.3s ease;
+}
+
+.modern-style-text .text {
+  color: white;
+}
+
+.modern-style-text.narration .text,
+.modern-style-text.narration .text span {
+  color: rgba(255, 255, 255, 0.7);
+}
+.modern-style-text.narration .text-box {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
 .text {
   white-space: pre-line;
 }
@@ -183,7 +221,8 @@
   vertical-align: middle;
   display: inline-block;
 
-  animation: text-appear 0.4s ease forwards, arrow-bounce 0.8s infinite ease-in-out;
+  animation: text-appear 0.4s ease forwards,
+    arrow-bounce 0.8s infinite ease-in-out;
 }
 .modern-style-text span.arrow::after {
   content: '';
@@ -194,6 +233,9 @@
   border-right: 0.3em solid transparent;
   border-top: 0.5em solid #ffffff;
   margin: 0 auto;
+}
+.modern-style-text.narration span.arrow::after {
+  border-top-color: rgba(255, 255, 255, 0.7);
 }
 
 @keyframes arrow-bounce {
