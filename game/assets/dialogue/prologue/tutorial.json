@@ -1,0 +1,221 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "action": "bgm",
+      "id": "Home",
+      "volume": 0.6
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "疑颜丁真",
+      "key": "dingzhen",
+      "emotion": "normal",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "这还是地球吗？\n这给我干哪儿来了？"
+    },
+    {
+      "action": "sound",
+      "id": "ch02"
+    },
+    {
+      "action": "add",
+      "id": "zhishiqie",
+      "title": "芝士企鹅",
+      "subtitle": "码头引导者",
+      "key": "zhishiqie",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "（清清嗓子）\n泥嚎~窝是这个时空的引导者。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "你会说话？？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "没错！窝是芝士企鹅，\n专门负责接待像泥这样的客人~"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "客人？\n别跟我来这套！快告诉我这是哪里！"
+    },
+    {
+      "id": "dingzhen",
+      "text": "还有，我要怎么才能回去？\n我还得拍戏呢！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "唉呀，泥先别急~\n窝慢慢跟泥解释......"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "这里是一个特殊的时空，\n是被某种强大的力量所创造出来的。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "特殊的时空？\n你是说......这里不是地球？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "unhappy",
+      "text": "可以这么理解。\n而且更糟糕的是......泥暂时回不去地球了。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "shock",
+      "text": "什么？！回不去？！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "别慌别慌！窝说的是$italic:暂时$~\n只要泥听窝的指引，还是有办法的！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "......行吧，我现在也没别的选择。\n你说怎么办？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "很好！首先，泥需要学会如何在这个世界生存。\n这里的物理规则和地球有些不同，不过泥应该很快就能适应。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "物理规则不同？\n你具体说说......"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "首先，泥需要学会移动。\n按$wow:A$向左走，按$wow:D$向右走。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "听起来像游戏操作......"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "别打岔，听窝说完！\n泥还可以按$wow:空格$跳跃，按的越久跳的越高捏~\n如果泥获得了$italic:弹簧靴$，甚至还能在空中$italic:二段跳$捏。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "二段跳？！\n那不是违反物理定律吗？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "所以说这里的$italic:物理规则不同$捏~\n泥在空中的时候按空格，就能再跳一次捏！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "二段跳啊......\n这要是在地球上能用就好了。"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "看来泥已经掌握基本操作了捏~\n窝就知道泥是个聪明的孩子捏！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "窝知道泥很急，但是泥先别急，窝还得提醒泥几点——\n在这个世界里，你不会受到摔落伤害，不过$italic:掉进深渊$会直接死亡，\n所以一定要小心脚下捏！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "shock",
+      "text": "死亡？！\n真的会死吗？！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "unhappy",
+      "text": "那倒不会，泥可以无限复活。\n但是会很痛的捏！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "还有，如果碰到$italic:尖刺$或者$italic:敌人$也会死亡捏，要小心避开~"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "这什么破地方！到处都是危险！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "不要担心捏！只要泥小心一点，再加上窝的指引，一定没问题的捏~"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "对了，泥还可以按$wow:S$下落捏，在脚手架上会很有用捏！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "（啥也没记住）\n所以，我现在该怎么做？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "angry",
+      "text": "泥需要先帮窝找到所有的$wow:灵感菇$！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "灵感菇？那是什么东西？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "那是一种美味的蘑菇，能够帮助窝打开$wow:时空之门$捏。\n只有拿到灵感菇，\n窝才能送泥离开这里！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "灵感菇......时空之门......听起来很玄乎啊。\n不过既然这是唯一的办法，那我就去找找看吧！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "这才对嘛！出口在右边，沿着这条路一直走就能到捏~\n记住，AD移动，空格跳跃，小心危险捏！"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "smile",
+      "text": "知道了知道了。那我出发了！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "窝先走了，在出口等你捏~"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "action": "remove",
+      "id": "zhishiqie"
+    }
+  ]
+}

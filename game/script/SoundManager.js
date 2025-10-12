@@ -95,7 +95,7 @@ class SoundManager {
     }
   }
 
-  play(name, { single = true, volume = 0.5 } = {}) {
+  play(name, { single = false, volume = 0.5 } = {}) {
     if (single) {
       const instances = this.sounds.get(name) || []
       if (instances.some(audio => !audio.paused && !audio.ended)) {

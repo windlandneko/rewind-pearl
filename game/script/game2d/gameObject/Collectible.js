@@ -1,6 +1,8 @@
 import { BaseObject } from './BaseObject.js'
 import Asset from '../../Asset.js'
 import SpriteAnimation from '../Sprite.js'
+import Game2D from '../Game2D.js'
+import { Player } from './Player.js'
 
 const COLLECT_ANIM_TIME = 0.25
 
@@ -10,10 +12,11 @@ export class Collectible extends BaseObject {
   collectTick = 0
   collected = false
 
-  constructor(x, y, spriteId, onlyGhostCanCollect = false) {
+  constructor(x, y, spriteId, onlyGhostCanCollect = false, onCollect = null) {
     super(x, y, 4, 4)
     this.spriteId = spriteId
     this.onlyGhostCanCollect = onlyGhostCanCollect
+    this.onCollect = onCollect
 
     if (this.spriteId === 'sprite/strawberry') {
       const sprite = Asset.get(this.spriteId)
@@ -31,12 +34,36 @@ export class Collectible extends BaseObject {
     if (this.anim) this.anim.update(dt)
   }
 
-  interactWithPlayer(player, game) {
+  /**
+   * @param {Player} player
+   * @param {Game2D} game
+   */
+  async interactWithPlayer(player, game) {
     if (this.collected) return
     if (player.checkCollision(this) && !player.removed) {
       if (this.onlyGhostCanCollect && player.type !== 'GhostPlayer') return
       this.collected = true
+      try {
+        const $ = name => game.ref(name)
+        await this.onCollect?.call(this, game, $)
+      } catch (e) {
+        console.error(e)
+      }
       game.sound.play('lgods' + Math.ceil(Math.random() * 4))
+
+      if (this.spriteId === 'sprite/strawberry') {
+        let count = game.globalState.strawberry || 0
+        count++
+        if (count >= 3) game.achievement.add('strawberry_lover')
+        if (count >= 8) game.achievement.add('strawberry_master')
+        if (count >= 20) game.achievement.add('strawberry_grandmaster')
+
+        game.globalState.strawberry = count
+        game.showNotification(`已收集 ${game.globalState.strawberry} 个草莓`, {
+          icon: '🍓',
+          type: 'info',
+        })
+      }
     }
   }
 
@@ -92,6 +119,7 @@ export class Collectible extends BaseObject {
       t: this.collectTick,
       c: this.collected,
       o: this.onlyGhostCanCollect,
+      oc: this.onCollect?.toString?.(),
     }
   }
 
@@ -102,6 +130,7 @@ export class Collectible extends BaseObject {
     this.collectTick = state.t
     this.collected = state.c
     this.onlyGhostCanCollect = state.o
+    this.onCollect = eval(state.oc)
 
     if (this.spriteId === 'sprite/strawberry') {
       const sprite = Asset.get(this.spriteId)

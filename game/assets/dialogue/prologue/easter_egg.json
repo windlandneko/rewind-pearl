@@ -3,55 +3,217 @@
   "auto_next_delay": null,
   "events": [
     {
+      "action": "bgm",
+      "id": "Gate of steiner",
+      "volume": 0.5
+    },
+    {
       "action": "add",
       "id": "new",
       "title": "丁真",
       "subtitle": "疑眼丁真",
       "key": "dingzhen",
-      "emotion": "normal",
+      "emotion": "confused",
       "position": "right"
     },
     {
       "action": "add",
-      "id": "old",
+      "id": "future",
       "title_color": "#ffb6c1",
-      "title": "丁真喵",
-      "subtitle": "疑演丁真",
+      "title": "？？？",
+      "subtitle": "神秘的猫娘",
       "key": "dingzhen",
       "emotion": "normal",
       "position": "left"
     },
     {
       "id": "new",
-      "subtitle": "疑眼丁真",
-      "text": "不是哥们，你为什么长得和我一模一样？"
-    },
-    {
-      "id": "old",
-      "text": "我也想知道喵，我刚刚醒来就发现自己在这里了喵！\n好不容易从王源手里死里逃生，结果又被传送到序章了喵！"
+      "emotion": "shock",
+      "text": "？！"
     },
     {
       "id": "new",
       "subtitle": "疑言丁真",
-      "text": "哇，还是猫娘。\n等等，你见到王源了？还跟他打了一架？"
+      "text": "不是哥们......\n你为什么长得和我一模一样？！"
     },
     {
-      "id": "old",
+      "id": "future",
+      "title": "丁真喵",
+      "subtitle": "疑演丁真",
+      "text": "我也想知道喵！\n我明明在和王源最终决战，怎么一眨眼就回到序章了喵？！"
+    },
+    {
+      "id": "new",
+      "emotion": "angry",
+      "text": "等等等等！先别管这个！\n你为什么说话带喵啊！而且......那是$wow:猫耳$？！"
+    },
+    {
+      "id": "future",
+      "emotion": "thinking",
+      "text": "（摸了摸头上的猫耳）啊这个喵？\n这是我在第三章被灵感菇辐射后长出来的喵......"
+    },
+    "虽然一开始很不习惯，\n但现在已经成为我的$italic:标志性特征$了喵~",
+    {
+      "id": "new",
+      "emotion": "confused",
+      "text": "第三章？灵感菇辐射？\n你到底在说什么啊？"
+    },
+    {
+      "id": "future",
+      "emotion": "shock",
+      "text": "欸？难道说......\n你是$wow:过去的我$？！"
+    },
+    {
+      "action": "sound",
+      "id": "ch03"
+    },
+    {
+      "id": "new",
       "subtitle": "遗言丁真",
-      "text": "是的喵，那小子不知道从哪里得到了时间回溯的能力，从未来不断回溯喵。\n我根本打不过这么强的敌人喵！"
+      "emotion": "shock",
+      "text": "过、过去的你？！\n也就是说，你是$wow:未来的我$？！"
+    },
+    {
+      "id": "future",
+      "subtitle": "沂源丁真",
+      "emotion": "thinking",
+      "text": "看来是这样喵......\n一定是王源的时间回溯能力出现了$italic:偏差$，\n把我传送回过去了喵。"
     },
     {
       "id": "new",
-      "subtitle": "反演丁真",
-      "text": "时间回溯？\n也就是说，你是从未来回到过去的？"
+      "subtitle": "疑颜丁真",
+      "emotion": "confused",
+      "text": "王源？时间回溯？\n你在说什么？我现在都还没搞清楚状况......"
+    },
+    {
+      "id": "future",
+      "emotion": "normal",
+      "text": "啊对喵，现在的你应该刚刚被抓进这个世界吧。\n简单来说——"
+    },
+    "你接下来会经历$wow:五个章节$的冒险，\n在过程中逐渐掌握$italic:时间回溯$的力量喵。",
+    {
+      "id": "new",
+      "emotion": "angry",
+      "text": "五个章节？！还要掌握什么力量？！\n我只想回去拍戏啊！"
+    },
+    {
+      "id": "future",
+      "emotion": "smile",
+      "text": "放心喵，过去的我也是这么想的。\n但是$italic:既来之，则安之$嘛~"
+    },
+    "而且说实话，这段经历还挺$wow:刺激$的喵！",
+    {
+      "id": "new",
+      "emotion": "thinking",
+      "text": "刺激......吗？"
     },
     {
       "id": "new",
-      "text": "可是我们现在该怎么办？"
+      "emotion": "confused",
+      "text": "那你现在能告诉我，\n最后到底发生了什么吗？我能回去吗？"
+    },
+    {
+      "id": "future",
+      "emotion": "eyes_closed",
+      "text": "抱歉喵，关于未来的事情，\n我$italic:不能透露太多$。"
+    },
+    "不然可能会造成$wow:时间悖论$喵。",
+    {
+      "id": "new",
+      "emotion": "angry",
+      "text": "什么啊！说了半天等于没说！"
+    },
+    {
+      "id": "future",
+      "emotion": "smile",
+      "text": "哈哈哈，别生气嘛喵~\n不过我可以给你一个$wow:提示$！"
+    },
+    {
+      "id": "new",
+      "emotion": "normal",
+      "text": "什么提示？"
+    },
+    {
+      "id": "future",
+      "emotion": "thinking",
+      "text": "在第二章的时候，\n$italic:千万不要相信墙上的涂鸦$喵。"
+    },
+    "还有，在第四章遇到$wow:奥托$的时候，\n记得问他关于$italic:时间锚点$的事情喵。",
+    {
+      "id": "new",
+      "emotion": "confused",
+      "text": "涂鸦？奥托？时间锚点？\n这都是什么跟什么啊......"
+    },
+    {
+      "action": "sound",
+      "id": "kira01"
+    },
+    {
+      "id": "future",
+      "emotion": "shock",
+      "text": "糟糕喵！时空裂缝要关闭了！\n我得赶紧回去了喵！"
+    },
+    {
+      "id": "new",
+      "emotion": "shock",
+      "text": "诶？这就要走了？！"
+    },
+    {
+      "id": "future",
+      "emotion": "smile",
+      "text": "最后再告诉你一句——"
+    },
+    {
+      "id": "future",
+      "emotion": "proud",
+      "text": "$wow:相信自己$，丁真！\n你比你想象的$italic:要强得多$喵！"
+    },
+    "还有，$wow:别忘了每天抽锐刻$喵~",
+    {
+      "id": "new",
+      "emotion": "thinking",
+      "text": "等等——！"
+    },
+    {
+      "action": "sound",
+      "id": "noise"
     },
     {
       "id": null,
-      "text": "(正当两人不知所措时，这段对话突然被打断了，因为我没写完喵)"
+      "text": "（白光闪过，猫娘丁真消失了。）"
+    },
+    {
+      "action": "remove",
+      "id": "future"
+    },
+    {
+      "id": "new",
+      "emotion": "eyes_closed",
+      "text": "......走了吗？"
+    },
+    {
+      "id": "new",
+      "emotion": "thinking",
+      "text": "未来的我......猫娘......时间回溯......"
+    },
+    {
+      "id": "new",
+      "emotion": "smile",
+      "text": "虽然完全搞不懂，\n但至少知道$wow:我最后活下来了$......"
+    },
+    {
+      "id": "new",
+      "emotion": "proud",
+      "text": "既然如此——$italic:那就放手一搏吧$！"
+    },
+    {
+      "action": "remove",
+      "id": "new"
+    },
+    {
+      "id": null,
+      "text": "（彩蛋·完）",
+      "wait": 2000
     }
   ]
 }

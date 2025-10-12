@@ -259,10 +259,15 @@ class Dialogue {
 
       this.$modernText.classList.remove('narration')
       this.$touhou.classList.remove('narration')
+
+      this.$modernTitle.style.visibility = 'visible'
+      this.$modernSubtitle.style.visibility = 'visible'
     } else {
       this.#updatePosition()
-      this.$modernTitle.textContent = ''
-      this.$modernSubtitle.textContent = ''
+      this.$modernTitle.textContent = '-'
+      this.$modernSubtitle.textContent = '-'
+      this.$modernTitle.style.visibility = 'hidden'
+      this.$modernSubtitle.style.visibility = 'hidden'
       this.$modernText.classList.add('narration')
       this.$touhou.classList.add('narration')
     }
@@ -314,9 +319,11 @@ class Dialogue {
             }
 
             if (this.textCursor >= text.length) {
-              const arrow = document.createElement('span')
-              arrow.className = 'arrow'
-              this.$modernText.appendChild(arrow)
+              if (!wait) {
+                const arrow = document.createElement('span')
+                arrow.className = 'arrow'
+                this.$modernText.appendChild(arrow)
+              }
               this.textDisplaying = false
               clearTimeout(this.textDisplayHandler)
               clearTimeout(this.autoNextHandler)

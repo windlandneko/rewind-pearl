@@ -159,8 +159,6 @@ export class Player extends BaseObject {
           game.levelData.spawnpoint.y
         )
         game.camera.target = game.player
-
-        game.gameObjects.forEach(obj => obj.collected = false)
       }
       return
     }
@@ -171,7 +169,6 @@ export class Player extends BaseObject {
         this.isExploding = true
 
         game.sound.play('pldead00', {
-          single: true,
           volume: 0.3,
         })
 

@@ -80,6 +80,15 @@ export class BaseObject {
   }
 
   /**
+   * 显示对象
+   * @returns {BaseObject}
+   */
+  show() {
+    this.hidden = false
+    return this
+  }
+
+  /**
    * 移除对象
    * @returns {BaseObject}
    */

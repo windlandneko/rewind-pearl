@@ -7,10 +7,15 @@
       "id": "intro"
     },
     {
+      "action": "bgm",
+      "id": "chat",
+      "volume": 0.5
+    },
+    {
       "action": "add",
       "id": "man",
-      "title": "路人甲",
-      "subtitle": "龙套演员",
+      "title": "李雷",
+      "subtitle": "路人甲",
       "key": "man",
       "emotion": "normal",
       "position": "left"
@@ -18,35 +23,47 @@
     {
       "action": "add",
       "id": "woman",
-      "title": "路人乙",
-      "subtitle": "龙套演员",
+      "title": "韩梅梅",
+      "subtitle": "路人乙",
       "key": "woman",
       "emotion": "normal",
       "position": "right"
     },
     {
       "id": "man",
-      "text": "你听说了没，最近有好多起艺人和网红的失踪事件......"
+      "text": "诶诶诶，你听说了没？\n最近娱乐圈又出大事了！"
     },
     {
       "id": "woman",
-      "text": "听说了听说了，好像全都是些有黑料的大咖......"
+      "text": "你说那个失踪案啊？\n我昨天就刷到了，太离谱了。"
     },
     {
       "id": "man",
-      "text": "好恐怖哦，人间蒸发了一样\n不会是被雪藏了吧？"
+      "text": "是吧是吧！一个月内连续失踪好几个，不是明星就是网红......"
     },
     {
       "id": "woman",
-      "text": "切，有钱不赚，公司才不会这么傻\n说不定是什么诈骗集团，被拐去园区了！"
-    },
-    {
-      "id": "woman",
-      "text": "祈祷别落在自己头上吧。"
+      "text": "而且诡异的是，失踪之前他们都在网上冲浪，被黑料缠身、被网暴、被挂热搜。"
     },
     {
       "id": "man",
-      "text": "你我这种跑龙套的人家才不稀罕......"
+      "text": "然后莫名其妙的就失踪了，警方到现在都没查清楚咋回事！"
+    },
+    {
+      "id": "woman",
+      "text": "人间蒸发啊......\n不会是隐退了吧？毕竟现在流量的钱不好赚了。"
+    },
+    {
+      "id": "man",
+      "text": "不可能，哪个公司会嫌钱多？\n我看啊，八成是被拐去园区了！"
+    },
+    {
+      "id": "woman",
+      "text": "说的有点道理，那些诈骗集团现在可猖狂了。\n只能祈祷别落在咱们头上了。"
+    },
+    {
+      "id": "man",
+      "text": "咱们这种跑龙套的，人家还看不上呢......"
     },
     {
       "action": "remove",
@@ -57,39 +74,53 @@
       "id": "woman"
     },
     {
+      "id": null,
+      "text": "两个龙套演员谈笑风生地走远了，留下片场一片寂静。"
+    },
+    {
       "action": "add",
       "id": "dingzhen",
       "title": "丁真",
-      "subtitle": "理塘王",
+      "subtitle": "理塘の传说",
       "key": "dingzhen",
       "emotion": "normal",
       "position": "left"
     },
     {
       "id": null,
-      "text": "（此时正在片场休息抽锐刻，无意中听见了两个龙套演员的对话。）"
+      "text": "此时，片场休息区的长椅上，一个面相纯真的青年正叼着锐刻五代，吞云吐雾地刷着手机。"
     },
     {
       "id": "dingzhen",
       "emotion": "proud",
-      "text": "诈骗团伙？都市传说？\n和我的保镖说去吧。"
+      "text": "（深吸一口）诈骗团伙？都市传说？\n笑死，真当我是小学生呢。"
     },
     {
       "id": null,
-      "text": "（抽完最后一口烟油，他眯了眯眼睛，缓缓将肺中的烟雾全部推出鼻腔，然后站起身来。）"
+      "text": "他眯着眼睛，缓缓将肺中的烟雾从鼻腔推出，\n白色的烟雾在夕阳下形成了扭曲的光晕。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "不过话说回来，王源那小子确实挺久没消息了......\n上次还和我约着打游戏来着。"
+    },
+    {
+      "id": null,
+      "text": "他弹了弹烟灰，准备起身回去拍戏。"
     },
     {
       "action": "bgm",
-      "id": "Gate of steiner"
+      "id": "Gate of steiner",
+      "volume": 0.7
     },
     {
       "id": null,
-      "text": "（这时他看到了一个熟悉的人影在注视着自己。）"
+      "text": "就在这时，空气仿佛凝固了。\n一个熟悉的身影出现在摄影棚的阴影中，静静地注视着他。"
     },
     {
       "action": "add",
       "id": "wangyuan",
-      "title": "王源",
+      "title": "？？？",
       "subtitle": "失踪的艺人",
       "key": "wangyuan",
       "emotion": "smile",
@@ -97,21 +128,31 @@
     },
     {
       "id": "dingzhen",
-      "emotion": "angry",
-      "text": "你是谁？你为什么在这里？"
+      "emotion": "confused",
+      "text": "欸？那个人是......\n怎么感觉有点眼熟？"
     },
     {
       "id": "dingzhen",
       "emotion": "shock",
-      "text": "不对，那是......那是......\n失踪的$wow:王源$！"
+      "text": "等等——！那不是......\n那不是$wow:王源$吗！？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "王源？！你怎么在这里？\n你不是失踪了吗？！"
     },
     {
       "id": null,
-      "text": "（王源没有回答，只是缓缓地走向丁真。）"
+      "text": "王源没有回答。"
     },
     {
-      "action": "background",
-      "id": null
+      "id": null,
+      "text": "他只是保持着诡异的微笑，一步一步地走近。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "喂喂喂！你别过来啊！\n我警告你，我可是————"
     },
     {
       "action": "remove",
@@ -119,14 +160,50 @@
     },
     {
       "id": null,
-      "text": "（随后丁真的眼前便是无尽的黑暗。）",
-      "wait": 500
+      "text": "话音未落，王源突然消失了。"
+    },
+    {
+      "action": "background",
+      "id": null
+    },
+    {
+      "id": null,
+      "text": "下一秒，世界扭曲了。",
+      "wait": 1500
+    },
+    {
+      "id": null,
+      "text": "光线、声音、重力感——",
+      "wait": 1500
+    },
+    {
+      "id": null,
+      "text": "一切都在瞬间消失。",
+      "wait": 1500
+    },
+    {
+      "id": null,
+      "text": "随后，是无尽的黑暗。",
+      "wait": 1500
     },
     {
       "id": "dingzhen",
-      "emotion": "confused",
-      "text": "欸？骗人的吧？\n我不应该是理塘王吗？"
+      "text": "...\n...\n嗯？\n...\n...\n什么情况？"
     },
-    "为什么为什么！我被绑架了！"
+    {
+      "id": "dingzhen",
+      "emotion": "shock",
+      "text": "欸欸欸欸欸？？？\n骗人的吧！！！"
+    },
+    "我不是在片场吗？！\n我不是丁真珍珠吗？！",
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "这是哪里！发生什么事了！"
+    },
+    {
+      "id": "dingzhen",
+      "text": "我被绑架了？！"
+    }
   ]
 }

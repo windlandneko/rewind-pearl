@@ -174,7 +174,7 @@
 
 .modern-style-text span {
   display: inline-block;
-  animation: text-appear 0.3s ease forwards;
+  animation: text-appear 0.2s ease forwards;
 }
 
 .modern-style-text span.arrow {

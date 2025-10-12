@@ -1,0 +1,117 @@
+{
+  "text_style": "modern",
+  "auto_next_delay": null,
+  "events": [
+    {
+      "id": null,
+      "text": "（......）",
+      "wait": 3000
+    },
+    {
+      "id": null,
+      "text": "（......嗡嗡嗡......）"
+    },
+    {
+      "action": "add",
+      "id": "dingzhen",
+      "title": "丁真",
+      "subtitle": "意识模糊",
+      "key": "dingzhen",
+      "emotion": "eyes_closed",
+      "position": "left"
+    },
+    {
+      "id": "dingzhen",
+      "text": "唔......头好晕......"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "（缓缓睁开眼睛）这是......哪里？"
+    },
+    {
+      "id": null,
+      "text": "映入眼帘的是一片陌生的景象——\n细密的雨丝从灰蒙蒙的天空飘落，远处高耸的建筑物轮廓在雾气中若隐若现。"
+    },
+    {
+      "id": null,
+      "text": "脚下是潮湿的石板路，空气中弥漫着一种说不出的味道——\n像是生锈的铁，混合着霉菌和......电子烟油？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "这是哪个鬼地方？！\n我的手机呢？"
+    },
+    {
+      "id": null,
+      "text": "（他摸了摸口袋，手机、钱包、锐刻......）\n...\n...\n（但是什么也没有。）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "defeat",
+      "text": "连锐刻都没了......\n这下完蛋了。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "冷静，冷静......\n先搞清楚这是哪里。"
+    },
+    {
+      "action": "sound",
+      "id": "ch02"
+    },
+    {
+      "id": null,
+      "text": "（就在这时，身后传来了奇怪的声音——"
+    },
+    {
+      "id": null,
+      "text": "「咕咕嘎嘎？咕咕嘎嘎！」\n咕——\n咕——————\n嘎————————————\n嘎——————————————————————————————————————————"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "嗯？什么声音？\n一个......企鹅？？"
+    },
+    {
+      "action": "add",
+      "id": "zhishiqie",
+      "title": "芝士企鹅",
+      "subtitle": "？？？",
+      "key": "zhishiqie",
+      "emotion": "normal",
+      "position": "right"
+    },
+    {
+      "id": null,
+      "text": "那是一只直立行走的企鹅，大约一米高，\n它正用圆溜溜的眼睛盯着丁真，\n头上顶着一片......芝士？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "shock",
+      "text": "......芝士企鹅？\n等等，企鹅为什么会在这里？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "不对，现在不是纠结这个的时候。\n我得先搞清楚这到底是怎么回事......"
+    },
+    {
+      "id": null,
+      "text": "丁真深吸一口气，试图整理思绪。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "好，先探索一下周围吧。\n说不定能找到出路。"
+    },
+    {
+      "action": "remove",
+      "id": "dingzhen"
+    },
+    {
+      "action": "remove",
+      "id": "zhishiqie"
+    }
+  ]
+}

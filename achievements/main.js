@@ -1,21 +1,21 @@
 // 成就数据定义
 const achievementsData = [
   {
-    id: 'dian_ji_ji_song',
-    title: '点击即送',
-    description: '第一次启动游戏',
+    id: 'yi_yan_ding_zhen',
+    title: '一眼丁真',
+    description: '进入游戏',
     icon: 'fas fa-play-circle',
   },
   {
-    id: 'level_complete',
+    id: 'gugugaga!',
     title: '咕咕嘎嘎',
-    description: '收集所有的灵感菇',
-    icon: 'fas fa-star',
+    description: '帮助高松登收集了灵感菇',
+    icon: 'fas fa-guitar',
   },
   {
-    id: 'no_damage_jump',
+    id: 'no_death_jump',
     title: '跑酷大神',
-    description: '在跳跳乐关卡中无伤通关',
+    description: '在跳跳乐关卡中零死亡通关',
     icon: 'fas fa-trophy',
   },
   {
@@ -25,6 +25,18 @@ const achievementsData = [
     icon: 'fas fa-running',
   },
   {
+    id: 'strawberry_lover',
+    title: '草莓爱好者',
+    description: '收集 3 个草莓',
+    icon: 'fas fa-crow',
+  },
+  {
+    id: 'strawberry_master',
+    title: '草莓大师',
+    description: '收集 10 个草莓',
+    icon: 'fas fa-medal',
+  },
+  {
     id: 'talk_to_everyone',
     title: '社交恐怖分子',
     description: '与所有生物（以及不是生物的东西）都进行了对话',
@@ -32,8 +44,8 @@ const achievementsData = [
   },
   {
     id: 'master_player',
-    title: '游戏大师',
-    description: '完成所有关卡',
+    title: '结束了？',
+    description: '达成结局',
     icon: 'fas fa-crown',
   },
   {
@@ -44,17 +56,24 @@ const achievementsData = [
     hidden: true,
   },
   {
-    id: 'hidden_achievement_2',
-    title: '???',
-    description: '这是一个隐藏成就，完成特定条件后解锁',
-    icon: 'fas fa-question',
+    id: 'strawberry_grandmaster',
+    title: '草莓炼金师',
+    description: '收集了全部的草莓！',
+    icon: 'fas fa-crown',
     hidden: true,
   },
   {
-    id: 'hidden_achievement_3',
-    title: '???',
-    description: '这是一个隐藏成就，完成特定条件后解锁',
-    icon: 'fas fa-question',
+    id: 'break_the_time_space',
+    title: '::(',
+    description: '破坏时空结构',
+    icon: 'fas fa-poop',
+    hidden: true,
+  },
+  {
+    id: 'true_ending',
+    title: '结束力！',
+    description: '达成真结局',
+    icon: 'fas fa-dove',
     hidden: true,
   },
 ]

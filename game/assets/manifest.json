@@ -7,7 +7,6 @@
     "Memories of Memories": "audio/Memories of Memories.mp3",
     "Home": "audio/Toby Fox - Home.mp3"
   },
-
   "tiles": {
     "index": "tiles/index.xml",
     "default": "tiles/default.png",
@@ -83,7 +82,6 @@
     "Snow": "tiles/Snow.png",
     "Straw": "tiles/Straw.png"
   },
-
   "character": {
     "gunmu": "character/gunmu/normal.png",
     "dingzhen": {
@@ -133,17 +131,16 @@
       "sad": "character/otto/sad.png"
     }
   },
-
   "dialogue": {
     "test_dialogue": "dialogue/test_dialogue.json",
     "prologue": {
       "intro": "dialogue/prologue/intro.json",
+      "wake_up": "dialogue/prologue/wake_up.json",
+      "tutorial": "dialogue/prologue/tutorial.json",
       "easter_egg": "dialogue/prologue/easter_egg.json",
-      "zhishiqie": "dialogue/prologue/zhishiqie.json",
       "finish": "dialogue/prologue/finish.json"
     }
   },
-
   "background": {
     "cave": "background/cave.png",
     "factory": "background/factory.png",
@@ -158,7 +155,6 @@
     "underground": "background/underground.png",
     "home": "background/home.png"
   },
-
   "sprite": {
     "player": {
       "jump_left": "sprite/jump_left.png",
@@ -172,10 +168,9 @@
     "strawberry": "sprite/strawberry.png",
     "sign": "sprite/sign.png"
   },
-
   "soundEffects": {
     "challenge_complete": "soundEffects/challenge_complete.mp3",
-
+    "mysterygo": "soundEffects/mysterygo.mp3",
     "big": "soundEffects/big.mp3",
     "bonus": "soundEffects/bonus.mp3",
     "bonus2": "soundEffects/bonus2.mp3",

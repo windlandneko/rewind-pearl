@@ -296,6 +296,7 @@ function initializeLevel() {
       width: 320,
       height: 180,
     },
+    onUpdate: null,
   }
   spawnpoint = {
     type: 'spawnpoint',
@@ -491,6 +492,12 @@ function showProperties(obj) {
         type: 'text',
         onChange: value => (obj.introDialogue = value),
       })
+      addProperty({
+        label: 'update函数',
+        value: obj.onUpdate ?? '',
+        type: 'textarea',
+        onChange: value => (obj.onUpdate = value),
+      })
       break
     case TOOL.interactable:
       addProperty({
@@ -637,6 +644,12 @@ function showProperties(obj) {
         value: obj.onlyGhostCanCollect ?? false,
         type: 'checkbox',
         onChange: value => (obj.onlyGhostCanCollect = value),
+      })
+      addProperty({
+        label: '收集时触发的函数',
+        value: obj.onCollect ?? '',
+        type: 'textarea',
+        onChange: value => (obj.onCollect = value),
       })
       break
     case TOOL.trigger:
@@ -2109,6 +2122,7 @@ function createObject(type, pos) {
         y,
         spriteId: 'sprite/linggangu',
         onlyGhostCanCollect: false,
+        onCollect: "game.player.score += 1\ngame.sound.play('coin')\n",
       }
       break
     case TOOL.interactable:
@@ -2311,6 +2325,7 @@ import * as $ from '../gameObject/index.js'
      },
      tileWidth: 88,
      tileHeight: 23,
+     onUpdate: null,
    }
  
    game.tilePalette = ["Air","ButternutGrass","FadedBrickGrey","FadedBrickWhite","FadedBrickGrey","Rock","DarkRock","BetterSummitNoSnow","BetterSummit","ButternutBrick"]
@@ -2426,6 +2441,14 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
     },
     tileWidth: ${levelData.tileWidth},
     tileHeight: ${levelData.tileHeight},
+    onUpdate: ${
+      levelData.onUpdate
+        ? `async (dt, game, $) => {\n${levelData.onUpdate
+            .split('\n')
+            .map(line => '      ' + line)
+            .join('\n')}\n    }`
+        : 'null'
+    },
   }
 
   game.tilePalette = ${JSON.stringify(tilePalette)}
@@ -2461,7 +2484,7 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
             obj.autoPlay
           }, ${
             obj.afterInteract
-              ? `(game, $) => {\n${obj.afterInteract
+              ? `async (game, $) => {\n${obj.afterInteract
                   .split('\n')
                   .map(line => '      ' + line)
                   .join('\n')}\n    }`
@@ -2484,6 +2507,13 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
         case TOOL.collectible:
           str += `Collectible(${obj.x - 2}, ${obj.y - 2}, '${obj.spriteId}', ${
             obj.onlyGhostCanCollect
+          }, ${
+            obj.onCollect
+              ? `async (game, $) => {\n${obj.onCollect
+                  .split('\n')
+                  .map(line => '      ' + line)
+                  .join('\n')}\n    }`
+              : 'null'
           })`
           break
         case TOOL.hazard:
@@ -2494,14 +2524,14 @@ export function ${levelSelect.value ?? 'UnknownLevelName'}(game) {
             obj.once
           }, ${
             obj.enterCallback
-              ? `(game, $) => {\n${obj.enterCallback
+              ? `async (game, $) => {\n${obj.enterCallback
                   .split('\n')
                   .map(line => '      ' + line)
                   .join('\n')}\n    }`
               : 'null'
           }, ${
             obj.leaveCallback
-              ? `(game, $) => {\n${obj.leaveCallback
+              ? `async (game, $) => {\n${obj.leaveCallback
                   .split('\n')
                   .map(line => '      ' + line)
                   .join('\n')}\n    }`

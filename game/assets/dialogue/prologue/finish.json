@@ -4,110 +4,185 @@
   "events": [
     {
       "action": "background",
-      "id": "intro"
+      "id": "raincity0"
     },
     {
-      "action": "add",
-      "id": "man",
-      "title": "路人甲",
-      "subtitle": "龙套演员",
-      "key": "man",
-      "emotion": "normal",
-      "position": "left"
-    },
-    {
-      "action": "add",
-      "id": "woman",
-      "title": "路人乙",
-      "subtitle": "龙套演员",
-      "key": "woman",
-      "emotion": "normal",
-      "position": "right"
-    },
-    {
-      "id": "man",
-      "text": "你听说了没，最近有好多起艺人和网红的失踪事件......"
-    },
-    {
-      "id": "woman",
-      "text": "听说了听说了，好像全都是些有黑料的大咖......"
-    },
-    {
-      "id": "man",
-      "text": "好恐怖哦，人间蒸发了一样\n不会是被雪藏了吧？"
-    },
-    {
-      "id": "woman",
-      "text": "切，有钱不赚，公司才不会这么傻\n说不定是什么诈骗集团，被拐去园区了！"
-    },
-    {
-      "id": "woman",
-      "text": "祈祷别落在自己头上吧。"
-    },
-    {
-      "id": "man",
-      "text": "你我这种跑龙套的人家才不稀罕......"
-    },
-    {
-      "action": "remove",
-      "id": "man"
-    },
-    {
-      "action": "remove",
-      "id": "woman"
+      "action": "bgm",
+      "id": "Memories of Memories",
+      "volume": 0.6
     },
     {
       "action": "add",
       "id": "dingzhen",
       "title": "丁真",
-      "subtitle": "理塘王",
+      "subtitle": "疲惫の理塘王",
       "key": "dingzhen",
-      "emotion": "normal",
+      "emotion": "eyes_closed",
       "position": "left"
     },
     {
-      "id": null,
-      "text": "（此时正在片场休息抽锐刻，无意中听见了两个龙套演员的对话。）"
+      "id": "dingzhen",
+      "text": "（喘着粗气）终于......搞到灵感菇了......"
     },
     {
       "id": "dingzhen",
-      "emotion": "proud",
-      "text": "诈骗团伙？都市传说？\n和我的保镖说去吧。"
+      "emotion": "thinking",
+      "text": "这什么鬼地方，\n处处透着诡异和抽象......"
     },
     {
       "id": null,
-      "text": "（抽完最后一口烟油，他眯了眯眼睛，缓缓将肺中的烟雾全部推出鼻腔，然后站起身来。）"
+      "text": "（他低头看了看手中的灵感菇，\n这玩意儿散发着淡淡的荧光，看起来就不太正经。）"
     },
     {
-      "action": "bgm",
-      "id": "Gate of steiner"
-    },
-    {
-      "id": null,
-      "text": "（这时他看到了一个熟悉的人影在注视着自己。）"
+      "action": "sound",
+      "id": "ch02"
     },
     {
       "action": "add",
-      "id": "wangyuan",
-      "title": "王源",
-      "subtitle": "失踪的艺人",
-      "key": "wangyuan",
-      "emotion": "smile",
+      "id": "zhishiqie",
+      "title": "芝士企鹅",
+      "subtitle": "码头引导者",
+      "key": "zhishiqie",
+      "emotion": "normal",
       "position": "right"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "哦呦呦呦~窝就知道泥是个有$wow:潜力$的孩子！\n这么快就拿到灵感菇了！"
     },
     {
       "id": "dingzhen",
       "emotion": "angry",
-      "text": "你是谁？你为什么在这里？"
+      "text": "少废话，快点送我回去！\n我还有工作要做！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "（咕咕嘎嘎笑）好说好说~\n不过在那之前，窝得告诉泥一些$italic:重要的事情$......"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "重要的事情？什么事情？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "泥觉得泥为什么会来到这里呢？\n仅仅是因为王源碰了泥一下？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "......现在想想确实不对劲。\n王源为什么会失踪？为什么能把我传送到这里？"
+    },
+    {
+      "id": "zhishiqie",
+      "text": "因为他掌握了$wow:时间回溯$的能力啊。"
+    },
+    {
+      "action": "sound",
+      "id": "kira01"
     },
     {
       "id": "dingzhen",
       "emotion": "shock",
-      "text": "不对，那是......那是......\n失踪的$wow:王源$！"
+      "text": "什么？！时间回溯？！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "unhappy",
+      "text": "没错。他一直在利用这个能力，\n将那些有黑料的明星艺人抓到这个$italic:特殊的时空$里来......"
+    },
+    "目的嘛......窝也不太清楚喵。\n但窝能感觉到，这绝对不是什么好事。",
+    {
+      "id": "dingzhen",
+      "emotion": "angry",
+      "text": "开什么玩笑！\n那家伙凭什么决定我们的命运！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "所以啊，泥需要变得更强。"
+    },
+    "窝能感觉到，在泥的身体里，\n也有着某种$wow:特殊的力量$在沉睡......",
+    {
+      "id": "dingzhen",
+      "emotion": "confused",
+      "text": "特殊的力量？我？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "没错！只要泥不断前进、不断挑战，\n总有一天会觉醒的喵！"
+    },
+    "到时候，泥就能和王源$italic:一决高下$了！",
+    {
+      "id": "dingzhen",
+      "emotion": "proud",
+      "text": "哼，虽然听起来很扯......\n但我丁真可不是会坐以待毙的人。"
+    },
+    "既然这样，那就来吧！",
+    {
+      "id": "dingzhen",
+      "emotion": "smile",
+      "text": "我要把所有人都救出去，\n然后狠狠地揍王源那家伙一顿！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "这才对嘛！有志气！\n那窝就先送泥去下一个区域了喵~"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "对了，企鹅。\n你为什么要帮我？"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "normal",
+      "text": "因为啊......窝$italic:讨厌看到有人作恶$。"
+    },
+    "而且窝觉得泥这孩子有点意思，\n就当是窝押注的$wow:潜力股$了喵~",
+    {
+      "id": "dingzhen",
+      "emotion": "normal",
+      "text": "行吧，那就谢了。"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "proud",
+      "text": "等我出去请你抽锐刻五代！"
+    },
+    {
+      "id": "zhishiqie",
+      "emotion": "happy",
+      "text": "哈哈哈！窝可记住了喵！\n那么——$wow:祝泥好运$！"
+    },
+    {
+      "action": "sound",
+      "id": "kira02"
     },
     {
       "id": null,
-      "text": "（王源没有回答，只是缓缓地走向丁真。）"
+      "text": "（白光闪过。）"
+    },
+    {
+      "action": "remove",
+      "id": "zhishiqie"
+    },
+    {
+      "id": null,
+      "text": "（丁真感到周围的景色开始扭曲、模糊......）"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "thinking",
+      "text": "这感觉......又要传送了吗？"
+    },
+    {
+      "id": "dingzhen",
+      "emotion": "smile",
+      "text": "好，来吧！\n不管前面是什么，我都不会退缩！"
     },
     {
       "action": "background",
@@ -115,18 +190,12 @@
     },
     {
       "action": "remove",
-      "id": "wangyuan"
+      "id": "dingzhen"
     },
     {
       "id": null,
-      "text": "（随后丁真的眼前便是无尽的黑暗。）",
-      "wait": 500
-    },
-    {
-      "id": "dingzhen",
-      "emotion": "confused",
-      "text": "欸？骗人的吧？\n我不应该是理塘王吗？"
-    },
-    "为什么为什么！我被绑架了！"
+      "text": "（序章·完）",
+      "wait": 2000
+    }
   ]
 }

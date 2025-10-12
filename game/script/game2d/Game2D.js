@@ -9,6 +9,7 @@ import TimeTravel from './TimeTravel.js'
 import SoundManager from '../SoundManager.js'
 import PauseManager from '../PauseManager.js'
 import AchievementManager from '../AchievementManager.js'
+import SpriteAnimation from './Sprite.js'
 import * as Levels from './level/index.js'
 import * as GameConfig from './GameConfig.js'
 import * as GameObject from './gameObject/index.js'
@@ -123,6 +124,8 @@ export class Game {
     this.$bgBase = this.$backgroundContainer?.querySelector('#bg-base')
     this.$bgLayer1 = this.$backgroundContainer?.querySelector('#bg-layer-1')
     this.$bgLayer2 = this.$backgroundContainer?.querySelector('#bg-layer-2')
+
+    this.strawberryUIAnim = null
 
     PauseManager.game = this
     PauseManager.on('pause', () => {
@@ -245,6 +248,20 @@ export class Game {
 
   async start(initial = false) {
     this.#setupCamera(this.levelData)
+
+    // 初始化草莓
+    if (Asset.has('sprite/strawberry')) {
+      const sprite = Asset.get('sprite/strawberry')
+      this.strawberryUIAnim = new SpriteAnimation(
+        sprite,
+        42,
+        16,
+        16,
+        1000 / 8,
+        true
+      )
+      this.strawberryUIAnim.play()
+    }
 
     // 初始提示
     if (!localStorage.getItem('rewind-pearl-showhelp')) {
@@ -442,6 +459,9 @@ export class Game {
   async update(dt) {
     if (PauseManager.isPaused) return
 
+    // 更新草莓
+    if (this.strawberryUIAnim) this.strawberryUIAnim.update(dt)
+
     // 更新摄像机
     this.camera.setWorldBounds(
       this.levelData.cameraBound?.x,
@@ -520,6 +540,12 @@ export class Game {
       obj.interactWithPlayer(this.player, this, dt)
     })
 
+    try {
+      await this.levelData.onUpdate?.(dt, this, name => this.ref(name))
+    } catch (error) {
+      console.warn(error)
+    }
+
     if (this.tick % 6000 === 5000) this.saveGame('自动保存', true)
   }
 
@@ -575,6 +601,8 @@ export class Game {
     this.player.render(ctx, this)
 
     ctx.restore()
+
+    this.#renderUI(ctx)
 
     // 调试数据
     if (this.debug) this.#debugRenderInfo(ctx)
@@ -738,6 +766,85 @@ export class Game {
       ctx.lineTo(endX, y)
       ctx.stroke()
     }
+  }
+
+  #renderUI(ctx) {
+    this.#renderStrawBerry(ctx)
+    this.#renderCollect(ctx)
+  }
+
+  #renderStrawBerry(ctx) {
+    if (!this.strawberryUIAnim) return
+
+    const strawberryCount = this.globalState.strawberry || 0
+    const scale = this.scale
+
+    ctx.save()
+
+    const uiX = 12 * scale
+    const uiY = 12 * scale
+
+    ctx.translate(uiX, uiY)
+
+    const size = 14 * scale
+
+    // 渲染草莓
+    this.strawberryUIAnim.render(ctx, -size / 2, -size / 2, size, size)
+
+    ctx.restore()
+
+    // 绘制文本
+    ctx.save()
+    ctx.fillStyle = '#fff'
+    ctx.font = `${8 * scale}px Fira Code, serif, sans-serif`
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.strokeStyle = '#000'
+    ctx.lineWidth = 1.2 * scale
+
+    const text = `${strawberryCount}`
+    ctx.strokeText(text, uiX + 7 * scale, uiY + 1 * scale)
+    ctx.fillText(text, uiX + 7 * scale, uiY + 1 * scale)
+
+    ctx.restore()
+  }
+
+  #renderCollect(ctx) {
+    if (!this.levelData.collectId) return
+
+    const scale = this.scale
+
+    ctx.save()
+
+    const uiX = 12 * scale
+    const uiY = 36 * scale
+
+    ctx.translate(uiX, uiY)
+
+    const sprite = Asset.get(this.levelData.collectId)
+    const width = 14 * scale
+    const height = (sprite.height / sprite.width) * width
+    ctx.drawImage(sprite, -width / 2, -height / 2, width, height)
+
+    ctx.restore()
+
+    // 绘制文本
+    ctx.save()
+    ctx.fillStyle = '#fff'
+    ctx.font = `${8 * scale}px Fira Code, serif, sans-serif`
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.strokeStyle = '#000'
+    ctx.lineWidth = 1.2 * scale
+
+    const count = this.levelData.collectCount || 0
+    const total = this.levelData.collectTotal || 0
+
+    const text = `${count} / ${total}`
+    ctx.strokeText(text, uiX + 7 * scale, uiY + 1 * scale)
+    ctx.fillText(text, uiX + 7 * scale, uiY + 1 * scale)
+
+    ctx.restore()
   }
 
   /**

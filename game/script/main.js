@@ -16,7 +16,7 @@ async function startNewGame() {
 }
 
 Loading.on('complete', () => {
-  AchievementManager.add('dian_ji_ji_song')
+  AchievementManager.add('yi_yan_ding_zhen', true)
 
   if (localStorage.getItem('rewind-pearl-debug-mode')) {
     startNewGame()

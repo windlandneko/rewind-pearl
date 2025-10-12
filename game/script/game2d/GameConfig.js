@@ -3,7 +3,7 @@ export const UPDATE_PER_SECOND = 120
 export const UPDATE_INTERVAL = 1000 / UPDATE_PER_SECOND
 
 // 最大时间回溯记录（秒）
-export const MAX_SNAPSHOTS_COUNT = UPDATE_PER_SECOND * 600
+export const MAX_SNAPSHOTS_COUNT = UPDATE_PER_SECOND * 30
 // 时间回溯充能时间（毫秒）
 export const TIME_TRAVEL_CHARGE_TIME = 1 * UPDATE_PER_SECOND
 

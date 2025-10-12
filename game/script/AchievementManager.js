@@ -43,20 +43,23 @@ class Achievement {
   /**
    * 解锁指定成就
    * @param {string} id 成就ID
+   * @param {boolean} [slient=false] 是否静默解锁（不显示通知）
    * @returns {boolean} 是否成功
    */
-  add(id) {
+  add(id, slient = false) {
     const user = this.#username
     if (!user) return false
     const allData = this.#getAllData()
     if (!allData[user]) allData[user] = {}
 
     if (!allData[user][id]) {
-      this.game.showNotification(`成就已解锁：${id}`, {
-        icon: '🏆',
-        type: 'success',
-      })
-      this.game.sound.play('challenge_complete')
+      if (!slient) {
+        this.game.showNotification(`成就已解锁：${id}`, {
+          icon: '🏆',
+          type: 'success',
+        })
+        this.game.sound.play('challenge_complete')
+      }
       allData[user][id] = true
       this.#save(allData)
     }

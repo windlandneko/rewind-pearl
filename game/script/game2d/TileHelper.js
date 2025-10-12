@@ -267,7 +267,7 @@ export class TileHelper {
                 d01 * fx * (1 - fy) +
                 d11 * fx * fy
 
-              const alpha = Math.min(0.6, dist * 0.01)
+              const alpha = Math.min(0.8, dist * 0.06)
               ctx.save()
               ctx.fillStyle = `rgba(0,0,0,${alpha})`
               ctx.fillRect(tx + dx * 4, ty + dy * 4, 4, 4)
@@ -292,6 +292,6 @@ export class TileHelper {
       }
     }
 
-    this.#calculateTileDistance()
+    // this.#calculateTileDistance()
   }
 }
