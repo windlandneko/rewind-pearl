@@ -392,19 +392,24 @@ class Dialogue {
   #onBackground(event) {
     const { id } = event
     if (Asset.has('background/' + id)) {
-      this.$background.childNodes.forEach(child => {
+      // 优化：使用for循环代替forEach，避免函数调用开销
+      const children = this.$background.childNodes
+      for (let i = children.length - 1; i >= 0; i--) {
+        const child = children[i]
         child.classList.remove('visible')
         setTimeout(() => child.remove(), 500)
-      })
+      }
 
       const image = Asset.get('background/' + id)
       setTimeout(() => image.classList.add('visible'), 0)
       this.$background.appendChild(image)
     } else if (id === null) {
-      this.$background.childNodes.forEach(child => {
+      const children = this.$background.childNodes
+      for (let i = children.length - 1; i >= 0; i--) {
+        const child = children[i]
         child.classList.remove('visible')
         setTimeout(() => child.remove(), 500)
-      })
+      }
     } else {
       console.warn('[Dialogue] (action: background) 背景图片不存在:', id)
     }
@@ -501,8 +506,8 @@ class Dialogue {
     this.$touhou.classList.remove('left', 'right', 'visible')
     this.$touhou.classList.add(this.currentSpeaker.position)
 
-    this.$touhou.querySelectorAll('span').forEach(span => span.remove())
-    this.$touhou.querySelectorAll('br').forEach(span => span.remove())
+    // 优化：使用innerHTML清空比querySelectorAll + forEach更快
+    this.$touhou.innerHTML = ''
     this.#parseText(this.$touhou, text)
 
     // retrigger animation
@@ -510,14 +515,20 @@ class Dialogue {
   }
 
   #parseText($el, text) {
+    // 优化：使用DocumentFragment批量添加DOM节点，减少重排
+    const fragment = document.createDocumentFragment()
     let span = document.createElement('span')
+    
     for (let i = 0; i < text.length; i++) {
       let char = text[i]
 
       if (char === '\\') {
         char = text[++i]
       } else if (char === '$') {
-        $el.appendChild(span)
+        // 添加当前span到fragment
+        if (span.textContent) {
+          fragment.appendChild(span)
+        }
         span = document.createElement('span')
 
         const divider = text.indexOf(':', i + 1)
@@ -531,22 +542,31 @@ class Dialogue {
         }
         i = end
 
-        $el.appendChild(span)
+        fragment.appendChild(span)
         span = document.createElement('span')
         continue
       }
 
       if (char === '\n') {
-        $el.appendChild(span)
-        $el.appendChild(document.createElement('br'))
+        if (span.textContent) {
+          fragment.appendChild(span)
+        }
+        fragment.appendChild(document.createElement('br'))
         span = document.createElement('span')
       } else {
         span.textContent = char
-        $el.appendChild(span)
+        fragment.appendChild(span)
         span = document.createElement('span')
       }
     }
-    $el.appendChild(span)
+    
+    // 添加最后一个span
+    if (span.textContent || fragment.childNodes.length === 0) {
+      fragment.appendChild(span)
+    }
+    
+    // 一次性添加所有节点到DOM
+    $el.appendChild(fragment)
   }
 }
 
