@@ -502,9 +502,21 @@ export class Game {
     this.history.delete(this.tick - GameConfig.MAX_SNAPSHOTS_COUNT)
 
     // 移除标记为删除的对象
-    const objectsToRemove = this.gameObjects.filter(obj => obj.removed)
-    if (objectsToRemove.length > 0) {
-      this.gameObjects = this.gameObjects.filter(obj => !obj.removed)
+    // 优化：使用单次遍历，就地过滤removed对象，避免创建新数组
+    let writeIndex = 0
+    let hasRemovedObjects = false
+    for (let i = 0; i < this.gameObjects.length; i++) {
+      if (!this.gameObjects[i].removed) {
+        if (writeIndex !== i) {
+          this.gameObjects[writeIndex] = this.gameObjects[i]
+        }
+        writeIndex++
+      } else {
+        hasRemovedObjects = true
+      }
+    }
+    if (hasRemovedObjects) {
+      this.gameObjects.length = writeIndex
       this.#updateRenderGroups()
     }
 
