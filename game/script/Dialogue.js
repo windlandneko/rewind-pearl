@@ -533,7 +533,7 @@ class Dialogue {
         char = text[++i]
       } else if (char === '$') {
         // 添加当前span到fragment
-        if (span.textContent) {
+        if (span.textContent !== '') {
           fragment.appendChild(span)
         }
         span = document.createElement('span')
@@ -555,7 +555,7 @@ class Dialogue {
       }
 
       if (char === '\n') {
-        if (span.textContent) {
+        if (span.textContent !== '') {
           fragment.appendChild(span)
         }
         fragment.appendChild(document.createElement('br'))
@@ -567,8 +567,8 @@ class Dialogue {
       }
     }
     
-    // 添加最后一个span
-    if (span.textContent || fragment.childNodes.length === 0) {
+    // 添加最后一个span（如果有内容，或者fragment为空则添加空span以保持结构）
+    if (span.textContent !== '' || fragment.childNodes.length === 0) {
       fragment.appendChild(span)
     }
     

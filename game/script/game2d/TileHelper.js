@@ -101,8 +101,7 @@ export class TileHelper {
     if (palette) this.#palette = palette
     // 优化：直接get然后检查，避免双重Map查找
     this.#paletteMap = this.#palette.map(name => {
-      const asset = Asset.get('tiles/' + name)
-      return asset || undefined
+      return Asset.get('tiles/' + name)
     })
   }
 

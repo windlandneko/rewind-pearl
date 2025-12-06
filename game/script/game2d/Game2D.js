@@ -259,10 +259,11 @@ export class Game {
     this.#setupCamera(this.levelData)
 
     // 初始化草莓
-    if (Asset.has('sprite/strawberry')) {
-      const sprite = Asset.get('sprite/strawberry')
+    // 优化：直接get然后检查，避免双重Map查找
+    const strawberrySprite = Asset.get('sprite/strawberry')
+    if (strawberrySprite) {
       this.strawberryUIAnim = new SpriteAnimation(
-        sprite,
+        strawberrySprite,
         42,
         16,
         16,
@@ -678,7 +679,7 @@ export class Game {
       }
     }
 
-    this.til
+    // 渲染瓦片地图
     ctx.drawImage(this.tileCanvas, 0, 0)
 
     // 渲染玩家
