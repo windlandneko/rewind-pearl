@@ -86,14 +86,17 @@ class Dialogue {
       return Promise.resolve()
     }
 
-    if (!Asset.has('dialogue/' + dialogue)) {
+    // 优化：直接get然后检查，避免双重Map查找
+    const dialogueKey = 'dialogue/' + dialogue
+    const dialogueData = Asset.get(dialogueKey)
+    if (!dialogueData) {
       console.warn('[Dialogue] (play) 对话资源不存在:', dialogue)
       return Promise.resolve()
     }
 
     this.stop(true)
     this.$modernText.textContent = ''
-    this.dialogueData = Asset.get('dialogue/' + dialogue)
+    this.dialogueData = dialogueData
     this.$dialogue.className = 'dialogue-container'
     this.$dialogue.classList.add(
       'visible',
@@ -391,7 +394,9 @@ class Dialogue {
    */
   #onBackground(event) {
     const { id } = event
-    if (Asset.has('background/' + id)) {
+    // 优化：直接get然后检查，避免双重Map查找
+    const backgroundImage = Asset.get('background/' + id)
+    if (backgroundImage) {
       // 优化：使用for循环代替forEach，避免函数调用开销
       const children = this.$background.childNodes
       for (let i = children.length - 1; i >= 0; i--) {
@@ -400,9 +405,8 @@ class Dialogue {
         setTimeout(() => child.remove(), 500)
       }
 
-      const image = Asset.get('background/' + id)
-      setTimeout(() => image.classList.add('visible'), 0)
-      this.$background.appendChild(image)
+      setTimeout(() => backgroundImage.classList.add('visible'), 0)
+      this.$background.appendChild(backgroundImage)
     } else if (id === null) {
       const children = this.$background.childNodes
       for (let i = children.length - 1; i >= 0; i--) {
@@ -437,9 +441,12 @@ class Dialogue {
   // 更新角色表情
   #updateCharacterEmotion(character, emotion) {
     const key = character.key ?? 'gunmu'
-    let image = `character/${key}/${emotion}`
-    if (Asset.has(image)) {
-      image = Asset.get(image).src
+    const imageKey = `character/${key}/${emotion}`
+    // 优化：直接get然后检查，避免双重Map查找
+    const imageAsset = Asset.get(imageKey)
+    let image
+    if (imageAsset) {
+      image = imageAsset.src
     } else {
       console.warn(
         '[Dialogue] (updateCharacterEmotion) 立绘图片不存在:',

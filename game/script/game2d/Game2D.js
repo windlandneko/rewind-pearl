@@ -240,14 +240,18 @@ export class Game {
 
     if (this.levelData.background) {
       const bg = 'background/' + this.levelData.background
-      if (Asset.has(bg + '0')) {
-        if (Asset.has(bg + '0')) this.$bgBase.src = Asset.get(bg + '0').src
-        else this.$bgBase.src = null
-        if (Asset.has(bg + '1')) this.$bgLayer1.src = Asset.get(bg + '1').src
-        else this.$bgLayer1.src = null
-        if (Asset.has(bg + '2')) this.$bgLayer2.src = Asset.get(bg + '2').src
-        else this.$bgLayer2.src = null
-      } else if (Asset.has(bg)) this.$bgBase.src = Asset.get(bg).src
+      // 优化：减少重复的has+get调用，直接get然后检查
+      const bg0 = Asset.get(bg + '0')
+      if (bg0) {
+        this.$bgBase.src = bg0.src
+        const bg1 = Asset.get(bg + '1')
+        this.$bgLayer1.src = bg1 ? bg1.src : null
+        const bg2 = Asset.get(bg + '2')
+        this.$bgLayer2.src = bg2 ? bg2.src : null
+      } else {
+        const bgSingle = Asset.get(bg)
+        if (bgSingle) this.$bgBase.src = bgSingle.src
+      }
     }
   }
 
@@ -615,34 +619,51 @@ export class Game {
 
     // 按优先级渲染游戏对象
     // 优化：使用for循环代替forEach，减少函数调用开销
+    // 优化：添加视口剔除，跳过屏幕外的对象渲染（保留一定边距）
+    const cullMargin = 50 // 渲染边距，确保物体进入视野时已经渲染
+    
     for (let i = 0; i < this.renderGroups.interactables.length; i++) {
       const obj = this.renderGroups.interactables[i]
-      if (!obj.hidden) obj.render(ctx, this)
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
+    // 触发器通常不需要渲染，但保留渲染逻辑
     for (let i = 0; i < this.renderGroups.triggers.length; i++) {
       const obj = this.renderGroups.triggers[i]
       if (!obj.hidden) obj.render(ctx, this)
     }
     for (let i = 0; i < this.renderGroups.collectibles.length; i++) {
       const obj = this.renderGroups.collectibles[i]
-      if (!obj.hidden) obj.render(ctx, this)
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
     for (let i = 0; i < this.renderGroups.enemies.length; i++) {
       const obj = this.renderGroups.enemies[i]
-      if (!obj.hidden) obj.render(ctx, this)
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
     for (let i = 0; i < this.renderGroups.movingPlatforms.length; i++) {
       const obj = this.renderGroups.movingPlatforms[i]
-      if (!obj.hidden) obj.render(ctx, this)
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
     // 先渲染非梯子平台，再渲染梯子（分层渲染）
+    // 平台通常覆盖大面积，视口剔除效果明显
     for (let i = 0; i < this.renderGroups.platforms.length; i++) {
       const obj = this.renderGroups.platforms[i]
-      if (!obj.hidden && !obj.ladder) obj.render(ctx, this)
+      if (!obj.hidden && !obj.ladder && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
     for (let i = 0; i < this.renderGroups.platforms.length; i++) {
       const obj = this.renderGroups.platforms[i]
-      if (!obj.hidden && obj.ladder) obj.render(ctx, this)
+      if (!obj.hidden && obj.ladder && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
     }
 
     this.til
