@@ -3,15 +3,6 @@
   "auto_next_delay": null,
   "events": [
     {
-      "action": "background",
-      "id": "raincity0"
-    },
-    {
-      "action": "bgm",
-      "id": "Memories of Memories",
-      "volume": 0.6
-    },
-    {
       "action": "add",
       "id": "dingzhen",
       "title": "丁真",

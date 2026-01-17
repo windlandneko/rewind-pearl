@@ -60,7 +60,7 @@ class Dialogue {
     })
 
     this.#keyboardListeners.push(
-      keyboard.onKeydown(['Enter', 'Space'], () => {
+      keyboard.onKeydown(['Space', 'E'], () => {
         this.next()
       }),
       keyboard.onKeydown(['LCtrl', 'RCtrl'], key => {
@@ -130,7 +130,7 @@ class Dialogue {
     clearTimeout(this.waitHandler)
     clearTimeout(this.autoNextHandler)
 
-    if (!force) setTimeout(() => this.onEnd?.(), 500)
+    if (!force) setTimeout(() => this.onEnd?.(), 300)
   }
 
   /**

@@ -1,26 +1,28 @@
-import * as GO from '../gameObject/index.js'
+import * as $ from '../gameObject/index.js'
 import Vec2 from '../Vector.js'
 
-export function 默认关卡(game) {
+export function TestLevel(game) {
   game.levelData = {
-  introDialogue: null,
+    introDialogue: 'null',
     background: 'test',
-    spawnpoint: new Vec2(507, 408),
+    spawnpoint: new Vec2(19, 416),
     cameraHeight: 180,
     cameraBound: {
-      x: 480,
-      y: 270,
-      width: 320,
-      height: 180,
+      x: 0,
+      y: 0,
+      width: 1280,
+      height: 640,
     },
     tileWidth: 160,
     tileHeight: 90,
+    onUpdate: null,
+
+    collectId: null,
+    collectCount: 0,
+    collectTotal: 0,
   }
 
-  // 开门状态标记，防止重复开门逻辑；关卡重载时重置为 false
-  if (game.levelData.door2Opened === undefined) game.levelData.door2Opened = false
-
-  game.tilePalette = ["Air","BalatroSilver","BalatroSilver","PaleLimestone","FadedBrickGrey","Rock","DarkRock","BetterSummitNoSnow","DarkRockMagma","ButternutBrick"]
+  game.tilePalette = ["Air","RockyMudGrassAutumn","RockyMudGrass","RockyMudGrassAutumnDead","Rock","Rock","DarkRock","BetterSummitNoSnow","DarkRockMagma","ButternutBrick"]
 
   game.tileData = [
     '                                                                                                                                                                ',
@@ -33,83 +35,82 @@ export function 默认关卡(game) {
     '                                                                                                                                                                ',
     '                                                                                                                                                                ',
     '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                111111                                                                                          ',
-    '                                                            11111111111111                                                                                      ',
-    '                                                          111111111111111111                                                                                    ',
-    '                                                          111111111 11111111             1111                                                                   ',
-    '                                                         111111         111111111111111111111                                                                   ',
-    '                                                         111111           1111111111111111111111111                                                             ',
-    '                                                         1111             11111111111111111111111111                                                            ',
-    '                                                         1                                   1     1                                                            ',
-    '                                                         1                                   1                                                                  ',
-    '                                                         1                                   1                                                                  ',
-    '                                                         1                                   1                                                                  ',
-    '                                                         11       11111      1               1                                                                  ',
-    '                                                         1111                1     1         1    11                                                            ',
-    '                                                         11111               11    11        1     1                                                            ',
-    '                                                         11111                1111111        111   1                                                            ',
-    '                                                        111111                 11111         1     1                                                            ',
-    '                                                        111111                               1   111                                                            ',
-    '                                                        11111                                1     1                                                            ',
-    '                                                        11111           11111                111   1                                                            ',
-    '                                                        11111               1                1     1                                                            ',
-    '                                                       11111111111          1                1     1                                                            ',
-    '                                                       111111               1          111         1                                                            ',
-    '                                                       111111         1111111          111       111                                                            ',
-    '                                                       111111                          1111        1                                                            ',
-    '                                                       111111                     111  1111        1                                                            ',
-    '                                                       111111                     111  1111        1                                                            ',
-    '                                                        11111111111111111111111111111111111111111111                                                            ',
-    '                                                          111111111111111111111111111111111111111111                                                            ',
-    '                                                          111111111111111111111111111111111111111111                                                            ',
-    '                                                           11111111111111111111111111111111111111111                                                            ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
-    '                                                                                                                                                                ',
+    '                                                                         22    22  3333                                                                         ',
+    '                                                                        222   222  333       33                                                                 ',
+    '                                                                        222   22   3        333                                                                 ',
+    '                                                                          2   22   3        333                                                                 ',
+    '                                                                          2   22  33333     33                                                                  ',
+    '                                                                          2  22   3   3    33                                                                   ',
+    '                                                                          2  22       33   3                                                                    ',
+    '                                                                          2  2    33 33    3                                                                    ',
+    '                                                                        2222      33333                                                                         ',
+    '                                                                        2222 22    33     33                                                                    ',
+    '                                                                         1113233333311111333                                                                    ',
+    '                                                                     11111113333333311111111113331                                                              ',
+    '                                                                133311111111333333331111111111333111                                                            ',
+    '                                                            1111133311111111333111111111111111333111                                                            ',
+    '                                                           111111333111111111111111111111111111133311                                                           ',
+    '                                                         111111111111111111111111111111111111111333111                                                          ',
+    '                                                       111111111111111111111111111111111111111113333331                                                         ',
+    '                                                       111111111111111111111111111111111111111111113331111                                                      ',
+    '                                                    1111111333331111111111111111111111111111111111133311111                                                     ',
+    '                                                    1111111333333111111111111111111111111111122222111111333                                                     ',
+    '                                                   1111111133333311111 111111111111111111111122222111111333                                                     ',
+    '                                            1133311111111113333331     11111111     1111111112222221111133311                                                   ',
+    '                                           1111111111111111333333                          1122222221111113331                                                  ',
+    '                                          11111111111111111133333                            222222211111133311                                                 ',
+    '                                          111111111111111111111               4444  4444     2222222211111333111333                                             ',
+    '                                         111111111111121411111            44    44            2222222111111111113331                                            ',
+    '                                       11111111111222224444             4444                  22222222221111111133331                                           ',
+    '                                      3111111112222244444                    44                2222222221111111113331                                           ',
+    '                                    131111111222244442            44          44444444         2222222222111111113331111                                        ',
+    '                                   111111111222244                44   44         4444          2222222221111111111111111                                       ',
+    '                                 1111111111222224                 444444          444           2222222221111111111111111                                       ',
+    '                                1111111222222222                    4444           4            2222222222211111111111111                                       ',
+    '                              311111111222222221                     4             4            2222222222211111111111111                                       ',
+    '                             311111111222222211                                    44           2222222222111111111111111                                       ',
+    '                            3311111122222221144                                     4          33222222222111111111111111                                       ',
+    '                           331111111111111111144         44444                      4         32222222222211111111111111111                                     ',
+    '                          11111111111111111114444444        44             44       4         32222223333311111111111111111                                     ',
+    '                      13111111111    111111                 444            44      44        333322333333311111111111111111                                     ',
+    '                    1112111111                               44           444      44       3333333333333311111111111111111                                     ',
+    '                   1                                   44444444       44  444      44         33333333333311111111111111111                                     ',
+    '                                                                     444  444      44         33333333333311111111111111111                                     ',
+    '                                                                   44444  444      44         3333333443331111111111111111111                                   ',
+    '               11111113333333333333333333333333334444444444444444444444444444444444444        44444334433331111111111111111111111                               ',
+    '       111111111111111111111111111111111111111114444444444444444444444444444444444444         44444434434331111111111111111111111111111111111                   ',
+    '1111111111111111111222222222222222222222222222444444444444444444444444444444444444444         4444444444444411111111144411111111111111111111111111111111        ',
+    '1111111111111111111111111111112122222221224444444444444444444444444444444444444444444         4444444444444444114444114411111111111111111111111111111111        ',
+    '1111111111111111111111444444444411111111222214444444444444444444444444444444444444444         4444444444444444414444444411111111111111111111111111111111        ',
+    '1111111144444444444444444444444444111111111114444444444444444444444444444444444444444         4444444444444444444444444411111111111111111111111111111111        ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         4444444444444444444444444441111111111111111111444411111111        ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         4444444444444444444444444444444441111111111111444411111           ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         4444444444444444444444444444444444441111111444444444411           ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         44444444444444444444444444444444444444444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         444444444444444444         44444444444444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444         4444444444444               4444444444444444444444444             ',
+    '444444444444444444444444444444444444444444444444444444444444444     44444444444444444         44444444444444                 4444444444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444        4444444444               4444444444                        4444444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444                                 444444444                         4444444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444                                                                     44444444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444                                                                       444444444444444             ',
+    '44444444444444444444444444444444444444444444444444444444444444                                                                       44444444444444             ',
+    '4444444444444444444444444444444444444444444444444444444444444444   44444444444444444444444444444444444444444                           444444444444             ',
+    '444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444                        4444444444444            ',
+    '44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444                      4444444444444            ',
+    '44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444                      4444444444444            ',
+    '44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444                  44444444444444            ',
+    '44444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444       4444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '4444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444            ',
+    '                                                              4444444444444444      4444444444444444444444444444444444444444444444444444444444444444            ',
     '                                                                                                                                                                ',
     '                                                                                                                                                                ',
     '                                                                                                                                                                ',
@@ -120,102 +121,162 @@ export function 默认关卡(game) {
 
   game.gameObjects.push(
 
-    new GO.Collectible(474, 298, 'sprite/linggangu', false).ref('one'),
-    new GO.Collectible(594, 378, 'sprite/linggangu', false).ref('two'),
-    new GO.Collectible(642, 314, 'sprite/linggangu', false).ref('three'),
-    new GO.Collectible(682, 410, 'sprite/linggangu', false).ref('four'),
-    new GO.Collectible(754, 314, 'sprite/linggangu', false).ref('five'),
-    new GO.Hazard(568, 304, 8, 8, 'right'),
-    new GO.Hazard(648, 408, 8, 16, 'left'),
-    new GO.Hazard(688, 384, 8, 40, 'left'),
-    new GO.Hazard(776, 336, 16, 8, 'up'),
-    new GO.Hazard(776, 416, 16, 8, 'up'),
-    new GO.Hazard(784, 400, 8, 16, 'left'),
-    new GO.LevelChanger(792, 280, 8, 32, 'nextStage', true).hide(),
-    new GO.MovingPlatform(new Vec2(576, 368), new Vec2(576, 344), 8, 24, false, 5, 'still').ref('door1'),
-    new GO.MovingPlatform(new Vec2(712, 352), new Vec2(680, 336), 32, 8, false, 5, 'still').ref('play1'),
-    new GO.MovingPlatform(new Vec2(784, 272), new Vec2(784, 232), 8, 40, false, 5, 'still').ref('door2'),
-    new GO.Trigger(472, 296, 16, 16, false, (game, $) => {
-      if (!game.levelData.door2Opened) {
-        const remainingCollectibles = game.gameObjects.filter(obj => obj && 'collected' in obj && typeof obj.collected === 'boolean' && !obj.collected && !obj.removed).length;
-        if (remainingCollectibles === 0) {
-          const door = $('door2');
-          if (door) { door.set(1); door.moveType = 'still'; }
-          game.levelData.door2Opened = true;
-          game.sound.play('bonus');
-          if (console && console.debug) console.debug('[door2] opened by t2');
-        }
-      }
-    }, null).ref('t2').hide(),
-    new GO.Trigger(496, 368, 24, 8, false, (game, $) => {
+    new $.Collectible(366, 406, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Collectible(470, 382, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Collectible(518, 542, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Collectible(550, 310, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Collectible(582, 406, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Collectible(694, 262, 'sprite/linggangu', false, async (game, $) => {
+      game.player.score += 1
+      game.sound.play('coin')
+      
+    }),
+    new $.Hazard(48, 424, 8, 8, 'left'),
+    new $.Hazard(112, 416, 8, 8, 'left'),
+    new $.Hazard(160, 392, 80, 8, 'down'),
+    new $.Hazard(264, 312, 16, 8, 'up'),
+    new $.Hazard(264, 408, 32, 8, 'up'),
+    new $.Hazard(304, 288, 8, 8, 'up'),
+    new $.Hazard(328, 272, 8, 8, 'up'),
+    new $.Hazard(360, 240, 48, 8, 'up'),
+    new $.Hazard(400, 312, 24, 8, 'down'),
+    new $.Hazard(424, 216, 16, 8, 'up'),
+    new $.Hazard(432, 304, 24, 8, 'down'),
+    new $.Hazard(456, 296, 16, 8, 'down'),
+    new $.Hazard(472, 288, 24, 8, 'down'),
+    new $.Hazard(496, 176, 16, 8, 'up'),
+    new $.Hazard(496, 368, 8, 8, 'up'),
+    new $.Hazard(544, 552, 24, 8, 'up'),
+    new $.Hazard(576, 392, 8, 24, 'right'),
+    new $.Hazard(576, 528, 32, 8, 'down'),
+    new $.Hazard(584, 384, 8, 32, 'left'),
+    new $.Hazard(624, 408, 40, 8, 'up'),
+    new $.Hazard(624, 552, 24, 8, 'up'),
+    new $.Hazard(632, 248, 40, 8, 'down'),
+    new $.Hazard(640, 520, 32, 8, 'down'),
+    new $.Hazard(672, 296, 16, 8, 'up'),
+    new $.Hazard(736, 160, 48, 8, 'up'),
+    new $.Hazard(736, 376, 8, 8, 'up'),
+    new $.Hazard(744, 280, 8, 16, 'left'),
+    new $.Hazard(744, 368, 8, 8, 'up'),
+    new $.Hazard(752, 296, 8, 16, 'left'),
+    new $.Hazard(752, 344, 8, 16, 'up'),
+    new $.Hazard(760, 312, 8, 32, 'left'),
+    new $.Hazard(760, 336, 8, 16, 'up'),
+    new $.Hazard(760, 536, 64, 8, 'down'),
+    new $.Hazard(784, 168, 16, 8, 'up'),
+    new $.Hazard(800, 184, 8, 8, 'up'),
+    new $.Hazard(808, 192, 8, 8, 'up'),
+    new $.Hazard(816, 200, 8, 8, 'up'),
+    new $.Hazard(824, 208, 24, 8, 'up'),
+    new $.Hazard(856, 240, 16, 8, 'up'),
+    new $.Hazard(872, 248, 8, 8, 'up'),
+    new $.Hazard(880, 256, 8, 8, 'up'),
+    new $.Hazard(888, 264, 24, 8, 'up'),
+    new $.Interactable(8, 416, 32, 16, 'dialogue', 'sprite/linggangu', '', true, null),
+    new $.Interactable(328, 400, 16, 16, 'dialogue', 'sprite/linggangu', 'hajimi', false, null),
+    new $.Interactable(864, 544, 24, 24, 'dialogue', 'sprite/linggangu', 'hajimi2', false, null),
+    new $.LevelChanger(1008, 520, 80, 96, 'nextStage', true).hide(),
+    new $.MovingPlatform(new Vec2(456, 368), new Vec2(456, 344), 8, 24, false, 2, 'still').ref('door1'),
+    new $.MovingPlatform(new Vec2(624, 360), new Vec2(576, 320), 24, 8, false, 3, 'still').ref('plat1'),
+    new $.MovingPlatform(new Vec2(688, 328), new Vec2(704, 328), 32, 8, true, 5, 'still').ref('p1'),
+    new $.MovingPlatform(new Vec2(688, 376), new Vec2(704, 376), 32, 8, true, 5, 'still').ref('p3'),
+    new $.MovingPlatform(new Vec2(696, 352), new Vec2(712, 352), 32, 8, true, 5, 'still').ref('p2'),
+    new $.MovingPlatform(new Vec2(696, 400), new Vec2(712, 400), 32, 8, true, 5, 'still').ref('p4'),
+    new $.MovingPlatform(new Vec2(752, 536), new Vec2(752, 512), 8, 24, false, 5, 'still').ref('door2'),
+    new $.MovingPlatform(new Vec2(824, 528), new Vec2(824, 496), 8, 32, false, 2, 'still').ref('door3'),
+    new $.MovingPlatform(new Vec2(832, 520), new Vec2(832, 488), 8, 40, false, 2, 'still').ref('door4'),
+    new $.Trigger(344, 376, 48, 40, false, async (game, $) => {
+      game.player.maxAirJumps = 1
+      game.sound.play('bonus')
+      game.levelData.spawnpoint = new Vec2(340,400)
+    }, null).hide(),
+    new $.Trigger(392, 360, 24, 8, false, async (game, $) => {
       game.player.maxAirJumps = 1;
       game.sound.play('bonus');
       $('door1').set(1);
       game.sound.play('item00');
-    }, (game, $) => {
+    }, async (game, $) => {
       $('door1').set(0);
-      const d1 = $('door1');
-      if (d1) d1.moveType = 'still';
-      game.sound.play('item00');
-    }).hide(),
-    new GO.Trigger(584, 368, 24, 24, false, (game, $) => {
-      if (!game.levelData.door2Opened) {
-        const remainingCollectibles = game.gameObjects.filter(obj => obj && 'collected' in obj && typeof obj.collected === 'boolean' && !obj.collected && !obj.removed).length;
-        if (remainingCollectibles === 0) {
-          const door = $('door2');
-          if (door) { door.set(1); door.moveType = 'still'; }
-          game.levelData.door2Opened = true;
-          game.sound.play('bonus');
-          if (console && console.debug) console.debug('[door2] opened by t5');
-        }
-      }
-    }, null).ref('t5').hide(),
-    new GO.Trigger(632, 304, 32, 24, false, (game, $) => {
-      if (!game.levelData.door2Opened) {
-        const remainingCollectibles = game.gameObjects.filter(obj => obj && 'collected' in obj && typeof obj.collected === 'boolean' && !obj.collected && !obj.removed).length;
-        if (remainingCollectibles === 0) {
-          const door = $('door2');
-          if (door) { door.set(1); door.moveType = 'still'; }
-          game.levelData.door2Opened = true;
-          game.sound.play('bonus');
-          if (console && console.debug) console.debug('[door2] opened by t3');
-        }
-      }
-    }, null).ref('t3').hide(),
-    new GO.Trigger(656, 400, 24, 8, false, (game, $) => {
-      game.player.maxAirJumps = 1;
-      game.sound.play('bonus');
-      $('play1').set(1);
-      game.sound.play('item00');
-    }, (game, $) => {
-      $('play1').set(0);
-      const p1 = $('play1');
+      const p1 = $('door1');
       if (p1) p1.moveType = 'still';
       game.sound.play('item00');
     }).hide(),
-    new GO.Trigger(680, 408, 16, 16, false, (game, $) => {
-      if (!game.levelData.door2Opened) {
-        const remainingCollectibles = game.gameObjects.filter(obj => obj && 'collected' in obj && typeof obj.collected === 'boolean' && !obj.collected && !obj.removed).length;
-        if (remainingCollectibles === 0) {
-          const door = $('door2');
-          if (door) { door.set(1); door.moveType = 'still'; }
-          game.levelData.door2Opened = true;
-          game.sound.play('bonus');
-          if (console && console.debug) console.debug('[door2] opened by t1');
-        }
-      }
-    }, null).ref('t1').hide(),
-    new GO.Trigger(752, 312, 16, 16, false, (game, $) => {
-      if (!game.levelData.door2Opened) {
-        const remainingCollectibles = game.gameObjects.filter(obj => obj && 'collected' in obj && typeof obj.collected === 'boolean' && !obj.collected && !obj.removed).length;
-        if (remainingCollectibles === 0) {
-          const door = $('door2');
-          if (door) { door.set(1); door.moveType = 'still'; }
-          game.levelData.door2Opened = true;
-          game.sound.play('bonus');
-          if (console && console.debug) console.debug('[door2] opened by t4');
-        }
-      }
-    }, null).ref('t4').hide()
+    new $.Trigger(488, 512, 40, 56, true, async (game, $) => {
+      game.player.maxAirJumps = 1
+      game.sound.play('bonus')
+      $('door2').set(1);
+      game.sound.play('item00');
+    }, null).hide(),
+    new $.Trigger(560, 384, 16, 8, false, async (game, $) => {
+      game.player.maxAirJumps = 1;
+      game.sound.play('bonus');
+      $('plat1').set(1);
+      game.sound.play('item00');
+    }, async (game, $) => {
+      $('plat1').set(0);
+      const p1 = $('plat1');
+      if (p1) p1.moveType = 'still';
+      game.sound.play('item00');
+    }).hide(),
+    new $.Trigger(672, 312, 80, 96, true, async (game, $) => {
+      game.player.maxAirJumps = 1
+            game.sound.play('bonus')
+            const p1 = $('p1');
+            if (p1) p1.removed = true;
+            const p2 = $('p2');
+            if (p2) p2.removed = true;
+            const p3 = $('p3');
+            if (p3) p3.removed = true;
+            const p4 = $('p4');
+            if (p4) p4.removed = true;
+    }, null).hide(),
+    new $.Trigger(672, 472, 80, 88, true, async (game, $) => {
+      game.player.maxAirJumps = 1
+      game.sound.play('bonus')
+      game.levelData.spawnpoint = new Vec2(715,540)
+    }, null).hide(),
+    new $.Trigger(760, 552, 16, 8, false, async (game, $) => {
+      game.player.maxAirJumps = 1
+      game.sound.play('bonus')
+      $('door4').set(1);
+      game.sound.play('item00');
+    }, async (game, $) => {
+      $('door4').set(0);
+      const p1 = $('door4');
+      if (p1) p1.moveType = 'still';
+      game.sound.play('item00');
+    }).hide(),
+    new $.Trigger(808, 552, 16, 8, false, async (game, $) => {
+      game.player.maxAirJumps = 1
+      game.sound.play('bonus')
+      $('door3').set(1);
+      game.sound.play('item00');
+    }, async (game, $) => {
+      $('door3').set(0);
+      const p1 = $('door3');
+      if (p1) p1.moveType = 'still';
+      game.sound.play('item00');
+    }).hide()
   )
 }
