@@ -26,7 +26,7 @@
       "id": "wy",
       "emotion": "angry"
     },
-    "那你废了\n因为我只认$italic:小键盘的回车键$\n哈哈",
+    "那没办法\n因为我只认$italic:小键盘的回车键$\n哈哈",
     {
       "id": "wy",
       "emotion": "normal"
@@ -40,8 +40,7 @@
     "按下$u:右Ctrl键$可以打开$wow:调试模式$",
     {
       "id": "wy",
-      "text": "再见！",
-      "wait": 600
+      "text": "再见！"
     }
   ]
 }
