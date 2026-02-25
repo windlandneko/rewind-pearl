@@ -60,8 +60,9 @@ export class TileHelper {
    * @returns {{sound: string, ignores: string[], copy: string[], sets: Map<string, { mask: number[][], tiles: number[][] }>}}
    */
   #loadTileSetFromURL(url = 'tiles/index') {
-    if (!Asset.has(url)) return
+    // 优化：直接get然后检查，避免双重Map查找
     const xml = Asset.get(url)
+    if (!xml) return
 
     const root = xml.querySelector('Tileset')
 
@@ -74,7 +75,10 @@ export class TileHelper {
 
     const sets = new Map()
 
-    root.querySelectorAll('set').forEach(setNode => {
+    // 优化：使用for循环代替forEach
+    const setNodes = root.querySelectorAll('set')
+    for (let i = 0; i < setNodes.length; i++) {
+      const setNode = setNodes[i]
       const key = setNode.getAttribute('mask')
       const mask = key
         .split('-')
@@ -88,15 +92,15 @@ export class TileHelper {
         .filter(Boolean)
         .map(pair => pair.split(',').map(n => parseInt(n, 10)))
       sets.set(key, { mask, tiles })
-    })
+    }
 
     this.#tileset = { ignores, sets }
   }
 
   #loadTilePalette(palette) {
     if (palette) this.#palette = palette
+    // 优化：直接get然后检查，避免双重Map查找
     this.#paletteMap = this.#palette.map(name => {
-      if (!Asset.has('tiles/' + name)) return
       return Asset.get('tiles/' + name)
     })
   }

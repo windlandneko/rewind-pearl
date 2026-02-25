@@ -232,20 +232,26 @@ export class Game {
     this.tileHelper = new TileHelper(this.tileData, this.tilePalette)
     this.tileHelper.render(this.tileCtx)
 
-    this.tileHelper.edges.forEach(edge => {
-      this.gameObjects.push(new GameObject.Platform(...edge).hide())
-    })
+    // 优化：使用for循环代替forEach
+    const edges = this.tileHelper.edges
+    for (let i = 0; i < edges.length; i++) {
+      this.gameObjects.push(new GameObject.Platform(...edges[i]).hide())
+    }
 
     if (this.levelData.background) {
       const bg = 'background/' + this.levelData.background
-      if (Asset.has(bg + '0')) {
-        if (Asset.has(bg + '0')) this.$bgBase.src = Asset.get(bg + '0').src
-        else this.$bgBase.src = null
-        if (Asset.has(bg + '1')) this.$bgLayer1.src = Asset.get(bg + '1').src
-        else this.$bgLayer1.src = null
-        if (Asset.has(bg + '2')) this.$bgLayer2.src = Asset.get(bg + '2').src
-        else this.$bgLayer2.src = null
-      } else if (Asset.has(bg)) this.$bgBase.src = Asset.get(bg).src
+      // 优化：减少重复的has+get调用，直接get然后检查
+      const bg0 = Asset.get(bg + '0')
+      if (bg0) {
+        this.$bgBase.src = bg0.src
+        const bg1 = Asset.get(bg + '1')
+        this.$bgLayer1.src = bg1 ? bg1.src : null
+        const bg2 = Asset.get(bg + '2')
+        this.$bgLayer2.src = bg2 ? bg2.src : null
+      } else {
+        const bgSingle = Asset.get(bg)
+        if (bgSingle) this.$bgBase.src = bgSingle.src
+      }
     }
   }
 
@@ -253,10 +259,11 @@ export class Game {
     this.#setupCamera(this.levelData)
 
     // 初始化草莓
-    if (Asset.has('sprite/strawberry')) {
-      const sprite = Asset.get('sprite/strawberry')
+    // 优化：直接get然后检查，避免双重Map查找
+    const strawberrySprite = Asset.get('sprite/strawberry')
+    if (strawberrySprite) {
       this.strawberryUIAnim = new SpriteAnimation(
-        sprite,
+        strawberrySprite,
         42,
         16,
         16,
@@ -496,52 +503,102 @@ export class Game {
     this.history.delete(this.tick - GameConfig.MAX_SNAPSHOTS_COUNT)
 
     // 移除标记为删除的对象
-    const objectsToRemove = this.gameObjects.filter(obj => obj.removed)
-    if (objectsToRemove.length > 0) {
-      this.gameObjects = this.gameObjects.filter(obj => !obj.removed)
+    // 优化：使用单次遍历，就地过滤removed对象，避免创建新数组
+    let writeIndex = 0
+    let hasRemovedObjects = false
+    for (let i = 0; i < this.gameObjects.length; i++) {
+      if (!this.gameObjects[i].removed) {
+        if (writeIndex !== i) {
+          this.gameObjects[writeIndex] = this.gameObjects[i]
+        }
+        writeIndex++
+      } else {
+        hasRemovedObjects = true
+      }
+    }
+    if (hasRemovedObjects) {
+      this.gameObjects.length = writeIndex
       this.#updateRenderGroups()
     }
 
     // 更新玩家
-    this.ghostPlayers.forEach(ghost => ghost.update(dt, this))
+    // 优化：使用for循环代替forEach
+    for (let i = 0; i < this.ghostPlayers.length; i++) {
+      this.ghostPlayers[i].update(dt, this)
+    }
     this.player.update(dt, this)
 
     // 更新游戏对象本身
-    this.gameObjects.forEach(obj => obj.update(dt))
+    for (let i = 0; i < this.gameObjects.length; i++) {
+      this.gameObjects[i].update(dt)
+    }
 
     // 重置落地状态
     this.player.onGround = false
-    this.ghostPlayers.forEach(ghost => {
-      ghost.onGround = false
-    })
+    for (let i = 0; i < this.ghostPlayers.length; i++) {
+      this.ghostPlayers[i].onGround = false
+    }
 
     // 更新游戏对象与玩家的互动（碰撞检测等）
-    this.renderGroups.movingPlatforms.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+    // 优化：减少嵌套循环，先收集所有玩家，然后按组处理交互
+    const allPlayers = [this.player, ...this.ghostPlayers]
+    const ghostCount = this.ghostPlayers.length
+    
+    // 移动平台交互
+    for (let i = 0; i < this.renderGroups.movingPlatforms.length; i++) {
+      const obj = this.renderGroups.movingPlatforms[i]
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
-    })
-    this.renderGroups.platforms.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+    }
+    
+    // 静态平台交互
+    for (let i = 0; i < this.renderGroups.platforms.length; i++) {
+      const obj = this.renderGroups.platforms[i]
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
-    })
-    this.renderGroups.collectibles.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+    }
+    
+    // 收集物品交互
+    for (let i = 0; i < this.renderGroups.collectibles.length; i++) {
+      const obj = this.renderGroups.collectibles[i]
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
-    })
-    this.renderGroups.enemies.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+    }
+    
+    // 敌人/危险物交互
+    for (let i = 0; i < this.renderGroups.enemies.length; i++) {
+      const obj = this.renderGroups.enemies[i]
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
-    })
-    this.renderGroups.triggers.forEach(obj => {
+    }
+    
+    // 触发器交互
+    for (let i = 0; i < this.renderGroups.triggers.length; i++) {
+      const obj = this.renderGroups.triggers[i]
       obj.interacting = false
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
       obj.trigger(this)
-    })
-    this.renderGroups.interactables.forEach(obj => {
-      this.ghostPlayers.forEach(ghost => obj.interactWithPlayer(ghost, this))
+    }
+    
+    // 可交互对象交互
+    for (let i = 0; i < this.renderGroups.interactables.length; i++) {
+      const obj = this.renderGroups.interactables[i]
+      for (let j = 0; j < ghostCount; j++) {
+        obj.interactWithPlayer(this.ghostPlayers[j], this)
+      }
       obj.interactWithPlayer(this.player, this, dt)
-    })
+    }
 
     try {
       await this.levelData.onUpdate?.(dt, this, name => this.ref(name))
@@ -574,33 +631,61 @@ export class Game {
     if (this.debug) this.#renderBackgroundGrid(ctx)
 
     // 按优先级渲染游戏对象
-    this.renderGroups.interactables.forEach(obj => {
+    // 优化：使用for循环代替forEach，减少函数调用开销
+    // 优化：添加视口剔除，跳过屏幕外的对象渲染（保留一定边距）
+    const cullMargin = 50 // 渲染边距，确保物体进入视野时已经渲染
+    
+    for (let i = 0; i < this.renderGroups.interactables.length; i++) {
+      const obj = this.renderGroups.interactables[i]
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
+    // 触发器通常不需要渲染，但保留渲染逻辑
+    for (let i = 0; i < this.renderGroups.triggers.length; i++) {
+      const obj = this.renderGroups.triggers[i]
       if (!obj.hidden) obj.render(ctx, this)
-    })
-    this.renderGroups.triggers.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, this)
-    })
-    this.renderGroups.collectibles.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, this)
-    })
-    this.renderGroups.enemies.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, this)
-    })
-    this.renderGroups.movingPlatforms.forEach(obj => {
-      if (!obj.hidden) obj.render(ctx, this)
-    })
-    this.renderGroups.platforms.forEach(obj => {
-      if (!obj.hidden) if (!obj.ladder) obj.render(ctx, this)
-    })
-    this.renderGroups.platforms.forEach(obj => {
-      if (!obj.hidden) if (obj.ladder) obj.render(ctx, this)
-    })
+    }
+    for (let i = 0; i < this.renderGroups.collectibles.length; i++) {
+      const obj = this.renderGroups.collectibles[i]
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
+    for (let i = 0; i < this.renderGroups.enemies.length; i++) {
+      const obj = this.renderGroups.enemies[i]
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
+    for (let i = 0; i < this.renderGroups.movingPlatforms.length; i++) {
+      const obj = this.renderGroups.movingPlatforms[i]
+      if (!obj.hidden && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
+    // 先渲染非梯子平台，再渲染梯子（分层渲染）
+    // 平台通常覆盖大面积，视口剔除效果明显
+    for (let i = 0; i < this.renderGroups.platforms.length; i++) {
+      const obj = this.renderGroups.platforms[i]
+      if (!obj.hidden && !obj.ladder && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
+    for (let i = 0; i < this.renderGroups.platforms.length; i++) {
+      const obj = this.renderGroups.platforms[i]
+      if (!obj.hidden && obj.ladder && this.camera.isInView(obj, cullMargin)) {
+        obj.render(ctx, this)
+      }
+    }
 
-    this.til
+    // 渲染瓦片地图
     ctx.drawImage(this.tileCanvas, 0, 0)
 
     // 渲染玩家
-    this.ghostPlayers.forEach(ghost => ghost.render(ctx, this))
+    for (let i = 0; i < this.ghostPlayers.length; i++) {
+      this.ghostPlayers[i].render(ctx, this)
+    }
     this.player.render(ctx, this)
 
     ctx.restore()
@@ -613,31 +698,43 @@ export class Game {
 
   /**
    * 更新渲染组缓存
+   * 优化：使用单次遍历代替6次filter操作
    */
   #updateRenderGroups() {
-    const objects = this.gameObjects
-
-    this.renderGroups.platforms = objects.filter(obj => obj.type === 'Platform')
-    this.renderGroups.movingPlatforms = objects.filter(
-      obj => obj.type === 'MovingPlatform'
-    )
-    this.renderGroups.collectibles = objects.filter(
-      obj => obj.type === 'Collectible'
-    )
-    this.renderGroups.enemies = objects.filter(
-      obj => obj.type === 'Enemy' || obj.type === 'Hazard'
-    )
-    this.renderGroups.interactables = objects.filter(
-      obj => obj.type === 'Interactable' || obj.type === 'LevelChanger'
-    )
-    this.renderGroups.triggers = objects.filter(
-      obj => obj.type === 'Trigger' || obj.type === 'CameraController'
-    )
-
+    // 重置所有渲染组
+    this.renderGroups.platforms = []
+    this.renderGroups.movingPlatforms = []
+    this.renderGroups.collectibles = []
+    this.renderGroups.enemies = []
+    this.renderGroups.interactables = []
+    this.renderGroups.triggers = []
     this.#ref = new Map()
-    objects.forEach(obj => {
-      if (obj._ref) this.#ref.set(obj._ref, obj)
-    })
+
+    // 单次遍历分类所有对象
+    for (let i = 0; i < this.gameObjects.length; i++) {
+      const obj = this.gameObjects[i]
+      const type = obj.type
+
+      // 分类到对应的渲染组
+      if (type === 'Platform') {
+        this.renderGroups.platforms.push(obj)
+      } else if (type === 'MovingPlatform') {
+        this.renderGroups.movingPlatforms.push(obj)
+      } else if (type === 'Collectible') {
+        this.renderGroups.collectibles.push(obj)
+      } else if (type === 'Enemy' || type === 'Hazard') {
+        this.renderGroups.enemies.push(obj)
+      } else if (type === 'Interactable' || type === 'LevelChanger') {
+        this.renderGroups.interactables.push(obj)
+      } else if (type === 'Trigger' || type === 'CameraController') {
+        this.renderGroups.triggers.push(obj)
+      }
+
+      // 更新引用映射
+      if (obj._ref) {
+        this.#ref.set(obj._ref, obj)
+      }
+    }
   }
 
   /**
